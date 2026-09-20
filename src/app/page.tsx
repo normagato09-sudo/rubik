@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CubeMark } from "@/components/cube-mark";
 import { FeatureCard } from "@/components/ui/feature-card";
 
@@ -18,20 +19,19 @@ export default function Home() {
             Cubo 3D interactivo, scrambles, cronómetro, estadísticas y un
             solucionador paso a paso, todo en un mismo lugar.
           </p>
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-foreground opacity-50"
+          <Link
+            href="/practice"
+            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
           >
-            Empezar a practicar — próximamente
-          </button>
+            Ver el cubo 3D
+          </Link>
         </section>
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <FeatureCard
             accent="var(--cube-blue)"
             title="Cubo 3D"
-            description="Un cubo interactivo con estado real: cada giro modifica el modelo, no solo la animación."
+            description="Un cubo interactivo que podrás inspeccionar en 3D. Los giros de caras llegan en el siguiente paso."
             status="próximamente"
           >
             <CubeIcon />
