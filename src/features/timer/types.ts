@@ -8,16 +8,26 @@
  */
 export type TimerStatus = "idle" | "running" | "stopped";
 
+/** "none" (no penalty) or "plus2" (+2s). DNF will extend this later. */
+export type Penalty = "none" | "plus2";
+
 export interface TimerState {
   status: TimerStatus;
   /** Timestamp (ms, monotonic clock) when the current run started. */
   startedAt: number | null;
-  /** Elapsed ms of the last completed run. Kept until the next start(). */
+  /**
+   * Raw elapsed ms of the last completed run — never touched by a
+   * penalty, so the base time is always recoverable. Kept until the
+   * next start().
+   */
   finalTimeMs: number | null;
+  /** Penalty applied to the last completed run, if any. */
+  penalty: Penalty;
 }
 
 export const INITIAL_TIMER_STATE: TimerState = {
   status: "idle",
   startedAt: null,
   finalTimeMs: null,
+  penalty: "none",
 };

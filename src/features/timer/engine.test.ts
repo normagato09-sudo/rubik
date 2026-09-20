@@ -4,13 +4,23 @@ import { INITIAL_TIMER_STATE } from "./types";
 
 describe("timer engine", () => {
   it("starts idle with no time", () => {
-    expect(INITIAL_TIMER_STATE).toEqual({ status: "idle", startedAt: null, finalTimeMs: null });
+    expect(INITIAL_TIMER_STATE).toEqual({
+      status: "idle",
+      startedAt: null,
+      finalTimeMs: null,
+      penalty: "none",
+    });
     expect(elapsedMs(INITIAL_TIMER_STATE, 1000)).toBe(0);
   });
 
   it("startTimer moves to running and records the start timestamp", () => {
     const state = startTimer(INITIAL_TIMER_STATE, 1000);
-    expect(state).toEqual({ status: "running", startedAt: 1000, finalTimeMs: null });
+    expect(state).toEqual({
+      status: "running",
+      startedAt: 1000,
+      finalTimeMs: null,
+      penalty: "none",
+    });
   });
 
   it("startTimer is a no-op while already running (no overlapping timers)", () => {
@@ -23,7 +33,12 @@ describe("timer engine", () => {
   it("stopTimer freezes the elapsed time and clears startedAt", () => {
     const running = startTimer(INITIAL_TIMER_STATE, 1000);
     const stopped = stopTimer(running, 4500);
-    expect(stopped).toEqual({ status: "stopped", startedAt: null, finalTimeMs: 3500 });
+    expect(stopped).toEqual({
+      status: "stopped",
+      startedAt: null,
+      finalTimeMs: 3500,
+      penalty: "none",
+    });
   });
 
   it("stopTimer is a no-op when not running", () => {

@@ -8,16 +8,20 @@
 import { INITIAL_TIMER_STATE } from "./types";
 import type { TimerState } from "./types";
 
-/** Starts a run. A no-op if already running, so two starts never overlap. */
+/**
+ * Starts a run. A no-op if already running, so two starts never overlap.
+ * Always clears any previous penalty: a new solve never inherits the
+ * last one's +2.
+ */
 export function startTimer(state: TimerState, now: number): TimerState {
   if (state.status === "running") return state;
-  return { status: "running", startedAt: now, finalTimeMs: null };
+  return { status: "running", startedAt: now, finalTimeMs: null, penalty: "none" };
 }
 
-/** Stops the current run, freezing its elapsed time. A no-op if not running. */
+/** Stops the current run, freezing its raw elapsed time. A no-op if not running. */
 export function stopTimer(state: TimerState, now: number): TimerState {
   if (state.status !== "running" || state.startedAt === null) return state;
-  return { status: "stopped", startedAt: null, finalTimeMs: now - state.startedAt };
+  return { status: "stopped", startedAt: null, finalTimeMs: now - state.startedAt, penalty: "none" };
 }
 
 /** Clears any run in progress and any finished time. */
@@ -25,13 +29,13 @@ export function resetTimer(): TimerState {
   return INITIAL_TIMER_STATE;
 }
 
-/** Elapsed ms to display for `state` at time `now`. */
+/** Elapsed ms to display for `state` at time `now`, penalty included. */
 export function elapsedMs(state: TimerState, now: number): number {
   if (state.status === "running" && state.startedAt !== null) {
     return now - state.startedAt;
   }
   if (state.status === "stopped" && state.finalTimeMs !== null) {
-    return state.finalTimeMs;
+    return state.finalTimeMs + (state.penalty === "plus2" ? 2000 : 0);
   }
   return 0;
 }

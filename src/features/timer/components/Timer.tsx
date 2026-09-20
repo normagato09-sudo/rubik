@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useInspectionStore } from "@/store/inspectionStore";
 import { useTimerStore } from "@/store/timerStore";
 import { elapsedMs, formatTime } from "../engine";
+import { canApplyPlus2 } from "../penalty";
 
 const BUTTON_BASE =
   "min-w-[7rem] flex-1 rounded-full px-6 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none";
@@ -12,9 +13,11 @@ export function Timer() {
   const status = useTimerStore((s) => s.status);
   const startedAt = useTimerStore((s) => s.startedAt);
   const finalTimeMs = useTimerStore((s) => s.finalTimeMs);
+  const penalty = useTimerStore((s) => s.penalty);
   const start = useTimerStore((s) => s.start);
   const stop = useTimerStore((s) => s.stop);
   const reset = useTimerStore((s) => s.reset);
+  const applyPlus2 = useTimerStore((s) => s.applyPlus2);
   const inspectionStatus = useInspectionStore((s) => s.status);
   const inspecting = inspectionStatus === "running";
 
@@ -51,12 +54,19 @@ export function Timer() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [status, inspecting, start, stop]);
 
-  const ms = elapsedMs({ status, startedAt, finalTimeMs }, now);
+  const ms = elapsedMs({ status, startedAt, finalTimeMs, penalty }, now);
+  const penalized = penalty === "plus2";
+  const plus2Disabled = !canApplyPlus2({ status, penalty }) || inspecting;
 
   return (
     <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-surface p-4">
-      <span className="font-mono text-5xl font-semibold tabular-nums tracking-tight text-foreground sm:text-6xl">
+      <span
+        className={`font-mono text-5xl font-semibold tabular-nums tracking-tight sm:text-6xl ${
+          penalized ? "text-cube-orange" : "text-foreground"
+        }`}
+      >
         {formatTime(ms)}
+        {penalized && <span className="ml-2 align-top text-lg font-semibold">+2</span>}
       </span>
       <div className="flex w-full flex-wrap justify-center gap-3">
         <button
@@ -74,6 +84,14 @@ export function Timer() {
           className={`${BUTTON_BASE} border border-border text-foreground hover:bg-border/60`}
         >
           Detener
+        </button>
+        <button
+          type="button"
+          onClick={applyPlus2}
+          disabled={plus2Disabled}
+          className={`${BUTTON_BASE} border border-cube-orange text-cube-orange hover:bg-cube-orange/10`}
+        >
+          +2
         </button>
         <button
           type="button"

@@ -2,15 +2,19 @@
 
 import { useCubeStore } from "@/store/cubeStore";
 import { useInspectionStore } from "@/store/inspectionStore";
+import { useTimerStore } from "@/store/timerStore";
 
 export function ResetButton() {
   const resetCube = useCubeStore((s) => s.resetCube);
   const cancelInspection = useInspectionStore((s) => s.cancel);
+  const resetTimer = useTimerStore((s) => s.reset);
 
   function handleReset() {
     resetCube();
-    // A reset cube invalidates whatever was being inspected.
+    // A reset cube invalidates whatever was being inspected...
     cancelInspection();
+    // ...and any finished time (and its +2, if any) from the previous solve.
+    resetTimer();
   }
 
   return (

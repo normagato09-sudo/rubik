@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSolvedCube } from "@/features/cube/model";
 import { elapsedMs } from "@/features/timer/engine";
 import { useCubeStore } from "./cubeStore";
+import { useInspectionStore } from "./inspectionStore";
 import { useTimerStore } from "./timerStore";
 
 function state() {
@@ -16,7 +17,7 @@ function mockNow(...values: number[]) {
 }
 
 beforeEach(() => {
-  useTimerStore.setState({ status: "idle", startedAt: null, finalTimeMs: null });
+  useTimerStore.setState({ status: "idle", startedAt: null, finalTimeMs: null, penalty: "none" });
 });
 
 afterEach(() => {
@@ -126,6 +127,117 @@ describe("timerStore", () => {
       useCubeStore.getState().requestMove("R");
       useCubeStore.getState().finishActiveMove();
 
+      expect(useCubeStore.getState().cubeState).not.toEqual(before);
+    });
+  });
+
+  describe("+2 penalty", () => {
+    beforeEach(() => {
+      useInspectionStore.setState({ status: "idle", startedAt: null });
+    });
+
+    it("can be applied to a finished solve and adds exactly 2000ms", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      expect(state().finalTimeMs).toBe(12_340);
+
+      state().applyPlus2();
+
+      expect(state().penalty).toBe("plus2");
+      expect(state().finalTimeMs).toBe(12_340); // base time untouched
+      expect(elapsedMs(state(), 999_999)).toBe(14_340);
+    });
+
+    it("cannot be applied before any solve has finished", () => {
+      state().applyPlus2();
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied while the timer is running", () => {
+      mockNow(1000);
+      state().start();
+      state().applyPlus2();
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied twice to the same solve", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().applyPlus2();
+      state().applyPlus2();
+      expect(elapsedMs(state(), 999_999)).toBe(14_340); // still +2, never +4
+    });
+
+    it("a new solve starts without the previous penalty", () => {
+      mockNow(1000, 13_340, 20_000);
+      state().start();
+      state().stop();
+      state().applyPlus2();
+
+      state().start();
+
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied while an inspection is running", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+
+      useInspectionStore.setState({ status: "running", startedAt: 20_000 });
+      state().applyPlus2();
+
+      expect(state().penalty).toBe("none");
+    });
+
+    it("full flow: inspection -> resolve -> stop -> +2", () => {
+      mockNow(1000, 16_000, 20_000, 32_340);
+      useInspectionStore.getState().start(); // 1000
+      useInspectionStore.getState().tick(); // 16000: auto-finishes
+      expect(useInspectionStore.getState().status).toBe("finished");
+
+      state().start(); // 20000, a fresh solve
+      state().stop(); // 32340 -> 12340ms raw
+
+      state().applyPlus2();
+
+      expect(state().penalty).toBe("plus2");
+      expect(elapsedMs(state(), 999_999)).toBe(14_340);
+    });
+
+    it("RESET clears the penalty, as the RESET button does", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().applyPlus2();
+      expect(state().penalty).toBe("plus2");
+
+      // Same composition ResetButton performs on click.
+      useCubeStore.getState().resetCube();
+      useInspectionStore.getState().cancel();
+      state().reset();
+
+      expect(state().penalty).toBe("none");
+      expect(state().finalTimeMs).toBeNull();
+    });
+
+    it("does not break scramble or cube moves", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().applyPlus2();
+
+      useCubeStore.getState().requestScramble();
+      expect(useCubeStore.getState().scramble).not.toBeNull();
+      while (useCubeStore.getState().activeMove !== null) {
+        useCubeStore.getState().finishActiveMove();
+      }
+
+      const before = useCubeStore.getState().cubeState;
+      useCubeStore.getState().requestMove("R");
+      useCubeStore.getState().finishActiveMove();
       expect(useCubeStore.getState().cubeState).not.toEqual(before);
     });
   });

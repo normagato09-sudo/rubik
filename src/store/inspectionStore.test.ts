@@ -19,7 +19,7 @@ function mockNow(...values: number[]) {
 
 beforeEach(() => {
   useInspectionStore.setState({ status: "idle", startedAt: null });
-  useTimerStore.setState({ status: "idle", startedAt: null, finalTimeMs: null });
+  useTimerStore.setState({ status: "idle", startedAt: null, finalTimeMs: null, penalty: "none" });
   useCubeStore.getState().resetCube();
 });
 
