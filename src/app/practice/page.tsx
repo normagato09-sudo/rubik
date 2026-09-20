@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MoveControls } from "@/features/cube/components/MoveControls";
 import { RubiksCubeScene } from "@/features/cube/components/RubiksCubeScene";
 
 export const metadata = {
@@ -17,11 +18,12 @@ export default function PracticePage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Cubo 3D</h1>
           <p className="text-sm text-muted">
-            Arrastra para rotar la vista. Los giros de caras llegan en el
-            siguiente paso.
+            Arrastra para rotar la vista y usa los botones para girar cada
+            cara.
           </p>
         </div>
         <RubiksCubeScene />
+        <MoveControls />
       </main>
     </div>
   );
