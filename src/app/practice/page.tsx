@@ -3,6 +3,7 @@ import { MoveControls } from "@/features/cube/components/MoveControls";
 import { ResetButton } from "@/features/cube/components/ResetButton";
 import { RubiksCubeScene } from "@/features/cube/components/RubiksCubeScene";
 import { ScrambleBar } from "@/features/scramble/components/ScrambleBar";
+import { InspectionPanel } from "@/features/timer/components/InspectionPanel";
 import { Timer } from "@/features/timer/components/Timer";
 
 export const metadata = {
@@ -29,6 +30,7 @@ export default function PracticePage() {
           <ScrambleBar />
           <ResetButton />
         </div>
+        <InspectionPanel />
         <Timer />
         <RubiksCubeScene />
         <MoveControls />

@@ -1,17 +1,25 @@
 "use client";
 
 import { useCubeStore } from "@/store/cubeStore";
+import { useInspectionStore } from "@/store/inspectionStore";
 
 export function ScrambleBar() {
   const scramble = useCubeStore((s) => s.scramble);
   const requestScramble = useCubeStore((s) => s.requestScramble);
+  const cancelInspection = useInspectionStore((s) => s.cancel);
+
+  function handleScramble() {
+    requestScramble();
+    // A new scramble means whatever inspection was in progress no longer applies.
+    cancelInspection();
+  }
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-surface p-4">
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          onClick={requestScramble}
+          onClick={handleScramble}
           className="rounded-full bg-accent px-6 py-2.5 text-sm font-semibold tracking-wide text-accent-foreground transition-opacity hover:opacity-90"
         >
           SCRAMBLE

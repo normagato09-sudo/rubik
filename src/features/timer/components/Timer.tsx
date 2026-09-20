@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useInspectionStore } from "@/store/inspectionStore";
 import { useTimerStore } from "@/store/timerStore";
 import { elapsedMs, formatTime } from "../engine";
 
@@ -14,6 +15,8 @@ export function Timer() {
   const start = useTimerStore((s) => s.start);
   const stop = useTimerStore((s) => s.stop);
   const reset = useTimerStore((s) => s.reset);
+  const inspectionStatus = useInspectionStore((s) => s.status);
+  const inspecting = inspectionStatus === "running";
 
   // Ticks each frame while running so the display updates smoothly; the
   // actual elapsed time is always derived from this timestamp, not a
@@ -35,12 +38,18 @@ export function Timer() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.code !== "Space" || event.repeat) return;
       event.preventDefault();
-      if (status === "running") stop();
-      else start();
+      if (status === "running") {
+        stop();
+        return;
+      }
+      // While inspecting, solving must start from the inspection panel's
+      // own button, so finishing the countdown is never skipped by accident.
+      if (inspecting) return;
+      start();
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [status, start, stop]);
+  }, [status, inspecting, start, stop]);
 
   const ms = elapsedMs({ status, startedAt, finalTimeMs }, now);
 
@@ -53,7 +62,7 @@ export function Timer() {
         <button
           type="button"
           onClick={start}
-          disabled={status === "running"}
+          disabled={status === "running" || inspecting}
           className={`${BUTTON_BASE} bg-accent text-accent-foreground hover:opacity-90`}
         >
           Iniciar
