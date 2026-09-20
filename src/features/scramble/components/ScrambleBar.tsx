@@ -7,7 +7,7 @@ export function ScrambleBar() {
   const requestScramble = useCubeStore((s) => s.requestScramble);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+    <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-surface p-4">
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"

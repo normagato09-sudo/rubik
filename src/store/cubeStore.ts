@@ -25,6 +25,13 @@ interface CubeStore {
   requestScramble: () => void;
   /** Called by the 3D layer once a move's animation reaches its target angle. */
   finishActiveMove: () => void;
+  /**
+   * Returns the cube to the solved state via the real model, discarding
+   * any scramble and any move animation/queue in flight. Safe to call by
+   * anything (UI button, timer, solver, ...) since it fully owns the
+   * store's cube-related fields.
+   */
+  resetCube: () => void;
 }
 
 export const useCubeStore = create<CubeStore>((set, get) => ({
@@ -62,6 +69,14 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       activeMove: next ?? null,
       moveId: next ? moveId + 1 : moveId,
       queue: rest,
+    });
+  },
+  resetCube: () => {
+    set({
+      cubeState: createSolvedCube(),
+      scramble: null,
+      activeMove: null,
+      queue: [],
     });
   },
 }));

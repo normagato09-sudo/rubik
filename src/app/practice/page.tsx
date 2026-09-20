@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MoveControls } from "@/features/cube/components/MoveControls";
+import { ResetButton } from "@/features/cube/components/ResetButton";
 import { RubiksCubeScene } from "@/features/cube/components/RubiksCubeScene";
 import { ScrambleBar } from "@/features/scramble/components/ScrambleBar";
 
@@ -23,7 +24,10 @@ export default function PracticePage() {
             cara.
           </p>
         </div>
-        <ScrambleBar />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+          <ScrambleBar />
+          <ResetButton />
+        </div>
         <RubiksCubeScene />
         <MoveControls />
       </main>
