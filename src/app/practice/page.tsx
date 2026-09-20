@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MoveControls } from "@/features/cube/components/MoveControls";
 import { RubiksCubeScene } from "@/features/cube/components/RubiksCubeScene";
+import { ScrambleBar } from "@/features/scramble/components/ScrambleBar";
 
 export const metadata = {
   title: "Cubo 3D — RUBIKO",
@@ -22,6 +23,7 @@ export default function PracticePage() {
             cara.
           </p>
         </div>
+        <ScrambleBar />
         <RubiksCubeScene />
         <MoveControls />
       </main>
