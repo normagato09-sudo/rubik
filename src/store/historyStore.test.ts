@@ -5,6 +5,7 @@ import { useHistoryStore } from "./historyStore";
 function entry(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
   return {
     id: "id-1",
+    cubeId: "cube-1",
     completedAt: 1000,
     baseTimeMs: 12_340,
     penalty: "none",

@@ -29,6 +29,16 @@ export function clearHistory(): HistoryEntry[] {
   return [];
 }
 
+/**
+ * Entries for one cube, in the same order they're already stored
+ * (newest first). This is how "Cubos" and "Tiempos" share one source of
+ * truth: both call this over the same `historyStore.entries`, "Tiempos"
+ * just skips the filter.
+ */
+export function solvesForCube(entries: HistoryEntry[], cubeId: string): HistoryEntry[] {
+  return entries.filter((entry) => entry.cubeId === cubeId);
+}
+
 /** The result to show/use for an entry: the raw time plus any +2, ignored for DNF. */
 export function resultTimeMs(entry: HistoryEntry): number {
   return entry.penalty === "plus2" ? entry.baseTimeMs + 2000 : entry.baseTimeMs;

@@ -9,6 +9,7 @@ import {
 import { INITIAL_TIMER_STATE } from "@/features/timer/types";
 import type { TimerState } from "@/features/timer/types";
 import { useCubeStore } from "./cubeStore";
+import { useCubesStore } from "./cubesStore";
 import { useHistoryStore } from "./historyStore";
 import { useInspectionStore } from "./inspectionStore";
 
@@ -47,6 +48,7 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     set({ ...after, currentEntryId: id });
     useHistoryStore.getState().record({
       id,
+      cubeId: useCubesStore.getState().activeCubeId,
       completedAt: Date.now(),
       baseTimeMs: after.finalTimeMs as number,
       penalty: "none",

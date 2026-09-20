@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { addEntry, clearHistory, resultTimeMs, updateEntryPenalty } from "./engine";
+import { addEntry, clearHistory, resultTimeMs, solvesForCube, updateEntryPenalty } from "./engine";
 import type { HistoryEntry } from "./types";
 
 function makeEntry(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
   return {
     id: "id-1",
+    cubeId: "cube-1",
     completedAt: 1000,
     baseTimeMs: 12_340,
     penalty: "none",
@@ -54,5 +55,13 @@ describe("history engine", () => {
     expect(resultTimeMs(makeEntry({ penalty: "none", baseTimeMs: 10_000 }))).toBe(10_000);
     expect(resultTimeMs(makeEntry({ penalty: "plus2", baseTimeMs: 10_000 }))).toBe(12_000);
     expect(resultTimeMs(makeEntry({ penalty: "dnf", baseTimeMs: 10_000 }))).toBe(10_000);
+  });
+
+  it("solvesForCube keeps only entries for the given cube, same order", () => {
+    const a = makeEntry({ id: "a", cubeId: "cube-1" });
+    const b = makeEntry({ id: "b", cubeId: "cube-2" });
+    const c = makeEntry({ id: "c", cubeId: "cube-1" });
+
+    expect(solvesForCube([a, b, c], "cube-1")).toEqual([a, c]);
   });
 });

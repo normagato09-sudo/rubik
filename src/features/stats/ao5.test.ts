@@ -11,6 +11,7 @@ function makeEntry(overrides: Partial<HistoryEntry> = {}): HistoryEntry {
   nextId += 1;
   return {
     id: `entry-${nextId}`,
+    cubeId: "cube-1",
     completedAt: nextId,
     baseTimeMs: 10_000,
     penalty: "none",

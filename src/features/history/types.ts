@@ -9,6 +9,8 @@ import type { Penalty } from "@/features/timer/types";
  */
 export interface HistoryEntry {
   id: string;
+  /** The cube (features/cubes) this solve was done on — Cubos and Tiempos both read this same array, filtered by this field. */
+  cubeId: string;
   /** Wall-clock time the solve finished (ms since epoch), for display/sorting. */
   completedAt: number;
   /** Raw solve time in ms, before any penalty. Never mutated once recorded. */
