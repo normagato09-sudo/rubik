@@ -15,6 +15,7 @@
   --cube-orange: #ff8c1a;
   --cube-blue: #1054d6;
   --cube-green: #009b48;
+  --cube-violet: #7c4dff;
 }
 
 @theme inline {
@@ -31,6 +32,7 @@
   --color-cube-orange: var(--cube-orange);
   --color-cube-blue: var(--cube-blue);
   --color-cube-green: var(--cube-green);
+  --color-cube-violet: var(--cube-violet);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
