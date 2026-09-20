@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MoveControls } from "@/features/cube/components/MoveControls";
 import { ResetButton } from "@/features/cube/components/ResetButton";
 import { RubiksCubeScene } from "@/features/cube/components/RubiksCubeScene";
+import { HistoryPanel } from "@/features/history/components/HistoryPanel";
 import { ScrambleBar } from "@/features/scramble/components/ScrambleBar";
 import { InspectionPanel } from "@/features/timer/components/InspectionPanel";
 import { Timer } from "@/features/timer/components/Timer";
@@ -34,6 +35,7 @@ export default function PracticePage() {
         <Timer />
         <RubiksCubeScene />
         <MoveControls />
+        <HistoryPanel />
       </main>
     </div>
   );
