@@ -1,67 +1,57 @@
+"use client";
+
 import Link from "next/link";
-import { QuickLinkCard } from "@/components/ui/quick-link-card";
+import { CubeMark } from "@/components/cube-mark";
+import { OptionDropdown } from "@/components/ui/option-dropdown";
 import { CUBES } from "@/features/trainer/cubes";
-import { METHODS } from "@/features/trainer/methods";
+import { getMethodsForCubeType } from "@/features/trainer/methods";
+import { useTrainerPreferences } from "@/features/trainer/store";
 
 export default function HomePage() {
-  const cube = CUBES.find((option) => option.status === "active");
-  const method = METHODS.find((option) => option.status === "active");
+  const cubeId = useTrainerPreferences((state) => state.cubeId);
+  const methodId = useTrainerPreferences((state) => state.methodId);
+  const setCube = useTrainerPreferences((state) => state.setCube);
+  const setMethod = useTrainerPreferences((state) => state.setMethod);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Inicio</h1>
-        <p className="text-sm text-muted">
-          Resumen de tu configuración de entrenamiento.
-        </p>
+    <div className="relative flex min-h-[70dvh] flex-col items-center justify-center gap-10">
+      {/* Subtle brand glow behind the wordmark — the only non-accent color on
+          the screen, kept faint so it reads as texture, not a second CTA color. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/3 rounded-full bg-cube-blue/20 blur-3xl"
+      />
+
+      <div className="relative flex flex-col items-center gap-3">
+        <CubeMark className="h-11 w-11" />
+        <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          RUBIKO
+        </h1>
       </div>
 
-      <div className="flex flex-col gap-6 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold tracking-wide text-muted uppercase">
-              Cubo
-            </span>
-            <span className="text-lg font-semibold text-foreground">
-              {cube?.label}
-            </span>
-          </div>
-          <div className="hidden h-10 w-px bg-border sm:block" />
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold tracking-wide text-muted uppercase">
-              Método
-            </span>
-            <span className="text-lg font-semibold text-foreground">
-              {method?.label}
-            </span>
-          </div>
-        </div>
-        <Link
-          href="/entrenar"
-          className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-        >
-          Entrenar
-          <span aria-hidden="true">→</span>
-        </Link>
+      <div className="relative flex w-full max-w-sm flex-col gap-5">
+        <OptionDropdown
+          label="Cubo"
+          options={CUBES}
+          selectedId={cubeId}
+          onSelect={setCube}
+          size="lg"
+        />
+        <OptionDropdown
+          label="Método"
+          options={getMethodsForCubeType(cubeId)}
+          selectedId={methodId}
+          onSelect={setMethod}
+          size="lg"
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <QuickLinkCard
-          href="/entrenar"
-          title="Entrenar"
-          description="CFOP: Cross, F2L, OLL, PLL."
-        />
-        <QuickLinkCard
-          href="/metodos"
-          title="Métodos"
-          description="Métodos disponibles para 3×3."
-        />
-        <QuickLinkCard
-          href="/progreso"
-          title="Progreso"
-          description="Seguimiento por etapa."
-        />
-      </div>
+      <Link
+        href="/entrenar"
+        className="relative flex w-full max-w-sm items-center justify-center rounded-2xl bg-accent py-4 text-lg font-semibold text-accent-foreground shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover active:scale-[0.98]"
+      >
+        Aprender
+      </Link>
     </div>
   );
 }

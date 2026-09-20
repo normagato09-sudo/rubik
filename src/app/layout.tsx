@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
@@ -17,6 +17,18 @@ export const metadata: Metadata = {
   title: "RUBIKO",
   description:
     "Entrenador de speedcubing para 3×3: practica CFOP (Cross, F2L, OLL, PLL) paso a paso.",
+  appleWebApp: {
+    title: "RUBIKO",
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "dark",
+  themeColor: "#12141c",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
