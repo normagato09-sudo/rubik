@@ -19,7 +19,9 @@ export default function MetodosPage() {
           return (
             <li
               key={method.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4"
+              className={`flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4 transition-colors ${
+                isActive ? "hover:border-accent/30" : ""
+              }`}
             >
               <span className="font-medium text-foreground">
                 {method.label}

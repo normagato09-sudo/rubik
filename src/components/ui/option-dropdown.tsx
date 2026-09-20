@@ -48,7 +48,7 @@ export function OptionDropdown({
       {open && (
         <ul
           role="listbox"
-          className="absolute top-full z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface py-1 shadow-lg"
+          className="absolute top-full z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface-2 py-1 shadow-lg"
         >
           {options.map((option) => {
             const isActive = option.status === "active";
@@ -66,7 +66,7 @@ export function OptionDropdown({
                   }}
                   className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm ${
                     isActive
-                      ? "cursor-pointer text-foreground hover:bg-border/50"
+                      ? "cursor-pointer text-foreground hover:bg-background"
                       : "cursor-not-allowed text-muted"
                   } ${isSelected ? "bg-accent/10" : ""}`}
                 >

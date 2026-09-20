@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-col lg:flex-row">
-      <header className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
+      <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <CubeMark className="h-6 w-6" />
           <span className="text-sm font-semibold tracking-tight">RUBIKO</span>
@@ -52,12 +52,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <aside className="hidden w-60 shrink-0 border-r border-border lg:block">
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-surface lg:block">
         <SidebarNav />
       </aside>
 
       <div className="flex flex-1 flex-col lg:flex-row">
-        <div className="border-b border-border px-4 py-4 sm:px-6 lg:hidden">
+        <div className="border-b border-border bg-surface px-4 py-4 sm:px-6 lg:hidden">
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-foreground">
               Opciones de entrenamiento
@@ -69,11 +69,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </details>
         </div>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           {children}
         </main>
 
-        <aside className="hidden border-l border-border px-6 py-10 lg:block lg:w-72 lg:shrink-0">
+        <aside className="hidden border-l border-border bg-surface px-6 py-10 lg:block lg:w-72 lg:shrink-0">
           <RightPanel />
         </aside>
       </div>

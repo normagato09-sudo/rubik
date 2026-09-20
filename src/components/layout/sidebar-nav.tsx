@@ -37,10 +37,10 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={isActive ? "page" : undefined}
-                className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`block rounded-r-lg border-l-2 py-2 pr-3 pl-[10px] text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-accent/10 text-accent"
-                    : "text-muted hover:bg-border/50 hover:text-foreground"
+                    ? "border-accent bg-surface-2 text-foreground"
+                    : "border-transparent text-muted hover:bg-surface-2 hover:text-foreground"
                 }`}
               >
                 {item.label}

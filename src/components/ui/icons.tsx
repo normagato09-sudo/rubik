@@ -14,6 +14,22 @@ export function ChevronDownIcon({ className = "" }: { className?: string }) {
   );
 }
 
+export function ChevronRightIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m9 6 6 6-6 6" />
+    </svg>
+  );
+}
+
 export function MenuIcon({ className = "" }: { className?: string }) {
   return (
     <svg
