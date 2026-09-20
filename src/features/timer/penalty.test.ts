@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { elapsedMs, startTimer, stopTimer } from "./engine";
-import { applyPlus2, canApplyPlus2 } from "./penalty";
+import { applyPlus2, canApplyDnf, canApplyPlus2, markDnf } from "./penalty";
 import { INITIAL_TIMER_STATE } from "./types";
 
 describe("penalty engine (+2)", () => {
@@ -47,6 +47,54 @@ describe("penalty engine (+2)", () => {
     const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 0), 12_340);
     const penalized = applyPlus2(stopped);
     const newRun = startTimer(penalized, 20_000);
+    expect(newRun.penalty).toBe("none");
+  });
+});
+
+describe("DNF", () => {
+  it("cannot be applied before a solve exists", () => {
+    expect(canApplyDnf(INITIAL_TIMER_STATE)).toBe(false);
+    expect(markDnf(INITIAL_TIMER_STATE)).toEqual(INITIAL_TIMER_STATE);
+  });
+
+  it("cannot be applied while a solve is running", () => {
+    const running = startTimer(INITIAL_TIMER_STATE, 1000);
+    expect(canApplyDnf(running)).toBe(false);
+    expect(markDnf(running)).toEqual(running);
+  });
+
+  it("can be applied to a finished solve", () => {
+    const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 1000), 13_340);
+    expect(canApplyDnf(stopped)).toBe(true);
+    expect(markDnf(stopped)).toEqual({ ...stopped, penalty: "dnf" });
+  });
+
+  it("cannot be applied twice to the same solve", () => {
+    const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 1000), 13_340);
+    const dnfOnce = markDnf(stopped);
+    const dnfTwice = markDnf(dnfOnce);
+    expect(dnfTwice).toEqual(dnfOnce);
+  });
+
+  it("a solve with +2 can become DNF, and DNF wins as the final result", () => {
+    const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 1000), 13_340);
+    const penalized = applyPlus2(stopped);
+    const dnf = markDnf(penalized);
+    expect(dnf.penalty).toBe("dnf");
+    expect(dnf.finalTimeMs).toBe(penalized.finalTimeMs); // raw time preserved either way
+  });
+
+  it("once DNF, +2 can no longer be applied", () => {
+    const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 1000), 13_340);
+    const dnf = markDnf(stopped);
+    expect(canApplyPlus2(dnf)).toBe(false);
+    expect(applyPlus2(dnf)).toEqual(dnf);
+  });
+
+  it("a new solve starts without any previous DNF", () => {
+    const stopped = stopTimer(startTimer(INITIAL_TIMER_STATE, 0), 12_340);
+    const dnf = markDnf(stopped);
+    const newRun = startTimer(dnf, 20_000);
     expect(newRun.penalty).toBe("none");
   });
 });

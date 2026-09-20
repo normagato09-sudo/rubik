@@ -241,4 +241,153 @@ describe("timerStore", () => {
       expect(useCubeStore.getState().cubeState).not.toEqual(before);
     });
   });
+
+  describe("DNF", () => {
+    beforeEach(() => {
+      useInspectionStore.setState({ status: "idle", startedAt: null });
+    });
+
+    it("can be applied to a finished solve", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+
+      state().markDnf();
+
+      expect(state().penalty).toBe("dnf");
+      expect(state().finalTimeMs).toBe(12_340); // raw time still preserved internally
+    });
+
+    it("cannot be applied before any solve has finished", () => {
+      state().markDnf();
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied while the timer is running", () => {
+      mockNow(1000);
+      state().start();
+      state().markDnf();
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied while an inspection is running", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+
+      useInspectionStore.setState({ status: "running", startedAt: 20_000 });
+      state().markDnf();
+
+      expect(state().penalty).toBe("none");
+    });
+
+    it("cannot be applied twice to the same solve", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().markDnf();
+      const afterFirst = state();
+      state().markDnf();
+      expect(state()).toEqual(afterFirst);
+    });
+
+    it("a solve with +2 can become DNF, and the result is DNF, not +2", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().applyPlus2();
+      expect(state().penalty).toBe("plus2");
+
+      state().markDnf();
+
+      expect(state().penalty).toBe("dnf");
+    });
+
+    it("a new solve starts without any previous DNF", () => {
+      mockNow(1000, 13_340, 20_000);
+      state().start();
+      state().stop();
+      state().markDnf();
+
+      state().start();
+
+      expect(state().penalty).toBe("none");
+    });
+
+    it("RESET clears DNF, as the RESET button does", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().markDnf();
+      expect(state().penalty).toBe("dnf");
+
+      // Same composition ResetButton performs on click.
+      useCubeStore.getState().resetCube();
+      useInspectionStore.getState().cancel();
+      state().reset();
+
+      expect(state().penalty).toBe("none");
+      expect(state().finalTimeMs).toBeNull();
+    });
+
+    it("full flow: inspection -> resolve -> stop -> DNF", () => {
+      mockNow(1000, 16_000, 20_000, 32_340);
+      useInspectionStore.getState().start();
+      useInspectionStore.getState().tick(); // auto-finishes at 16000
+      expect(useInspectionStore.getState().status).toBe("finished");
+
+      state().start(); // 20000
+      state().stop(); // 32340
+
+      state().markDnf();
+
+      expect(state().penalty).toBe("dnf");
+    });
+
+    it("full flow: +2 then DNF ends as DNF", () => {
+      mockNow(1000, 16_000, 20_000, 32_340);
+      useInspectionStore.getState().start();
+      useInspectionStore.getState().tick();
+
+      state().start();
+      state().stop();
+      state().applyPlus2();
+      state().markDnf();
+
+      expect(state().penalty).toBe("dnf");
+    });
+
+    it("a fresh resolution after DNF or +2 starts clean", () => {
+      mockNow(1000, 13_340, 20_000);
+      state().start();
+      state().stop();
+      state().markDnf();
+
+      // New attempt: scramble, then a brand-new solve.
+      useCubeStore.getState().requestScramble();
+      useInspectionStore.getState().cancel();
+      state().start();
+
+      expect(state().penalty).toBe("none");
+      expect(state().finalTimeMs).toBeNull();
+    });
+
+    it("does not break scramble or cube moves", () => {
+      mockNow(1000, 13_340);
+      state().start();
+      state().stop();
+      state().markDnf();
+
+      useCubeStore.getState().requestScramble();
+      expect(useCubeStore.getState().scramble).not.toBeNull();
+      while (useCubeStore.getState().activeMove !== null) {
+        useCubeStore.getState().finishActiveMove();
+      }
+
+      const before = useCubeStore.getState().cubeState;
+      useCubeStore.getState().requestMove("R");
+      useCubeStore.getState().finishActiveMove();
+      expect(useCubeStore.getState().cubeState).not.toEqual(before);
+    });
+  });
 });

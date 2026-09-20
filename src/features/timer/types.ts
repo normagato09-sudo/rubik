@@ -2,14 +2,17 @@
  * Pure state of a speedcubing timer. Deliberately minimal: `status` is a
  * plain string union so it can grow later (e.g. an "inspecting" state)
  * without touching existing states, and `finalTimeMs` is the one place a
- * finished solve's time lives, ready to be paired later with a penalty
- * (+2/DNF) or stored in a history entry alongside the scramble that
- * produced it.
+ * finished solve's time lives, ready to be stored later in a history
+ * entry alongside the scramble that produced it.
  */
 export type TimerStatus = "idle" | "running" | "stopped";
 
-/** "none" (no penalty) or "plus2" (+2s). DNF will extend this later. */
-export type Penalty = "none" | "plus2";
+/**
+ * The three possible outcomes of a finished solve. Only one applies at a
+ * time — DNF and +2 are mutually exclusive, matching how WCA competitions
+ * record a single result per solve (DNF always wins if both would apply).
+ */
+export type Penalty = "none" | "plus2" | "dnf";
 
 export interface TimerState {
   status: TimerStatus;

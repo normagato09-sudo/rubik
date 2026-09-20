@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { resetTimer, startTimer, stopTimer } from "@/features/timer/engine";
-import { applyPlus2 as applyPlus2Transition } from "@/features/timer/penalty";
+import {
+  applyPlus2 as applyPlus2Transition,
+  markDnf as markDnfTransition,
+} from "@/features/timer/penalty";
 import { INITIAL_TIMER_STATE } from "@/features/timer/types";
 import type { TimerState } from "@/features/timer/types";
 import { useInspectionStore } from "./inspectionStore";
@@ -11,6 +14,8 @@ interface TimerStore extends TimerState {
   reset: () => void;
   /** Applies +2 to the just-finished solve. See the guard comment below. */
   applyPlus2: () => void;
+  /** Marks the just-finished solve as DNF. Same guard as applyPlus2. */
+  markDnf: () => void;
 }
 
 export const useTimerStore = create<TimerStore>((set, get) => ({
@@ -25,5 +30,9 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     // between the two stores rather than inside the pure engine.
     if (useInspectionStore.getState().status === "running") return;
     set(applyPlus2Transition(get()));
+  },
+  markDnf: () => {
+    if (useInspectionStore.getState().status === "running") return;
+    set(markDnfTransition(get()));
   },
 }));
