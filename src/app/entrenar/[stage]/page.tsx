@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CrossTrainer } from "@/features/trainings/components/CrossTrainer";
 import { CFOP_STAGES } from "@/features/trainer/cfop";
 
 export function generateStaticParams() {
@@ -23,13 +24,19 @@ export default async function CfopStagePage({
       >
         ← Entrenar
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {stage.label}
-      </h1>
-      <p className="max-w-md text-sm leading-relaxed text-muted">
-        Esta sección de CFOP todavía no está implementada. Aquí llegarán los
-        casos, algoritmos y práctica de {stage.label}.
-      </p>
+      {stage.id === "cross" ? (
+        <CrossTrainer stage={stage} />
+      ) : (
+        <>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {stage.label}
+          </h1>
+          <p className="max-w-md text-sm leading-relaxed text-muted">
+            Esta sección de CFOP todavía no está implementada. Aquí llegarán
+            los casos, algoritmos y práctica de {stage.label}.
+          </p>
+        </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSolvedCube } from "./model";
-import { ALL_MOVES, FACES, applyMove, applyMoves, inverseMove } from "./moves";
+import { ALL_MOVES, FACES, applyMove, applyMoves, inverseMove, invertMoves } from "./moves";
 import type { Move } from "./moves";
 
 const solved = createSolvedCube();
@@ -55,5 +55,25 @@ describe("cube move engine", () => {
     const scrambled = applyMoves(solved, sequence);
     const restored = applyMoves(scrambled, inverse);
     expect(restored).toEqual(solved);
+  });
+
+  describe("invertMoves", () => {
+    it("undoes a sequence exactly, so applying both in order restores the solved state", () => {
+      const sequence: Move[] = ["F", "U'", "R", "U"];
+      const restored = applyMoves(applyMoves(solved, sequence), invertMoves(sequence));
+      expect(restored).toEqual(solved);
+    });
+
+    it("reverses order and inverts each move", () => {
+      expect(invertMoves(["R", "U'", "F2"])).toEqual(["F2", "U", "R'"]);
+    });
+
+    it("is its own inverse (applying it twice restores the original sequence's effect)", () => {
+      const sequence: Move[] = ["R", "U", "R'", "U'"];
+      const state = applyMoves(solved, sequence);
+      const undone = applyMoves(state, invertMoves(sequence));
+      const redone = applyMoves(undone, invertMoves(invertMoves(sequence)));
+      expect(redone).toEqual(state);
+    });
   });
 });

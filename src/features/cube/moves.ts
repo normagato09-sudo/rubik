@@ -76,6 +76,11 @@ export function inverseMove(move: Move): Move {
   return turnsToMove(face, ((4 - turns) % 4) as 1 | 2 | 3);
 }
 
+/** Inverse of a whole sequence — reversed order, each move inverted — undoes it exactly. */
+export function invertMoves(moves: Move[]): Move[] {
+  return [...moves].reverse().map(inverseMove);
+}
+
 export function applyMove(state: CubeState, move: Move): CubeState {
   const { face, turns } = parseMove(move);
   const { axis, layer, sign } = FACE_DEF[face];

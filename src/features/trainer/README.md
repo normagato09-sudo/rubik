@@ -13,8 +13,15 @@ aplica la cascada: cambiar de cubo recalcula el método por defecto para
 ese tipo de cubo.
 
 `cfop.ts` describe las cuatro etapas de CFOP (Cross, F2L, OLL, PLL) que se
-muestran en /entrenar: nombre, descripción breve y color de acento. Todavía
-sin casos ni algoritmos — eso llega en una fase posterior.
+muestran en /entrenar: nombre, descripción breve y color de acento.
+
+`cross-cases.ts` tiene los primeros casos reales: los 4 casos titulados
+de la cruz blanca de la guía beginner de ruwix.com (situación + algoritmo,
+citados de esa fuente, no inventados), más `startingStateFor()`, que
+calcula el `CubeState` de partida de cada caso aplicando el inverso de su
+algoritmo a un cubo resuelto — así "resolver el caso" siempre vuelve a un
+cubo resuelto, sin necesidad de fabricar un scramble a mano. F2L/OLL/PLL
+sin casos ni algoritmos todavía — eso llega en una fase posterior.
 
 Nota: esto es el catálogo de *tipos* de cubo para Aprender, distinto de
 `features/cubes` (los cubos concretos del usuario, "Mis cubos"), que es
