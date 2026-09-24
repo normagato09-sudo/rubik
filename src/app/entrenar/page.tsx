@@ -1,3 +1,4 @@
+import { isLearningCategoryId } from "@/features/learning/categories";
 import { LearnScreen } from "@/features/learning/components/LearnScreen";
 
 export const metadata = {
@@ -5,7 +6,11 @@ export const metadata = {
 };
 
 export default async function AprenderPage({ searchParams }: PageProps<"/entrenar">) {
-  // `?abierto=f2l` keeps the F2L block open when coming back from a case.
+  // `?abierto=oll` keeps that block open when coming back from one of its cases.
   const { abierto } = await searchParams;
-  return <LearnScreen initialExpanded={abierto === "f2l" ? ["f2l"] : []} />;
+  return (
+    <LearnScreen
+      initialExpanded={typeof abierto === "string" && isLearningCategoryId(abierto) ? [abierto] : []}
+    />
+  );
 }

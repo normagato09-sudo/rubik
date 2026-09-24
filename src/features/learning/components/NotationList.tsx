@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { NotationMove } from "../notation";
 import { notationItemId } from "../progress-store";
-import { CheckIcon } from "./F2LCaseList";
+import { CheckIcon } from "./CheckIcon";
 
 /**
  * Each diagram already is the whole lesson (the move and its inverse),

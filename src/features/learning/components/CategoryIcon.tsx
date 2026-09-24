@@ -2,12 +2,11 @@ import type { LearningCategoryId } from "../categories";
 
 /**
  * A 3×3 face where the highlighted cells hint at what each category
- * works on: a turning column (notation), the cross (beginner), the
- * first two layers (F2L) or the last layer (OLL/PLL).
+ * works on: a turning column (notation), the first two layers (F2L)
+ * or the last layer (OLL/PLL).
  */
 const HIGHLIGHTED: Record<LearningCategoryId, number[]> = {
   notation: [2, 5, 8],
-  beginner: [1, 3, 4, 5, 7],
   f2l: [3, 4, 5, 6, 7, 8],
   oll: [0, 1, 2],
   pll: [0, 2],

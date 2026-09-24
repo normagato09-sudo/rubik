@@ -1,27 +1,26 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { LEARNING_CATEGORIES, type LearningCategoryId } from "../categories";
-import { F2L_CASES, matchesF2LCase } from "../f2l-cases";
-import { NOTATION_MOVES, matchesNotationMove } from "../notation";
+import { matchesCase, type AlgorithmSetId } from "../algorithm-sets";
+import { LEARNING_CATEGORIES, getCategory, type LearningCategoryId } from "../categories";
+import { NOTATION_MOVES, matchesNotationMove, type NotationMove } from "../notation";
 import {
+  caseItemId,
   countLearned,
-  f2lItemId,
   notationItemId,
   useLearningProgress,
 } from "../progress-store";
+import { ALGORITHM_SETS } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
+import { CaseList } from "./CaseList";
 import { CategoryCard } from "./CategoryCard";
-import { F2LCaseList } from "./F2LCaseList";
 import { NotationList } from "./NotationList";
 
-const F2L_ITEM_IDS = F2L_CASES.map((f2lCase) => f2lItemId(f2lCase.id));
-const NOTATION_ITEM_IDS = NOTATION_MOVES.map((notation) => notationItemId(notation.id));
-const NOTATION_ACCENT = LEARNING_CATEGORIES.find((category) => category.id === "notation")!.accent;
-
-const PROGRESS_ITEMS: Partial<Record<LearningCategoryId, string[]>> = {
-  notation: NOTATION_ITEM_IDS,
-  f2l: F2L_ITEM_IDS,
+const ITEM_IDS: Record<LearningCategoryId, string[]> = {
+  notation: NOTATION_MOVES.map((notation) => notationItemId(notation.id)),
+  f2l: ALGORITHM_SETS.f2l.map((algorithmCase) => caseItemId("f2l", algorithmCase.id)),
+  oll: ALGORITHM_SETS.oll.map((algorithmCase) => caseItemId("oll", algorithmCase.id)),
+  pll: ALGORITHM_SETS.pll.map((algorithmCase) => caseItemId("pll", algorithmCase.id)),
 };
 
 export function LearnScreen({
@@ -36,32 +35,40 @@ export function LearnScreen({
   const toggleLearned = useLearningProgress((state) => state.toggleLearned);
 
   const trimmedQuery = query.trim();
-  const f2lResults = F2L_CASES.filter((f2lCase) => matchesF2LCase(f2lCase, trimmedQuery));
-  const notationResults = NOTATION_MOVES.filter((notation) =>
-    matchesNotationMove(notation, trimmedQuery),
-  );
-  const resultCount = f2lResults.length + notationResults.length;
 
-  const notationList = (moves: typeof NOTATION_MOVES) => (
+  const content = (id: LearningCategoryId, filter: string) => {
+    if (id === "notation") {
+      const moves = NOTATION_MOVES.filter((notation) => matchesNotationMove(notation, filter));
+      return { count: moves.length, node: notationList(moves) };
+    }
+    const cases = ALGORITHM_SETS[id as AlgorithmSetId].filter((algorithmCase) =>
+      matchesCase(algorithmCase, filter),
+    );
+    return { count: cases.length, node: <CaseList cases={cases} learned={learned} /> };
+  };
+
+  const notationList = (moves: NotationMove[]) => (
     <NotationList
       moves={moves}
       learned={learned}
-      accent={NOTATION_ACCENT}
+      accent={getCategory("notation").accent}
       hydrated={hydrated}
       onToggle={toggleLearned}
     />
   );
 
-  const progressFor = (id: LearningCategoryId) => {
-    const itemIds = PROGRESS_ITEMS[id];
-    if (!itemIds || !hydrated) return null;
-    return { learned: countLearned(learned, itemIds), total: itemIds.length };
-  };
-
   const toggle = (id: LearningCategoryId) =>
     setExpanded((current) =>
       current.includes(id) ? current.filter((open) => open !== id) : [...current, id],
     );
+
+  const results = trimmedQuery
+    ? LEARNING_CATEGORIES.map((category) => ({
+        category,
+        ...content(category.id, trimmedQuery),
+      })).filter((result) => result.count > 0)
+    : [];
+  const resultCount = results.reduce((total, result) => total + result.count, 0);
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -88,14 +95,11 @@ export function LearnScreen({
               ? `Sin resultados para “${trimmedQuery}”`
               : `${resultCount} ${resultCount === 1 ? "resultado" : "resultados"}`}
           </p>
-          {notationResults.length > 0 && (
-            <SearchGroup title="Notación del Cubo">{notationList(notationResults)}</SearchGroup>
-          )}
-          {f2lResults.length > 0 && (
-            <SearchGroup title="F2L (CFOP)">
-              <F2LCaseList cases={f2lResults} learned={learned} />
+          {results.map(({ category, node }) => (
+            <SearchGroup key={category.id} title={category.title}>
+              {node}
             </SearchGroup>
-          )}
+          ))}
         </section>
       ) : (
         <div className="flex flex-col gap-4">
@@ -103,12 +107,12 @@ export function LearnScreen({
             <CategoryCard
               key={category.id}
               category={category}
-              progress={progressFor(category.id)}
+              total={ITEM_IDS[category.id].length}
+              learned={hydrated ? countLearned(learned, ITEM_IDS[category.id]) : null}
               expanded={expanded.includes(category.id)}
               onToggle={() => toggle(category.id)}
             >
-              {category.id === "notation" && notationList(NOTATION_MOVES)}
-              {category.id === "f2l" && <F2LCaseList cases={F2L_CASES} learned={learned} />}
+              {expanded.includes(category.id) && content(category.id, "").node}
             </CategoryCard>
           ))}
         </div>

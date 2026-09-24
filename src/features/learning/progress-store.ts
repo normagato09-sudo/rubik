@@ -14,8 +14,9 @@ export interface LearningProgressStore {
 
 export const LEARNING_PROGRESS_STORAGE_KEY = "rubiko-learning-progress";
 
-export function f2lItemId(caseId: string): string {
-  return `f2l-${caseId}`;
+/** "f2l-07", "oll-12", "pll-08"... — F2L ids predate OLL/PLL and keep this shape. */
+export function caseItemId(setId: string, caseId: string): string {
+  return `${setId}-${caseId}`;
 }
 
 export function notationItemId(notationId: string): string {

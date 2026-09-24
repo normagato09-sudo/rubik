@@ -3,32 +3,37 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
-import { F2L_CATEGORY } from "../categories";
-import { F2L_CASES, getAdjacentF2LCases, getF2LCase, getF2LSteps } from "../f2l-cases";
-import { f2lItemId, useLearningProgress } from "../progress-store";
+import { IMAGE_SIZE, getAdjacentCases, getSteps, type AlgorithmSetId } from "../algorithm-sets";
+import { getCategory } from "../categories";
+import { caseItemId, useLearningProgress } from "../progress-store";
+import { ALGORITHM_SETS, getCase } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
-import { CheckIcon } from "./F2LCaseList";
+import { CheckIcon } from "./CheckIcon";
 
 /**
- * Read-only guide for one F2L case: diagram, algorithm and its moves as
- * numbered steps, to reproduce on a physical cube. Nothing here moves or
- * animates a cube — the only interaction is marking the case as learned.
+ * Read-only guide for one F2L/OLL/PLL case: diagram, algorithm and its
+ * moves as numbered steps, to reproduce on a physical cube. Nothing here
+ * moves or animates a cube — the only interaction is marking it learned.
  */
-export function F2LCaseDetail({ caseId }: { caseId: string }) {
-  const f2lCase = getF2LCase(caseId)!;
-  const steps = getF2LSteps(f2lCase);
-  const { previous, next } = getAdjacentF2LCases(caseId);
-  const accent = F2L_CATEGORY.accent;
+export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: string }) {
+  const cases = ALGORITHM_SETS[setId];
+  const algorithmCase = getCase(setId, caseId)!;
+  const steps = getSteps(algorithmCase);
+  const { previous, next } = getAdjacentCases(cases, caseId);
+  const category = getCategory(setId);
+  const { accent } = category;
 
   const hydrated = useLearningProgressHydration();
-  const itemId = f2lItemId(f2lCase.id);
+  const itemId = caseItemId(setId, algorithmCase.id);
   const isLearned = useLearningProgress((state) => state.learned[itemId] === true);
   const toggleLearned = useLearningProgress((state) => state.toggleLearned);
+
+  const heading = algorithmCase.name ?? `Caso ${algorithmCase.id}`;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <Link
-        href="/entrenar?abierto=f2l"
+        href={`/entrenar?abierto=${setId}`}
         className="flex w-fit items-center gap-1 text-sm text-navy-muted hover:text-foreground"
       >
         <ChevronRightIcon className="h-4 w-4 rotate-180" />
@@ -38,27 +43,27 @@ export function F2LCaseDetail({ caseId }: { caseId: string }) {
       <header className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: accent }}>
-            {F2L_CATEGORY.title}
+            {category.title}
+            {algorithmCase.name && ` · Caso ${algorithmCase.id}`}
           </p>
-          <h1 className="text-2xl font-bold tracking-tight">Caso {f2lCase.id}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{heading}</h1>
         </div>
         <span
           className="rounded-full px-3 py-1 text-sm font-semibold tabular-nums"
           style={{ backgroundColor: `${accent}1f`, color: accent }}
-          aria-label={`Caso ${f2lCase.number} de ${F2L_CASES.length}`}
+          aria-label={`Caso ${algorithmCase.number} de ${cases.length}`}
         >
-          {f2lCase.number}/{F2L_CASES.length}
+          {algorithmCase.number}/{cases.length}
         </span>
       </header>
 
       <div className="flex justify-center rounded-3xl border border-navy-border bg-navy-2 py-6">
         <Image
-          src={f2lCase.image}
-          alt={`Diagrama del caso F2L ${f2lCase.number}`}
-          width={151}
-          height={161}
+          src={algorithmCase.image}
+          alt={`Diagrama de ${heading} de ${category.title}`}
+          {...IMAGE_SIZE[setId]}
           priority
-          className="h-40 w-auto"
+          className="h-40 w-40 object-contain"
         />
       </div>
 
@@ -70,7 +75,7 @@ export function F2LCaseDetail({ caseId }: { caseId: string }) {
           className="rounded-2xl border border-l-4 border-navy-border bg-navy-2 px-4 py-4 font-mono text-xl leading-snug font-semibold break-words text-foreground"
           style={{ borderLeftColor: accent }}
         >
-          {f2lCase.algorithm}
+          {algorithmCase.algorithm}
         </p>
       </section>
 
@@ -112,24 +117,24 @@ export function F2LCaseDetail({ caseId }: { caseId: string }) {
         {isLearned ? "Aprendido" : "Marcar como aprendido"}
       </button>
 
-      <nav className="grid grid-cols-2 gap-3" aria-label="Casos F2L">
+      <nav className="grid grid-cols-2 gap-3" aria-label={`Casos de ${category.title}`}>
         {previous ? (
           <Link
-            href={`/entrenar/f2l/${previous.id}`}
+            href={`/entrenar/${setId}/${previous.id}`}
             className="flex h-12 items-center justify-center gap-1 rounded-2xl bg-navy-2 text-sm font-medium text-foreground transition-colors hover:bg-navy-3"
           >
             <ChevronRightIcon className="h-4 w-4 rotate-180" />
-            Caso {previous.id}
+            {previous.name ?? `Caso ${previous.id}`}
           </Link>
         ) : (
           <span />
         )}
         {next ? (
           <Link
-            href={`/entrenar/f2l/${next.id}`}
+            href={`/entrenar/${setId}/${next.id}`}
             className="flex h-12 items-center justify-center gap-1 rounded-2xl bg-navy-2 text-sm font-medium text-foreground transition-colors hover:bg-navy-3"
           >
-            Caso {next.id}
+            {next.name ?? `Caso ${next.id}`}
             <ChevronRightIcon className="h-4 w-4" />
           </Link>
         ) : (

@@ -1,46 +1,49 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
-import { F2L_CATEGORY } from "../categories";
-import type { F2LCase } from "../f2l-cases";
-import { f2lItemId } from "../progress-store";
+import { IMAGE_SIZE, caseTitle, type AlgorithmCase } from "../algorithm-sets";
+import { getCategory } from "../categories";
+import { caseItemId } from "../progress-store";
+import { CheckIcon } from "./CheckIcon";
 
-export function F2LCaseList({
+/** Cases of one set (F2L, OLL or PLL); each row opens its read-only detail. */
+export function CaseList({
   cases,
   learned,
 }: {
-  cases: F2LCase[];
+  cases: AlgorithmCase[];
   learned: Record<string, true>;
 }) {
   return (
     <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-      {cases.map((f2lCase) => {
-        const isLearned = learned[f2lItemId(f2lCase.id)] === true;
+      {cases.map((algorithmCase) => {
+        const { setId, id } = algorithmCase;
+        const isLearned = learned[caseItemId(setId, id)] === true;
+        const setTitle = getCategory(setId).title;
         return (
-          <li key={f2lCase.id}>
+          <li key={id}>
             <Link
-              href={`/entrenar/f2l/${f2lCase.id}`}
+              href={`/entrenar/${setId}/${id}`}
               className="flex items-center gap-3 rounded-2xl bg-navy px-3 py-2.5 transition-colors hover:bg-navy-3 active:scale-[0.99]"
             >
               <Image
-                src={f2lCase.image}
-                alt={`Diagrama del caso F2L ${f2lCase.number}`}
-                width={151}
-                height={161}
-                className="h-16 w-auto shrink-0"
+                src={algorithmCase.image}
+                alt={`Diagrama del ${caseTitle(algorithmCase)} de ${setTitle}`}
+                {...IMAGE_SIZE[setId]}
+                className="h-16 w-16 shrink-0 object-contain"
               />
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="text-xs font-semibold tracking-wide text-navy-muted uppercase">
-                  Caso {f2lCase.id}
+                  {caseTitle(algorithmCase)}
                 </span>
                 <span className="font-mono text-sm leading-snug font-medium break-words text-foreground">
-                  {f2lCase.algorithm}
+                  {algorithmCase.algorithm}
                 </span>
               </span>
               {isLearned ? (
                 <span
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-navy"
-                  style={{ backgroundColor: F2L_CATEGORY.accent }}
+                  style={{ backgroundColor: getCategory(setId).accent }}
                   aria-label="Aprendido"
                   role="img"
                 >
@@ -58,22 +61,5 @@ export function F2LCaseList({
         );
       })}
     </ul>
-  );
-}
-
-export function CheckIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="m5 12.5 4.5 4.5L19 7.5" />
-    </svg>
   );
 }

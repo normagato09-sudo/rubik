@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { LEARNING_CATEGORIES } from "./categories";
 import { NOTATION_MOVES, matchesNotationMove } from "./notation";
 import { countLearned, createLearningProgressStore, notationItemId } from "./progress-store";
 
@@ -19,10 +18,6 @@ describe("NOTATION_MOVES", () => {
       expect(readFileSync(file).subarray(1, 4).toString()).toBe("PNG");
     }
     expect(existsSync(join(process.cwd(), "docs/source/notacion.docx"))).toBe(true);
-  });
-
-  it("the notation category is now available", () => {
-    expect(LEARNING_CATEGORIES.find((category) => category.id === "notation")?.available).toBe(true);
   });
 });
 
