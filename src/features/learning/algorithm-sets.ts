@@ -1,6 +1,6 @@
 import { splitAlgorithm } from "./algorithm";
 
-export type AlgorithmSetId = "f2l" | "oll" | "pll";
+export type AlgorithmSetId = "cruz" | "esquinas" | "f2l" | "oll" | "pll";
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -17,6 +17,8 @@ export interface AlgorithmCase {
 
 /** Natural size of each set's diagrams, for next/image. */
 export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number }> = {
+  cruz: { width: 128, height: 128 },
+  esquinas: { width: 128, height: 128 },
   f2l: { width: 151, height: 161 },
   oll: { width: 200, height: 200 },
   pll: { width: 200, height: 200 },
@@ -72,7 +74,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|f2l|oll|pll)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { NotationMove } from "../notation";
+import type { NotationMove, WideMove } from "../notation";
 import { notationItemId } from "../progress-store";
 import { CheckIcon } from "./CheckIcon";
 
@@ -64,5 +64,34 @@ export function NotationList({
         );
       })}
     </ul>
+  );
+}
+
+/** Lowercase moves: the letter stays lowercase, with "(2x)" beside it. */
+export function WideMoveList({ moves, accent }: { moves: WideMove[]; accent: string }) {
+  return (
+    <section className="flex flex-col gap-2 rounded-2xl bg-navy px-4 py-4">
+      <h3 className="text-sm font-semibold text-foreground">Movimientos en minúscula</h3>
+      <p className="text-sm text-navy-muted">
+        Una letra en minúscula gira 2 capas a la vez. x, y y z no cambian: giran todo el
+        cubo.
+      </p>
+      <ul className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {moves.map((wide) => (
+          <li
+            key={wide.move}
+            className="flex flex-col gap-0.5 rounded-xl border border-navy-border bg-navy-2 px-3 py-2.5"
+          >
+            <span className="font-mono text-lg font-semibold text-foreground">
+              {wide.move}{" "}
+              <span className="text-sm font-semibold" style={{ color: accent }}>
+                (2x)
+              </span>
+            </span>
+            <span className="text-xs leading-snug text-navy-muted">{wide.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

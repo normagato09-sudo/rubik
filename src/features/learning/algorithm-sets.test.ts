@@ -14,7 +14,7 @@ import {
 import { F2L_CASES } from "./f2l-cases";
 import { OLL_CASES } from "./oll-cases";
 import { PLL_CASES } from "./pll-cases";
-import { ALGORITHM_SETS, getCase } from "./sets";
+import { ALGORITHM_SETS, LEARNING_STEPS, getCase, getSetInfo } from "./sets";
 
 /**
  * Page 1 of docs/source/F2L_Complet.pdf as its text layer gives it
@@ -67,6 +67,8 @@ function docxTableRows(file: string): [string, string][] {
 }
 
 const SETS: [AlgorithmSetId, number][] = [
+  ["cruz", 5],
+  ["esquinas", 4],
   ["f2l", 24],
   ["oll", 57],
   ["pll", 21],
@@ -136,8 +138,22 @@ describe("source fidelity", () => {
     });
   });
 
+  it.each([
+    ["cruz", "cruz.docx"],
+    ["esquinas", "esquinas.docx"],
+  ] as const)("%s matches docs/source/%s row by row", (setId, file) => {
+    const rows = docxTableRows(file);
+    const cases = ALGORITHM_SETS[setId];
+    expect(rows).toHaveLength(cases.length);
+    rows.forEach(([number, algorithm], i) => {
+      expect(Number(number)).toBe(cases[i].number);
+      // Only the ’ glyph and a doubled space are normalized.
+      expect(cases[i].algorithm).toBe(algorithm.replace(/’/g, "'").replace(/\s+/g, " "));
+    });
+  });
+
   it("the source files are in the project", () => {
-    for (const file of ["F2L_Complet.pdf", "oll.docx", "pll.docx"]) {
+    for (const file of ["F2L_Complet.pdf", "oll.docx", "pll.docx", "cruz.docx", "esquinas.docx"]) {
       expect(existsSync(join(process.cwd(), "docs/source", file)), file).toBe(true);
     }
   });
@@ -190,5 +206,22 @@ describe("matchesCase", () => {
   it("titles include the source name when there is one", () => {
     expect(caseTitle(getCase("f2l", "07")!)).toBe("Caso 07");
     expect(caseTitle(getCase("pll", "08")!)).toBe("Caso 08 · T");
+  });
+});
+
+describe("learning steps", () => {
+  it("lists Cruz then Esquinas, each backed by its own case set", () => {
+    expect(LEARNING_STEPS.map((step) => step.setId)).toEqual(["cruz", "esquinas"]);
+    for (const step of LEARNING_STEPS) expect(ALGORITHM_SETS[step.setId].length).toBeGreaterThan(0);
+  });
+
+  it("steps belong to the Pasos block and are numbered by their position", () => {
+    expect(getSetInfo("cruz")).toMatchObject({ categoryId: "steps", title: "Paso 1 · Cruz" });
+    expect(getSetInfo("esquinas")).toMatchObject({ categoryId: "steps", title: "Paso 2 · Esquinas" });
+    expect(getSetInfo("oll")).toMatchObject({ categoryId: "oll", title: "OLL (CFOP)" });
+  });
+
+  it("keeps a repeated move as two steps (Cruz 2: F' F')", () => {
+    expect(getSteps(getCase("cruz", "02")!)).toEqual(["F'", "F'"]);
   });
 });

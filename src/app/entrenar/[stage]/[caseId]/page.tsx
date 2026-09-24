@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { caseTitle } from "@/features/learning/algorithm-sets";
-import { getCategory } from "@/features/learning/categories";
 import { CaseDetail } from "@/features/learning/components/CaseDetail";
-import { ALGORITHM_SETS, getCase, isAlgorithmSetId } from "@/features/learning/sets";
+import { ALGORITHM_SETS, getCase, getSetInfo, isAlgorithmSetId } from "@/features/learning/sets";
 
 export function generateStaticParams() {
   return Object.entries(ALGORITHM_SETS).flatMap(([stage, cases]) =>
@@ -17,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/entrenar/[stage]/
   if (!isAlgorithmSetId(stage)) return {};
   const algorithmCase = getCase(stage, caseId);
   if (!algorithmCase) return {};
-  return { title: `${getCategory(stage).title} · ${caseTitle(algorithmCase)} — RUBIKO` };
+  return { title: `${getSetInfo(stage).title} · ${caseTitle(algorithmCase)} — RUBIKO` };
 }
 
 export default async function AlgorithmCasePage({

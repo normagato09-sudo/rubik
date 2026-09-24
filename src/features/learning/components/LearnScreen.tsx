@@ -5,24 +5,33 @@ import { useState, type ReactNode } from "react";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { matchesCase, type AlgorithmSetId } from "../algorithm-sets";
 import { LEARNING_CATEGORIES, getCategory, type LearningCategoryId } from "../categories";
-import { NOTATION_MOVES, matchesNotationMove, type NotationMove } from "../notation";
+import {
+  NOTATION_MOVES,
+  WIDE_MOVES,
+  matchesNotationMove,
+  matchesWideMove,
+} from "../notation";
 import {
   caseItemId,
   countLearned,
   notationItemId,
   useLearningProgress,
 } from "../progress-store";
-import { ALGORITHM_SETS } from "../sets";
+import { ALGORITHM_SETS, LEARNING_STEPS, getSetInfo } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CaseList } from "./CaseList";
 import { CategoryCard } from "./CategoryCard";
-import { NotationList } from "./NotationList";
+import { NotationList, WideMoveList } from "./NotationList";
+
+const setItemIds = (setId: AlgorithmSetId) =>
+  ALGORITHM_SETS[setId].map((algorithmCase) => caseItemId(setId, algorithmCase.id));
 
 const ITEM_IDS: Record<LearningCategoryId, string[]> = {
   notation: NOTATION_MOVES.map((notation) => notationItemId(notation.id)),
-  f2l: ALGORITHM_SETS.f2l.map((algorithmCase) => caseItemId("f2l", algorithmCase.id)),
-  oll: ALGORITHM_SETS.oll.map((algorithmCase) => caseItemId("oll", algorithmCase.id)),
-  pll: ALGORITHM_SETS.pll.map((algorithmCase) => caseItemId("pll", algorithmCase.id)),
+  steps: LEARNING_STEPS.flatMap((step) => setItemIds(step.setId)),
+  f2l: setItemIds("f2l"),
+  oll: setItemIds("oll"),
+  pll: setItemIds("pll"),
 };
 
 export function LearnScreen({
@@ -38,26 +47,66 @@ export function LearnScreen({
 
   const trimmedQuery = query.trim();
 
-  const content = (id: LearningCategoryId, filter: string) => {
+  /** What a block shows, filtered by the search ("" shows everything). */
+  const content = (id: LearningCategoryId, filter: string): { count: number; node: ReactNode } => {
     if (id === "notation") {
+      const accent = getCategory("notation").accent;
       const moves = NOTATION_MOVES.filter((notation) => matchesNotationMove(notation, filter));
-      return { count: moves.length, node: notationList(moves) };
+      const wideMoves = WIDE_MOVES.filter((wide) => matchesWideMove(wide, filter));
+      return {
+        count: moves.length + wideMoves.length,
+        node: (
+          <div className="flex flex-col gap-2">
+            {moves.length > 0 && (
+              <NotationList
+                moves={moves}
+                learned={learned}
+                accent={accent}
+                hydrated={hydrated}
+                onToggle={toggleLearned}
+              />
+            )}
+            {wideMoves.length > 0 && <WideMoveList moves={wideMoves} accent={accent} />}
+          </div>
+        ),
+      };
     }
-    const cases = ALGORITHM_SETS[id as AlgorithmSetId].filter((algorithmCase) =>
-      matchesCase(algorithmCase, filter),
-    );
+
+    if (id === "steps") {
+      const steps = LEARNING_STEPS.map((step) => ({
+        ...step,
+        cases: ALGORITHM_SETS[step.setId].filter((algorithmCase) =>
+          matchesCase(algorithmCase, filter),
+        ),
+      })).filter((step) => step.cases.length > 0);
+      return {
+        count: steps.reduce((total, step) => total + step.cases.length, 0),
+        node: (
+          <div className="flex flex-col gap-4">
+            {steps.map((step) => {
+              const itemIds = setItemIds(step.setId);
+              return (
+                <div key={step.setId} className="flex flex-col gap-2">
+                  <h3 className="flex items-baseline justify-between px-1 text-sm font-semibold text-foreground">
+                    {getSetInfo(step.setId).title}
+                    {hydrated && (
+                      <span className="text-xs font-semibold text-navy-muted tabular-nums">
+                        {countLearned(learned, itemIds)}/{itemIds.length}
+                      </span>
+                    )}
+                  </h3>
+                  <CaseList cases={step.cases} learned={learned} />
+                </div>
+              );
+            })}
+          </div>
+        ),
+      };
+    }
+
+    const cases = ALGORITHM_SETS[id].filter((algorithmCase) => matchesCase(algorithmCase, filter));
     return { count: cases.length, node: <CaseList cases={cases} learned={learned} /> };
   };
-
-  const notationList = (moves: NotationMove[]) => (
-    <NotationList
-      moves={moves}
-      learned={learned}
-      accent={getCategory("notation").accent}
-      hydrated={hydrated}
-      onToggle={toggleLearned}
-    />
-  );
 
   const toggle = (id: LearningCategoryId) =>
     setExpanded((current) =>

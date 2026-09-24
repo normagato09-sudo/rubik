@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { IMAGE_SIZE, caseTitle, type AlgorithmCase } from "../algorithm-sets";
-import { getCategory } from "../categories";
 import { caseItemId } from "../progress-store";
+import { getSetInfo } from "../sets";
 import { CheckIcon } from "./CheckIcon";
 
-/** Cases of one set (F2L, OLL or PLL); each row opens its read-only detail. */
+/** Cases of one set (a learning step, F2L, OLL or PLL); each row opens its read-only detail. */
 export function CaseList({
   cases,
   learned,
@@ -19,7 +19,7 @@ export function CaseList({
       {cases.map((algorithmCase) => {
         const { setId, id } = algorithmCase;
         const isLearned = learned[caseItemId(setId, id)] === true;
-        const setTitle = getCategory(setId).title;
+        const { title: setTitle, accent } = getSetInfo(setId);
         return (
           <li key={id}>
             <Link
@@ -30,7 +30,7 @@ export function CaseList({
                 src={algorithmCase.image}
                 alt={`Diagrama del ${caseTitle(algorithmCase)} de ${setTitle}`}
                 {...IMAGE_SIZE[setId]}
-                className="h-16 w-16 shrink-0 object-contain"
+                className="h-16 w-16 shrink-0 rounded-lg object-contain"
               />
               <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="text-xs font-semibold tracking-wide text-navy-muted uppercase">
@@ -43,7 +43,7 @@ export function CaseList({
               {isLearned ? (
                 <span
                   className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-navy"
-                  style={{ backgroundColor: getCategory(setId).accent }}
+                  style={{ backgroundColor: accent }}
                   aria-label="Aprendido"
                   role="img"
                 >

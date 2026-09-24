@@ -1,4 +1,4 @@
-export type LearningCategoryId = "notation" | "f2l" | "oll" | "pll";
+export type LearningCategoryId = "notation" | "steps" | "f2l" | "oll" | "pll";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -18,6 +18,13 @@ export const LEARNING_CATEGORIES: LearningCategory[] = [
     title: "Notación del Cubo",
     description: "Aprende los giros básicos para leer algoritmos",
     accent: "#38bdf8",
+  },
+  {
+    // Its content is the ordered list of steps in sets.ts (LEARNING_STEPS).
+    id: "steps",
+    title: "Pasos de aprendizaje",
+    description: "Aprende a resolver el 3×3 paso a paso",
+    accent: "#34d399",
   },
   {
     id: "f2l",

@@ -33,6 +33,36 @@ export const NOTATION_MOVES: NotationMove[] = MOVES.map(({ move, label }) => {
   return { id, move, label, image: `/learning/notation/notation-${id}.png` };
 });
 
+export interface WideMove {
+  /** Lowercase letter, as written in algorithms: "r", "u"... */
+  move: string;
+  label: string;
+}
+
+/**
+ * A lowercase face letter turns 2 layers: that face plus the middle layer
+ * next to it — shown as "r (2x)". x, y and z are whole-cube rotations, not
+ * wide moves, so they are never listed here. These have no diagram in the
+ * source document, so they are not counted in the notation progress.
+ */
+export const WIDE_MOVES: WideMove[] = [
+  { move: "f", label: "F y la capa central (S)" },
+  { move: "r", label: "R y la capa media (M)" },
+  { move: "l", label: "L y la capa media (M)" },
+  { move: "b", label: "B y la capa central (S)" },
+  { move: "u", label: "U y la capa ecuatorial (E)" },
+  { move: "d", label: "D y la capa ecuatorial (E)" },
+];
+
+/** "r", "r'", "2x" or "minúscula" find the wide moves. */
+export function matchesWideMove(wide: WideMove, query: string): boolean {
+  const q = query.trim().toLowerCase().replace(/’/g, "'");
+  if (q.length === 0) return true;
+  if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2;
+  const tokens = q.split(/\s+/);
+  return tokens.every((token) => token === wide.move || token === `${wide.move}'`);
+}
+
 /** Matches "R", "r'", "R R'" or words of the label ("capa media"). */
 export function matchesNotationMove(notation: NotationMove, query: string): boolean {
   const q = query.trim().toLowerCase().replace(/’/g, "'");

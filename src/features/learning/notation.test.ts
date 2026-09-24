@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { NOTATION_MOVES, matchesNotationMove } from "./notation";
+import { NOTATION_MOVES, WIDE_MOVES, matchesNotationMove, matchesWideMove } from "./notation";
 import { countLearned, createLearningProgressStore, notationItemId } from "./progress-store";
 
 describe("NOTATION_MOVES", () => {
@@ -36,6 +36,23 @@ describe("matchesNotationMove", () => {
   it("finds moves by their label", () => {
     expect(search("capa media")).toEqual(["M"]);
     expect(search("todo el cubo")).toEqual(["z", "y", "x"]);
+  });
+});
+
+describe("WIDE_MOVES", () => {
+  it("lists the lowercase moves f r l b u d, never x, y or z", () => {
+    expect(WIDE_MOVES.map((wide) => wide.move)).toEqual(["f", "r", "l", "b", "u", "d"]);
+    for (const rotation of ["x", "y", "z"]) {
+      expect(WIDE_MOVES.some((wide) => wide.move === rotation)).toBe(false);
+    }
+  });
+
+  it("finds wide moves by letter or by \"2x\"", () => {
+    const search = (query: string) =>
+      WIDE_MOVES.filter((wide) => matchesWideMove(wide, query)).map((wide) => wide.move);
+    expect(search("r'")).toEqual(["r"]);
+    expect(search("2x")).toHaveLength(6);
+    expect(search("x")).toEqual([]);
   });
 });
 

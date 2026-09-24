@@ -4,9 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { IMAGE_SIZE, getAdjacentCases, getSteps, type AlgorithmSetId } from "../algorithm-sets";
-import { getCategory } from "../categories";
 import { caseItemId, useLearningProgress } from "../progress-store";
-import { ALGORITHM_SETS, getCase } from "../sets";
+import { ALGORITHM_SETS, getCase, getSetInfo } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CheckIcon } from "./CheckIcon";
 
@@ -20,8 +19,8 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
   const algorithmCase = getCase(setId, caseId)!;
   const steps = getSteps(algorithmCase);
   const { previous, next } = getAdjacentCases(cases, caseId);
-  const category = getCategory(setId);
-  const { accent } = category;
+  const info = getSetInfo(setId);
+  const { accent } = info;
 
   const hydrated = useLearningProgressHydration();
   const itemId = caseItemId(setId, algorithmCase.id);
@@ -33,7 +32,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <Link
-        href={`/entrenar?abierto=${setId}`}
+        href={`/entrenar?abierto=${info.categoryId}`}
         className="flex w-fit items-center gap-1 text-sm text-navy-muted hover:text-foreground"
       >
         <ChevronRightIcon className="h-4 w-4 rotate-180" />
@@ -43,7 +42,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
       <header className="flex items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: accent }}>
-            {category.title}
+            {info.title}
             {algorithmCase.name && ` · Caso ${algorithmCase.id}`}
           </p>
           <h1 className="text-2xl font-bold tracking-tight">{heading}</h1>
@@ -60,10 +59,10 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
       <div className="flex justify-center rounded-3xl border border-navy-border bg-navy-2 py-6">
         <Image
           src={algorithmCase.image}
-          alt={`Diagrama de ${heading} de ${category.title}`}
+          alt={`Diagrama de ${heading} de ${info.title}`}
           {...IMAGE_SIZE[setId]}
           priority
-          className="h-40 w-40 object-contain"
+          className="h-40 w-40 rounded-2xl object-contain"
         />
       </div>
 
@@ -117,7 +116,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
         {isLearned ? "Aprendido" : "Marcar como aprendido"}
       </button>
 
-      <nav className="grid grid-cols-2 gap-3" aria-label={`Casos de ${category.title}`}>
+      <nav className="grid grid-cols-2 gap-3" aria-label={`Casos de ${info.title}`}>
         {previous ? (
           <Link
             href={`/entrenar/${setId}/${previous.id}`}
