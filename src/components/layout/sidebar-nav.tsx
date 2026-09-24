@@ -5,10 +5,13 @@ import { usePathname } from "next/navigation";
 import type { Route } from "next";
 import { CubeMark } from "@/components/cube-mark";
 
+/**
+ * Inicio is the hub: Cubo → Método → Aprender all start there, so the menu
+ * only adds Progreso. /entrenar/cross and /metodos still exist, just
+ * aren't linked from the menu.
+ */
 const NAV_ITEMS: { href: Route; label: string }[] = [
   { href: "/", label: "Inicio" },
-  { href: "/entrenar", label: "Entrenar" },
-  { href: "/metodos", label: "Métodos" },
   { href: "/progreso", label: "Progreso" },
 ];
 

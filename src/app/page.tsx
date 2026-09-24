@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CubeMark } from "@/components/cube-mark";
 import { OptionDropdown } from "@/components/ui/option-dropdown";
 import { CUBES } from "@/features/trainer/cubes";
-import { getMethodsForCubeType } from "@/features/trainer/methods";
+import { getSelectableMethodsForCubeType } from "@/features/trainer/methods";
 import { useTrainerPreferences } from "@/features/trainer/store";
 
 export default function HomePage() {
@@ -39,7 +39,7 @@ export default function HomePage() {
         />
         <OptionDropdown
           label="Método"
-          options={getMethodsForCubeType(cubeId)}
+          options={getSelectableMethodsForCubeType(cubeId)}
           selectedId={methodId}
           onSelect={setMethod}
           size="lg"
@@ -47,7 +47,8 @@ export default function HomePage() {
       </div>
 
       <Link
-        href="/entrenar"
+        // Aprender starts at Notación, then continues to F2L, OLL and PLL.
+        href="/entrenar?abierto=notation"
         className="relative flex w-full max-w-sm items-center justify-center rounded-2xl bg-accent py-4 text-lg font-semibold text-accent-foreground shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover active:scale-[0.98]"
       >
         Aprender

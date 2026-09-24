@@ -2,7 +2,7 @@
 
 import { OptionDropdown } from "@/components/ui/option-dropdown";
 import { CUBES } from "@/features/trainer/cubes";
-import { getMethodsForCubeType } from "@/features/trainer/methods";
+import { getSelectableMethodsForCubeType } from "@/features/trainer/methods";
 import { useTrainerPreferences } from "@/features/trainer/store";
 
 export function RightPanel({ className = "" }: { className?: string }) {
@@ -25,7 +25,7 @@ export function RightPanel({ className = "" }: { className?: string }) {
         />
         <OptionDropdown
           label="Método"
-          options={getMethodsForCubeType(cubeId)}
+          options={getSelectableMethodsForCubeType(cubeId)}
           selectedId={methodId}
           onSelect={setMethod}
         />

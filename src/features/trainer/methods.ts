@@ -20,3 +20,11 @@ export const DEFAULT_METHOD_ID = "cfop";
 export function getMethodsForCubeType(cubeType: string): MethodOption[] {
   return METHODS.filter((method) => method.cubeType === cubeType);
 }
+
+/**
+ * What the Método selector shows: only methods that are active today.
+ * "Coming soon" methods stay in METHODS for later, but are not listed.
+ */
+export function getSelectableMethodsForCubeType(cubeType: string): MethodOption[] {
+  return getMethodsForCubeType(cubeType).filter((method) => method.status === "active");
+}

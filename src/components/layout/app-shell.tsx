@@ -3,8 +3,7 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { CubeMark } from "@/components/cube-mark";
-import { ChevronDownIcon, CloseIcon, MenuIcon } from "@/components/ui/icons";
-import { RightPanel } from "./right-panel";
+import { CloseIcon, MenuIcon } from "@/components/ui/icons";
 import { SidebarNav } from "./sidebar-nav";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -56,26 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SidebarNav />
       </aside>
 
+      {/* Cubo and Método are chosen on Inicio only, so the old "Opciones de
+          entrenamiento" panel (RightPanel) is no longer rendered here. */}
       <div className="flex flex-1 flex-col lg:flex-row">
-        <div className="border-b border-border bg-surface px-4 py-4 sm:px-6 lg:hidden">
-          <details className="group">
-            <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-foreground">
-              Opciones de entrenamiento
-              <ChevronDownIcon className="h-4 w-4 text-muted transition-transform group-open:rotate-180" />
-            </summary>
-            <div className="pt-4">
-              <RightPanel />
-            </div>
-          </details>
-        </div>
-
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           {children}
         </main>
-
-        <aside className="hidden border-l border-border bg-surface px-6 py-10 lg:block lg:w-72 lg:shrink-0">
-          <RightPanel />
-        </aside>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
+import { ChevronRightIcon } from "@/components/ui/icons";
 import { matchesCase, type AlgorithmSetId } from "../algorithm-sets";
 import { LEARNING_CATEGORIES, getCategory, type LearningCategoryId } from "../categories";
 import { NOTATION_MOVES, matchesNotationMove, type NotationMove } from "../notation";
@@ -72,7 +74,16 @@ export function LearnScreen({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <h1 className="text-3xl font-bold tracking-tight">Aprender a resolver</h1>
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/"
+          className="flex w-fit items-center gap-1 text-sm text-navy-muted hover:text-foreground"
+        >
+          <ChevronRightIcon className="h-4 w-4 rotate-180" />
+          Inicio
+        </Link>
+        <h1 className="text-3xl font-bold tracking-tight">Aprender a resolver</h1>
+      </div>
 
       <label className="relative block">
         <span className="sr-only">Buscar algoritmos</span>
