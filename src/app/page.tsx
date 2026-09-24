@@ -14,7 +14,7 @@ export default function HomePage() {
   const setMethod = useTrainerPreferences((state) => state.setMethod);
 
   return (
-    <div className="relative flex min-h-[70dvh] flex-col items-center justify-center gap-10">
+    <div className="relative flex min-h-[calc(100dvh-3rem)] flex-col items-center justify-center gap-10">
       {/* Subtle brand glow behind the wordmark — the only non-accent color on
           the screen, kept faint so it reads as texture, not a second CTA color. */}
       <div
@@ -52,6 +52,13 @@ export default function HomePage() {
         className="relative flex w-full max-w-sm items-center justify-center rounded-2xl bg-accent py-4 text-lg font-semibold text-accent-foreground shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover active:scale-[0.98]"
       >
         Aprender
+      </Link>
+
+      <Link
+        href="/solucionador"
+        className="relative -mt-6 flex w-full max-w-sm items-center justify-center rounded-2xl border border-border bg-surface py-4 text-lg font-semibold text-foreground transition-all hover:border-accent/40 active:scale-[0.98]"
+      >
+        Solucionador
       </Link>
     </div>
   );

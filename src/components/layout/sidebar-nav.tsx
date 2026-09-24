@@ -7,12 +7,10 @@ import { CubeMark } from "@/components/cube-mark";
 
 /**
  * Inicio is the hub: Cubo → Método → Aprender all start there, so the menu
- * only adds Progreso. /entrenar/cross and /metodos still exist, just
- * aren't linked from the menu.
+ * lists Inicio. Not rendered today (AppShell has no menu); kept for later.
  */
 const NAV_ITEMS: { href: Route; label: string }[] = [
   { href: "/", label: "Inicio" },
-  { href: "/progreso", label: "Progreso" },
 ];
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {

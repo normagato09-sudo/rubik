@@ -27,6 +27,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Lets the shell pad around the notch/status bar when installed as an app.
+  viewportFit: "cover",
   colorScheme: "dark",
   themeColor: "#12141c",
 };
