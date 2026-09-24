@@ -4,7 +4,10 @@ import { CrossTrainer } from "@/features/trainings/components/CrossTrainer";
 import { CFOP_STAGES } from "@/features/trainer/cfop";
 
 export function generateStaticParams() {
-  return CFOP_STAGES.map((stage) => ({ stage: stage.id }));
+  // F2L has its own static route (/entrenar/f2l) inside the new Aprender.
+  return CFOP_STAGES.filter((stage) => stage.id !== "f2l").map((stage) => ({
+    stage: stage.id,
+  }));
 }
 
 export default async function CfopStagePage({

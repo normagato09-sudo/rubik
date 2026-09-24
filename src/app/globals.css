@@ -22,6 +22,13 @@
   --cube-blue: #1054d6;
   --cube-green: #009b48;
   --cube-violet: #7c4dff;
+
+  /* Navy surfaces used only by the Aprender screens. */
+  --navy: #0e1830;
+  --navy-2: #14213f;
+  --navy-3: #1b2b50;
+  --navy-border: #263863;
+  --navy-muted: #a6b3d1;
 }
 
 @theme inline {
@@ -43,6 +50,11 @@
   --color-cube-blue: var(--cube-blue);
   --color-cube-green: var(--cube-green);
   --color-cube-violet: var(--cube-violet);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-navy-3: var(--navy-3);
+  --color-navy-border: var(--navy-border);
+  --color-navy-muted: var(--navy-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
