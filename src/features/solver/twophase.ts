@@ -9,7 +9,15 @@
  * Building the tables takes around a second or two, so run it once (see
  * initTables) and preferably off the main thread (solver.worker.ts).
  */
-import { MOVE_CUBES, MOVE_NAMES, applyMove, solvedCube, type CubieCube } from "./cubie";
+import {
+  MOVE_CUBES,
+  MOVE_NAMES,
+  applyMove,
+  cubeProblem,
+  isSolved,
+  solvedCube,
+  type CubieCube,
+} from "./cubie";
 
 const N_MOVES = 18;
 const N_TWIST = 2187; // 3^7
@@ -244,6 +252,8 @@ export interface SolveOptions {
   maxLength?: number;
   /** After a first solution, keep looking for shorter ones for this long. */
   improveForMs?: number;
+  /** Give up (throw) if the first search takes longer than this. */
+  timeLimitMs?: number;
 }
 
 /**
@@ -251,10 +261,13 @@ export interface SolveOptions {
  * standard orientation of CubieCube: apply them holding U up and F front.
  */
 export function solve(cube: CubieCube, options: SolveOptions = {}): string[] {
+  // An unreachable cube has no solution: phase 2 would search forever.
+  const problem = cubeProblem(cube);
+  if (problem) throw new Error(`Cubo imposible (${problem}).`);
   initTables();
-  const { maxLength = 30, improveForMs = 300 } = options;
+  const { maxLength = 30, improveForMs = 300, timeLimitMs = 15_000 } = options;
 
-  let best = search(cube, maxLength, Infinity);
+  let best = search(cube, maxLength, Date.now() + timeLimitMs);
   if (!best) throw new Error("No se ha encontrado solución.");
 
   const deadline = Date.now() + improveForMs;
@@ -263,6 +276,8 @@ export function solve(cube: CubieCube, options: SolveOptions = {}): string[] {
     if (!shorter) break;
     best = shorter;
   }
+  // Never hand out moves that do not solve the cube.
+  if (!isSolved(best.reduce(applyMove, cube))) throw new Error("Solución incorrecta.");
   return best.map((move) => MOVE_NAMES[move]);
 }
 

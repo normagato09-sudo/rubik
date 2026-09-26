@@ -13,6 +13,8 @@
  *     the one next to the face on the left when looking at it (for R that
  *     is F, for B it is R, for L it is B, for F it is L).
  */
+import { createSolvedCube } from "@/features/cube/model";
+import { ALL_MOVES, applyMoves, invertMoves, type Move } from "@/features/cube/moves";
 import type { CubeState, StickerFace, Vec3 } from "@/features/cube/types";
 import { FACE_NAMES, type FaceName } from "./cubie";
 import type { Facelets } from "./facelets";
@@ -59,4 +61,18 @@ export function faceletsFromCubeState(state: CubeState): Facelets {
     if (!sticker) throw new Error(`No hay pegatina en ${position} hacia ${normal}.`);
     return sticker.color;
   });
+}
+
+/**
+ * The user's cube as a 3D state, for playing the solution back step by
+ * step: undoing `moves` on a solved cube with the features/cube engine
+ * gives the only state they solve. Returns null unless that state shows
+ * exactly the painted stickers — i.e. unless the moves, applied with
+ * RUBIKO's own move engine, really solve the cube the user entered.
+ */
+export function cubeStateForSolution(facelets: Facelets, moves: string[]): CubeState | null {
+  if (!moves.every((move): move is Move => (ALL_MOVES as string[]).includes(move))) return null;
+  const start = applyMoves(createSolvedCube(), invertMoves(moves));
+  const shown = faceletsFromCubeState(start);
+  return shown.every((color, i) => color === facelets[i]) ? start : null;
 }

@@ -107,6 +107,42 @@ export function applyAlgorithm(cube: CubieCube, algorithm: string): CubieCube {
     }, cube);
 }
 
+/**
+ * Why a cubie cube cannot be reached by turning a real 3×3 (null if it
+ * can): every piece exactly once, twists and flips that add up, and corner
+ * and edge permutations of the same parity.
+ */
+export type CubeProblem = "corner-repeated" | "edge-repeated" | "twist" | "flip" | "parity";
+
+export function permutationParity(permutation: number[]): number {
+  let swaps = 0;
+  for (let i = 0; i < permutation.length; i++) {
+    for (let j = i + 1; j < permutation.length; j++) {
+      if (permutation[i] > permutation[j]) swaps++;
+    }
+  }
+  return swaps % 2;
+}
+
+const isPermutation = (values: number[], n: number) =>
+  values.length === n && new Set(values).size === n && values.every((v) => v >= 0 && v < n);
+
+const isOrientation = (values: number[], n: number, mod: number) =>
+  values.length === n && values.every((v) => Number.isInteger(v) && v >= 0 && v < mod);
+
+export function cubeProblem(cube: CubieCube): CubeProblem | null {
+  if (!isPermutation(cube.cp, 8)) return "corner-repeated";
+  if (!isPermutation(cube.ep, 12)) return "edge-repeated";
+  if (!isOrientation(cube.co, 8, 3) || cube.co.reduce((sum, t) => sum + t, 0) % 3 !== 0) {
+    return "twist";
+  }
+  if (!isOrientation(cube.eo, 12, 2) || cube.eo.reduce((sum, f) => sum + f, 0) % 2 !== 0) {
+    return "flip";
+  }
+  if (permutationParity(cube.cp) !== permutationParity(cube.ep)) return "parity";
+  return null;
+}
+
 export function isSolved(cube: CubieCube): boolean {
   const solved = solvedCube();
   return (
