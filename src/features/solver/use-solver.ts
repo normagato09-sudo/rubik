@@ -27,6 +27,15 @@ export function useSolver() {
       callbacks.get(response.id)?.(response);
       callbacks.delete(response.id);
     };
+    // A worker that fails to load or crashes would leave "Calculando…"
+    // forever: fail every pending request instead.
+    worker.onerror = (event) => {
+      event.preventDefault();
+      for (const [id, callback] of callbacks) {
+        callback({ type: "error", id, message: "El solucionador ha fallado." });
+      }
+      callbacks.clear();
+    };
     worker.postMessage({ type: "warmup" } satisfies SolverRequest);
     return () => {
       worker.terminate();

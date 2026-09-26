@@ -13,6 +13,8 @@ import {
   FACE_LABELS,
   emptyFacelets,
   faceOffset,
+  findTurnedFace,
+  neighborFace,
   parseFacelets,
   type Facelets,
 } from "../facelets";
@@ -44,8 +46,36 @@ const NET_POSITION: Record<FaceName, [number, number]> = {
 type Result =
   | { kind: "idle" }
   | { kind: "solving" }
-  | { kind: "error"; message: string }
+  | { kind: "error"; message: string; details?: string[] }
   | { kind: "solved"; moves: string[] };
+
+/**
+ * What to tell the user about stickers that are not a solvable cube. For a
+ * complete, 9/9 cube that cannot exist, also point at a face that looks
+ * read turned — by far the most common slip when copying a real cube.
+ */
+function invalidInput(facelets: Facelets, reason: string, error: string): Result {
+  if (reason !== "impossible") return { kind: "error", message: error };
+  const turned = findTurnedFace(facelets);
+  return {
+    kind: "error",
+    message: "Los colores introducidos no corresponden a un cubo 3×3 válido.",
+    details: [
+      error,
+      turned
+        ? `Parece que la cara ${FACE_LABELS[turned.face]} (${turned.face}) está girada. ${FACE_HINTS[turned.face]} Fíjate en los colores de los bordes.`
+        : "Revisa que cada cara esté copiada con el cubo en la posición que se indica: los bordes de color muestran qué cara toca cada lado.",
+    ],
+  };
+}
+
+/** Border sticker (2 top, 4 left, 6 right, 8 bottom) → where its marker goes. */
+const BORDERS = [
+  { n: 2, className: "col-start-2 row-start-1 h-1.5 w-1/2 self-center justify-self-center" },
+  { n: 4, className: "col-start-1 row-start-2 h-1/2 w-1.5 self-center justify-self-center" },
+  { n: 6, className: "col-start-3 row-start-2 h-1/2 w-1.5 self-center justify-self-center" },
+  { n: 8, className: "col-start-2 row-start-3 h-1.5 w-1/2 self-center justify-self-center" },
+] as const;
 
 export function SolverScreen() {
   const [facelets, setFacelets] = useState<Facelets>(emptyFacelets);
@@ -68,16 +98,18 @@ export function SolverScreen() {
   const handleSolve = async () => {
     const parsed = parseFacelets(facelets);
     if (!parsed.ok) {
-      setResult({ kind: "error", message: parsed.error });
+      setResult(invalidInput(facelets, parsed.reason, parsed.error));
       return;
     }
     setResult({ kind: "solving" });
     try {
       setResult({ kind: "solved", moves: await solve(parsed.cube) });
-    } catch (error) {
+    } catch {
+      // The input was already validated, so this is the solver itself
+      // failing: never show its technical message.
       setResult({
         kind: "error",
-        message: error instanceof Error ? error.message : "No se ha podido resolver.",
+        message: "No se ha podido calcular la solución. Inténtalo de nuevo.",
       });
     }
   };
@@ -154,29 +186,44 @@ export function SolverScreen() {
         </div>
         <p className="text-sm text-navy-muted">{FACE_HINTS[face]}</p>
 
-        <div className="mx-auto grid w-full max-w-[264px] grid-cols-3 gap-2 rounded-2xl bg-black/40 p-2">
-          {facelets.slice(faceOffset(face), faceOffset(face) + 9).map((color, i) => {
-            const index = faceOffset(face) + i;
-            const isCenter = i === 4;
+        {/* Each border shows the color of the face it touches, so the face is read the right way round. */}
+        <div className="mx-auto grid w-full max-w-[288px] grid-cols-[12px_1fr_12px] grid-rows-[12px_auto_12px]">
+          {BORDERS.map(({ n, className }) => {
+            const color = CENTER_COLORS[neighborFace(face, n)];
             return (
-              <button
-                key={index}
-                type="button"
-                onClick={() => paint(index)}
-                disabled={isCenter}
-                aria-label={
-                  isCenter
-                    ? `Centro ${COLOR_NAMES[CENTER_COLORS[face]]}`
-                    : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}`
-                }
-                className="aspect-square rounded-xl border-2 transition-transform active:scale-95 disabled:cursor-default"
-                style={{
-                  backgroundColor: color ? CUBE_COLOR_HEX[color] : "var(--navy-3)",
-                  borderColor: color ? "rgb(0 0 0 / 25%)" : "var(--navy-border)",
-                }}
+              <span
+                key={n}
+                className={`rounded-full ${className}`}
+                style={{ backgroundColor: CUBE_COLOR_HEX[color] }}
+                title={`Este lado toca el centro ${COLOR_NAMES[color]}`}
+                aria-hidden
               />
             );
           })}
+          <div className="col-start-2 row-start-2 grid grid-cols-3 gap-2 rounded-2xl bg-black/40 p-2">
+            {facelets.slice(faceOffset(face), faceOffset(face) + 9).map((color, i) => {
+              const index = faceOffset(face) + i;
+              const isCenter = i === 4;
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => paint(index)}
+                  disabled={isCenter}
+                  aria-label={
+                    isCenter
+                      ? `Centro ${COLOR_NAMES[CENTER_COLORS[face]]}`
+                      : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}`
+                  }
+                  className="aspect-square rounded-xl border-2 transition-transform active:scale-95 disabled:cursor-default"
+                  style={{
+                    backgroundColor: color ? CUBE_COLOR_HEX[color] : "var(--navy-3)",
+                    borderColor: color ? "rgb(0 0 0 / 25%)" : "var(--navy-border)",
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -246,12 +293,17 @@ export function SolverScreen() {
       </div>
 
       {result.kind === "error" && (
-        <p
+        <div
           role="alert"
-          className="rounded-2xl border border-cube-red/40 bg-cube-red/10 px-4 py-3 text-sm text-foreground"
+          className="flex flex-col gap-1.5 rounded-2xl border border-cube-red/40 bg-cube-red/10 px-4 py-3 text-sm text-foreground"
         >
-          {result.message}
-        </p>
+          <p className={result.details ? "font-semibold" : undefined}>{result.message}</p>
+          {result.details?.map((detail) => (
+            <p key={detail} className="text-navy-muted">
+              {detail}
+            </p>
+          ))}
+        </div>
       )}
 
       {result.kind === "solved" && <Solution moves={result.moves} />}
@@ -262,8 +314,8 @@ export function SolverScreen() {
 function Solution({ moves }: { moves: string[] }) {
   if (moves.length === 0) {
     return (
-      <p className="rounded-2xl bg-navy-2 px-4 py-4 text-sm text-foreground">
-        El cubo ya está resuelto.
+      <p className="rounded-2xl bg-navy-2 px-4 py-4 text-sm text-foreground" aria-live="polite">
+        El cubo ya está resuelto: no hace falta ningún movimiento.
       </p>
     );
   }

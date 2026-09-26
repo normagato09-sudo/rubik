@@ -76,7 +76,11 @@ describe("facelets", () => {
 
   it("asks for the missing stickers", () => {
     const result = parseFacelets(emptyFacelets());
-    expect(result).toEqual({ ok: false, error: "Faltan 48 pegatinas por colorear." });
+    expect(result).toEqual({
+      ok: false,
+      reason: "incomplete",
+      error: "Faltan 48 pegatinas por colorear.",
+    });
   });
 
   const broken = (edit: (facelets: Facelets) => void) => {

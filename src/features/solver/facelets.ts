@@ -10,11 +10,16 @@ import { FACE_NAMES, type CubieCube, type FaceName } from "./cubie";
  *            D
  *
  * U is seen from above with F at its bottom edge; D from below with F at its
- * top edge; the side faces with U on top.
+ * top edge; the side faces with U on top. cube-state.ts writes this down
+ * in the 3D model's coordinates, and the tests check it against the
+ * features/cube move engine.
  */
 export type Facelets = (CubeColor | null)[];
 
-/** Holding the cube white up, green front (the scheme used in Aprender). */
+/**
+ * Holding the cube white up, green front: the same colors features/cube
+ * paints on +y, -y, +x, -x, +z, -z (the scheme used in Aprender).
+ */
 export const CENTER_COLORS: Record<FaceName, CubeColor> = {
   U: "white",
   R: "red",
@@ -113,7 +118,21 @@ export function faceletsFromCube(cube: CubieCube): Facelets {
   return facelets;
 }
 
-export type ParseResult = { ok: true; cube: CubieCube } | { ok: false; error: string };
+/**
+ * Why some stickers are not a solvable cube:
+ * - "incomplete": some stickers are still unpainted;
+ * - "count": everything painted, but a color is not used exactly 9 times;
+ * - "impossible": every color is 9/9 but the stickers are not a real 3×3 (a
+ *   piece that does not exist or is repeated, or a twisted corner, flipped
+ *   edge or swapped pair that no turn can produce).
+ */
+export type InvalidReason = "incomplete" | "count" | "impossible";
+
+export type ParseResult =
+  | { ok: true; cube: CubieCube }
+  | { ok: false; reason: InvalidReason; error: string };
+
+const impossible = (error: string): ParseResult => ({ ok: false, reason: "impossible", error });
 
 export const COLOR_NAMES: Record<CubeColor, string> = {
   white: "blanco",
@@ -142,7 +161,7 @@ function parity(permutation: number[]): number {
 export function parseFacelets(facelets: Facelets): ParseResult {
   const missing = facelets.filter((color) => color === null).length;
   if (missing > 0) {
-    return { ok: false, error: `Faltan ${missing} pegatinas por colorear.` };
+    return { ok: false, reason: "incomplete", error: `Faltan ${missing} pegatinas por colorear.` };
   }
 
   for (const color of Object.values(CENTER_COLORS)) {
@@ -150,6 +169,7 @@ export function parseFacelets(facelets: Facelets): ParseResult {
     if (count !== 9) {
       return {
         ok: false,
+        reason: "count",
         error: `Hay ${count} pegatinas de color ${COLOR_NAMES[color]}; tienen que ser 9.`,
       };
     }
@@ -171,7 +191,7 @@ export function parseFacelets(facelets: Facelets): ParseResult {
       (faces) => ori !== -1 && faces[1] === side1 && faces[2] === side2,
     );
     if (corner === -1) {
-      return { ok: false, error: "Hay una esquina con una combinación de colores imposible." };
+      return impossible("Hay una esquina con una combinación de colores imposible.");
     }
     cube.cp.push(corner);
     cube.co.push(ori);
@@ -193,28 +213,62 @@ export function parseFacelets(facelets: Facelets): ParseResult {
       }
     }
     if (!found) {
-      return { ok: false, error: "Hay una arista con una combinación de colores imposible." };
+      return impossible("Hay una arista con una combinación de colores imposible.");
     }
   }
 
   if (new Set(cube.cp).size !== 8) {
-    return { ok: false, error: "Hay una esquina repetida (y otra que falta)." };
+    return impossible("Hay una esquina repetida (y otra que falta).");
   }
   if (new Set(cube.ep).size !== 12) {
-    return { ok: false, error: "Hay una arista repetida (y otra que falta)." };
+    return impossible("Hay una arista repetida (y otra que falta).");
   }
   if (cube.co.reduce((sum, twist) => sum + twist, 0) % 3 !== 0) {
-    return { ok: false, error: "Hay una esquina girada sobre sí misma: revisa sus colores." };
+    return impossible("Hay una esquina girada sobre sí misma: revisa sus colores.");
   }
   if (cube.eo.reduce((sum, flip) => sum + flip, 0) % 2 !== 0) {
-    return { ok: false, error: "Hay una arista dada la vuelta: revisa sus colores." };
+    return impossible("Hay una arista dada la vuelta: revisa sus colores.");
   }
   if (parity(cube.cp) !== parity(cube.ep)) {
-    return {
-      ok: false,
-      error: "Hay dos piezas intercambiadas: así el cubo no se puede resolver.",
-    };
+    return impossible("Hay dos piezas intercambiadas: así el cubo no se puede resolver.");
   }
 
   return { ok: true, cube };
+}
+
+/** Sticker order of a face after turning it a quarter clockwise. */
+const QUARTER_TURN = [6, 3, 0, 7, 4, 1, 8, 5, 2];
+
+/**
+ * When the stickers are not a real cube, checks whether one face was
+ * probably read turned (the usual slip when copying a real cube): returns
+ * that face and how many quarter turns clockwise fix it, only if exactly
+ * one such fix makes the whole cube valid. Never used to solve anything —
+ * just to point the user at the face to check.
+ */
+export function findTurnedFace(facelets: Facelets): { face: FaceName; turns: 1 | 2 | 3 } | null {
+  if (parseFacelets(facelets).ok) return null;
+  const fixes: { face: FaceName; turns: 1 | 2 | 3 }[] = [];
+  for (const face of FACE_NAMES) {
+    let stickers = facelets.slice(faceOffset(face), faceOffset(face) + 9);
+    for (const turns of [1, 2, 3] as const) {
+      stickers = QUARTER_TURN.map((i) => stickers[i]);
+      const candidate = [...facelets];
+      candidate.splice(faceOffset(face), 9, ...stickers);
+      if (parseFacelets(candidate).ok) fixes.push({ face, turns });
+    }
+  }
+  return fixes.length === 1 ? fixes[0] : null;
+}
+
+/**
+ * Face whose center shows next to sticker `n` (1–9) of `face`: for the
+ * middle of each border (2 top, 4 left, 6 right, 8 bottom) this is the face
+ * that side of the grid touches, as the screen asks to hold the cube.
+ */
+export function neighborFace(face: FaceName, n: 2 | 4 | 6 | 8): FaceName {
+  const index = at(face, n);
+  const edge = EDGE_FACELETS.findIndex((stickers) => stickers.includes(index));
+  const side = EDGE_FACELETS[edge].indexOf(index);
+  return EDGE_FACES[edge][1 - side];
 }
