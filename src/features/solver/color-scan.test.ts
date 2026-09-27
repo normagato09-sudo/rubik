@@ -5,10 +5,12 @@ import {
   centerFits,
   classifyColor,
   classifyFace,
+  classifyFace2x2,
   createStabilityTracker,
   emptyCalibration,
   faceletsFromScans,
   guideSquare,
+  isNewFace,
   looksLikeSticker,
   medianColor,
   sampleFace,
@@ -289,5 +291,62 @@ describe("faceletsFromScans", () => {
     const validation = validateFacelets(faceletsFromScans(scans));
     expect(validation.kind).toBe("impossible");
     if (validation.kind === "impossible") expect(validation.turned?.[0].face).toBe("F");
+  });
+});
+
+describe("2×2 faces (no center)", () => {
+  /** A 2×2 face: 4 flat squares on black plastic. */
+  function face2x2(colors: Rgb[], size = 90): Pixels {
+    const data = new Uint8ClampedArray(size * size * 4);
+    const square = guideSquare(size, size);
+    const cell = square.size / 2;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const col = Math.floor((x - square.x) / cell);
+        const row = Math.floor((y - square.y) / cell);
+        const inside = col >= 0 && col < 2 && row >= 0 && row < 2;
+        data.set([...(inside ? colors[row * 2 + col] : [15, 15, 18]), 255], (y * size + x) * 4);
+      }
+    }
+    return { width: size, height: size, data };
+  }
+
+  const colors: Rgb[] = [
+    [200, 30, 35],
+    [230, 215, 40],
+    [20, 70, 180],
+    [230, 230, 228],
+  ];
+
+  it("samples the 4 cells of a 2×2 guide grid, row by row", () => {
+    expect(sampleFace(face2x2(colors), undefined, 2)).toEqual(colors);
+  });
+
+  it("classifies all 4 stickers (none is fixed)", () => {
+    expect(classifyFace2x2(colors, emptyCalibration()).map((c) => c.color)).toEqual([
+      "red",
+      "yellow",
+      "blue",
+      "white",
+    ]);
+  });
+
+  it("calibrates with confirmed faces: a warm-light orange then reads right, a close call gets a ?", () => {
+    // Under warm light this orange sticker sits between the default red and orange.
+    const warmOrange: Rgb = [215, 75, 35];
+    const before = classifyFace2x2([warmOrange], emptyCalibration())[0];
+    const after = classifyFace2x2(
+      [warmOrange],
+      calibrate(emptyCalibration(), [[218, 78, 36], [170, 25, 30]], ["orange", "red"]),
+    )[0];
+    expect(after).toEqual({ color: "orange", unsure: false });
+    expect(before.unsure || before.color === "orange").toBe(true);
+  });
+
+  it("does not take the face just confirmed again", () => {
+    const previous: CubeColor[] = ["red", "yellow", "blue", "white"];
+    expect(isNewFace(previous, previous)).toBe(false);
+    expect(isNewFace(["red", "yellow", "blue", "green"], previous)).toBe(true);
+    expect(isNewFace(previous, undefined)).toBe(true);
   });
 });

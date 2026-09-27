@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { getFaceDef, parseMove } from "../moves";
+import { getFaceDef, isInLayer, parseMove } from "../moves";
 import type { Move } from "../moves";
-import type { Cubie as CubieState, CubeState } from "../types";
+import type { CubeSize, Cubie as CubieState, CubeState } from "../types";
 import { AnimatedLayer } from "./AnimatedLayer";
 import { Cubie } from "./Cubie";
 
@@ -18,22 +18,24 @@ export function CubeBody({
   activeMove,
   moveId,
   onMoveComplete,
+  size = 3,
 }: {
   cubeState: CubeState;
   activeMove: Move | null;
   moveId: number;
   onMoveComplete: () => void;
+  size?: CubeSize;
 }) {
   const { rest, affected, axis } = useMemo(() => {
     if (!activeMove) {
       return { rest: cubeState.cubies, affected: [] as CubieState[], axis: 0 as 0 | 1 | 2 };
     }
     const { face } = parseMove(activeMove);
-    const { axis, layer } = getFaceDef(face);
+    const { axis } = getFaceDef(face);
     const rest: CubieState[] = [];
     const affected: CubieState[] = [];
     for (const cubie of cubeState.cubies) {
-      (cubie.position[axis] === layer ? affected : rest).push(cubie);
+      (isInLayer(face, cubie.position) ? affected : rest).push(cubie);
     }
     return { rest, affected, axis };
   }, [cubeState, activeMove]);
@@ -41,7 +43,7 @@ export function CubeBody({
   return (
     <group>
       {rest.map((cubie) => (
-        <Cubie key={cubie.id} cubie={cubie} />
+        <Cubie key={cubie.id} cubie={cubie} size={size} />
       ))}
       {activeMove && (
         <AnimatedLayer
@@ -49,6 +51,7 @@ export function CubeBody({
           move={activeMove}
           axis={axis}
           cubies={affected}
+          size={size}
           onComplete={onMoveComplete}
         />
       )}

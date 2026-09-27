@@ -169,6 +169,24 @@ export function classifyFace(
   );
 }
 
+/**
+ * The 4 stickers of a 2×2 face. There is no center to calibrate with, so
+ * each sample is compared with this cube's colors as seen on the faces
+ * already confirmed (or typical camera colors before the first one); close
+ * calls come back `unsure`, to be marked with "?".
+ */
+export function classifyFace2x2(samples: readonly Rgb[], calibration: Calibration): Classified[] {
+  return samples.map((sample) => classifyColor(sample, calibration));
+}
+
+/**
+ * Whether the 2×2 face in view can be a new one: not the face just
+ * confirmed, still in front of the camera (the 3×3 checks its center).
+ */
+export function isNewFace(colors: readonly CubeColor[], previous: readonly (CubeColor | null)[] | undefined): boolean {
+  return !previous || colors.some((color, i) => color !== previous[i]);
+}
+
 // ---------- sampling the image ----------
 
 /** Share of the image's short side the guide grid covers (the overlay uses the same). */
@@ -212,15 +230,22 @@ export function medianColor(image: Pixels, cx: number, cy: number, radius: numbe
   return [median(r), median(g), median(b)];
 }
 
-/** One sample per cell of the guide grid, row by row, from the middle of each cell. */
-export function sampleFace(image: Pixels, square = guideSquare(image.width, image.height)): Rgb[] {
-  const cell = square.size / 3;
+/**
+ * One sample per cell of the guide grid (`size` × `size`: 3 for a 3×3,
+ * 2 for a 2×2), row by row, from the middle of each cell.
+ */
+export function sampleFace(
+  image: Pixels,
+  square = guideSquare(image.width, image.height),
+  size: 2 | 3 = 3,
+): Rgb[] {
+  const cell = square.size / size;
   const radius = Math.max(1, cell * 0.15);
-  return Array.from({ length: 9 }, (_, i) =>
+  return Array.from({ length: size * size }, (_, i) =>
     medianColor(
       image,
-      square.x + cell * ((i % 3) + 0.5),
-      square.y + cell * (Math.floor(i / 3) + 0.5),
+      square.x + cell * ((i % size) + 0.5),
+      square.y + cell * (Math.floor(i / size) + 0.5),
       radius,
     ),
   );

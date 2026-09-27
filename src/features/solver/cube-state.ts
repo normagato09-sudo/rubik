@@ -15,7 +15,7 @@
  */
 import { createSolvedCube } from "@/features/cube/model";
 import { ALL_MOVES, applyMoves, invertMoves, type Move } from "@/features/cube/moves";
-import type { CubeState, StickerFace, Vec3 } from "@/features/cube/types";
+import type { CubeColor, CubeState, StickerFace, Vec3 } from "@/features/cube/types";
 import { FACE_NAMES, type FaceName } from "./cubie";
 import type { Facelets } from "./facelets";
 
@@ -49,9 +49,15 @@ const LOCAL_AXIS: Record<StickerFace, { axis: "x" | "y" | "z"; sign: 1 | -1 }> =
   "-z": { axis: "z", sign: -1 },
 };
 
-/** The 54 sticker colors of a 3D cube state, in the solver's order. */
-export function faceletsFromCubeState(state: CubeState): Facelets {
-  return FACELET_GEOMETRY.map(([position, normal]) => {
+/**
+ * The sticker colors of a 3D cube state, in the solver's order: the 54 of a
+ * 3×3 by default, or those of any other `geometry` (the 2×2 uses 24).
+ */
+export function faceletsFromCubeState(
+  state: CubeState,
+  geometry: [Vec3, Vec3][] = FACELET_GEOMETRY,
+): CubeColor[] {
+  return geometry.map(([position, normal]) => {
     const cubie = state.cubies.find((piece) => same(piece.position, position));
     const sticker = cubie?.stickers.find(({ face }) => {
       const { axis, sign } = LOCAL_AXIS[face];

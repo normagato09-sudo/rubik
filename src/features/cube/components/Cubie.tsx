@@ -3,23 +3,30 @@
 import { useMemo } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { CUBE_COLOR_HEX, CUBE_PLASTIC_HEX } from "../palette";
-import type { Cubie as CubieState } from "../types";
+import type { CubeSize, Cubie as CubieState } from "../types";
 import { orientationToQuaternion } from "./orientation";
 import { STICKER_TRANSFORM } from "./sticker-transforms";
 
 const SPACING = 1.04;
+
+/**
+ * Distance between neighbouring pieces for each cube size. Positions are
+ * always in {-1, 0, 1}; a 2×2 has no middle layer, so its ±1 pieces are
+ * drawn half as far apart to touch each other.
+ */
+export const PIECE_SPACING: Record<CubeSize, number> = { 3: SPACING, 2: SPACING / 2 };
 const CUBIE_SIZE = 0.94;
 const STICKER_SIZE = CUBIE_SIZE * 0.82;
 const STICKER_OFFSET = CUBIE_SIZE / 2 + 0.011;
 
-export function Cubie({ cubie }: { cubie: CubieState }) {
+export function Cubie({ cubie, size = 3 }: { cubie: CubieState; size?: CubeSize }) {
   const quaternion = useMemo(
     () => orientationToQuaternion(cubie.orientation),
     [cubie.orientation],
   );
   const position = useMemo(
-    () => cubie.position.map((c) => c * SPACING) as [number, number, number],
-    [cubie.position],
+    () => cubie.position.map((c) => c * PIECE_SPACING[size]) as [number, number, number],
+    [cubie.position, size],
   );
 
   return (

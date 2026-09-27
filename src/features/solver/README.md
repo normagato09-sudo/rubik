@@ -1,7 +1,15 @@
 # solver
 
-Solucionador 3×3 (`/solucionador`): el usuario introduce las 54 pegatinas de
-su cubo (blanco arriba, verde delante) y recibe los movimientos para
+Solucionador 3×3 y 2×2 (`/solucionador`). Un selector "3×3 / 2×2" arriba
+elige el cubo; la elección se recuerda en el dispositivo (localStorage, con
+try/catch: sin almacenamiento dura hasta cerrar la página), y cada cubo
+guarda sus propias pegatinas al cambiar. El 2×2 vive en `features/solver2x2`;
+esta carpeta tiene la pantalla, la cámara, el reproductor y el Worker que
+comparten los dos (`components/puzzles.ts` describe cada cubo: pegatinas por
+cara, centros fijos, validación, indicaciones).
+
+En el 3×3 el usuario introduce las 54 pegatinas de su cubo (blanco arriba,
+verde delante) y recibe los movimientos para
 resolverlo, que puede seguir paso a paso con su cubo físico. Al entrar elige
 cómo introducirlas: **Manual** (pintarlas con la paleta) o **Cámara / foto**
 (se leen con la cámara, o con una foto por cara). "Cambiar forma" vuelve al
@@ -66,6 +74,14 @@ selector.
 - `components/SolutionPlayer.tsx` — la solución completa y un reproductor
   paso a paso con el cubo 3D (`CubeScene`), movimiento actual explicado y
   lista numerada.
+
+En el 2×2 (24 pegatinas, sin centros) la guía es la esquina
+amarilla-azul-naranja abajo-detrás-izquierda: las indicaciones de cada cara la
+usan, el editor marca con un punto de su color dónde se ve, el marco de cada
+cara dice qué cara toca cada lado, y la cámara usa una cuadrícula 2×2 y se
+calibra con las caras ya confirmadas (las dudosas llevan "?"). Antes de
+resolver se elige Óptima, Ortega o CLL; el reproductor agrupa los movimientos
+por pasos con su explicación y enseña el cubo 3D en 2×2.
 
 Tests: `solver.test.ts` (movimientos, coordenadas, validación, solver y
 Worker), `cube-state.test.ts` (recorrido completo: estado 3D → pegatinas →

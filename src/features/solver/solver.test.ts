@@ -16,6 +16,8 @@ import {
   type Facelets,
 } from "./facelets";
 import { handleSolverRequest } from "./solver-requests";
+import { isSolved2 } from "@/features/solver2x2/facelets";
+import { applyMoves2, solvedFacelets2 } from "@/features/solver2x2/sticker-moves";
 import { __coordinates as c, initTables, solve } from "./twophase";
 
 /** Deterministic pseudo-random scrambles, so failures are reproducible. */
@@ -346,6 +348,31 @@ describe("solver worker requests", () => {
     expect(handleSolverRequest({ type: "solve", id: 4, cube: broken })).toMatchObject({
       type: "error",
       id: 4,
+    });
+  });
+});
+
+describe("solver worker requests · 2×2", () => {
+  const scrambled = applyMoves2(solvedFacelets2(), ["R", "U", "F'", "R2", "U'", "F"]);
+
+  it("warms up the 2×2 tables", () => {
+    expect(handleSolverRequest({ type: "warmup2x2" })).toEqual({ type: "ready2x2" });
+  });
+
+  it.each(["optimal", "ortega", "cll"] as const)("solves with %s, in named steps", (method) => {
+    const response = handleSolverRequest({ type: "solve2x2", id: 9, facelets: scrambled, method });
+    expect(response).toMatchObject({ type: "solved2x2", id: 9 });
+    if (response?.type !== "solved2x2") return;
+    expect(response.solution.steps.length).toBeGreaterThan(0);
+    expect(isSolved2(applyMoves2(scrambled, response.solution.moves))).toBe(true);
+  });
+
+  it("answers with an error (never throws) for an impossible 2×2", () => {
+    const twisted = [...scrambled];
+    [twisted[3], twisted[4], twisted[9]] = [scrambled[9], scrambled[3], scrambled[4]];
+    expect(handleSolverRequest({ type: "solve2x2", id: 5, facelets: twisted, method: "cll" })).toMatchObject({
+      type: "error",
+      id: 5,
     });
   });
 });

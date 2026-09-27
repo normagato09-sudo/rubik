@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSolvedCube } from "./model";
-import { ALL_MOVES, FACES, applyMove, applyMoves, inverseMove, invertMoves } from "./moves";
+import { ALL_MOVES, EVERY_MOVE, FACES, applyMove, applyMoves, inverseMove, invertMoves, isRotation } from "./moves";
 import type { Move } from "./moves";
 
 const solved = createSolvedCube();
@@ -75,5 +75,44 @@ describe("cube move engine", () => {
       const redone = applyMoves(undone, invertMoves(invertMoves(sequence)));
       expect(redone).toEqual(state);
     });
+  });
+});
+
+describe("2×2 and whole-cube rotations", () => {
+  const solved2 = createSolvedCube(2);
+
+  it("a 2×2 has the 8 corners of a 3×3, same ids and stickers", () => {
+    const corners3 = solved.cubies.filter((cubie) => cubie.stickers.length === 3);
+    expect(solved2.cubies).toEqual(corners3);
+  });
+
+  it.each(FACES)("on a 2×2, %s four times, and %s then its inverse, return to solved", (face) => {
+    expect(applyMoves(solved2, [face, face, face, face])).toEqual(solved2);
+    expect(applyMoves(solved2, [face, inverseMove(face)])).toEqual(solved2);
+  });
+
+  it("a face turn moves the same corners on a 2×2 as on a 3×3", () => {
+    const sequence: Move[] = ["R", "U", "F'", "L2", "D", "B'"];
+    const corners = (state: typeof solved) => state.cubies.filter((cubie) => cubie.stickers.length === 3);
+    expect(applyMoves(solved2, sequence)).toEqual({ cubies: corners(applyMoves(solved, sequence)) });
+  });
+
+  it.each(["x", "y", "z"] as Move[])("%s moves every corner, and is undone by its inverse", (rotation) => {
+    const turned = applyMove(solved2, rotation);
+    turned.cubies.forEach((cubie, i) => expect(cubie.position).not.toEqual(solved2.cubies[i].position));
+    expect(applyMove(applyMove(solved, rotation), inverseMove(rotation))).toEqual(solved);
+  });
+
+  it("on a 2×2, x is R and L' together, y is U and D', z is F and B'", () => {
+    const sameOnCorners = (a: Move[], b: Move[]) =>
+      expect(applyMoves(solved2, a)).toEqual(applyMoves(solved2, b));
+    sameOnCorners(["x"], ["R", "L'"]);
+    sameOnCorners(["y"], ["U", "D'"]);
+    sameOnCorners(["z"], ["F", "B'"]);
+  });
+
+  it("face turns and the scramble move list never include rotations", () => {
+    expect(ALL_MOVES.some(isRotation)).toBe(false);
+    expect(EVERY_MOVE.filter(isRotation)).toEqual(["x", "x'", "x2", "y", "y'", "y2", "z", "z'", "z2"]);
   });
 });

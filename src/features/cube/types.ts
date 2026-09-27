@@ -1,11 +1,14 @@
 /**
- * Pure data model of a 3x3x3 Rubik's cube. No Three.js / rendering
+ * Pure data model of a Rubik's cube (3×3 or 2×2). No Three.js / rendering
  * concerns live here so this can be tested and reused (scramble, timer
  * replays, solver) independently of how it is drawn on screen.
  */
 
-/** Integer vector; components are always in {-1, 0, 1} for this cube. */
+/** Integer vector; components are always in {-1, 0, 1} (a 2×2 never uses 0). */
 export type Vec3 = readonly [number, number, number];
+
+/** Pieces per edge: a 3×3 or a 2×2. */
+export type CubeSize = 2 | 3;
 
 /** The six classic face colors. */
 export type CubeColor =
@@ -47,14 +50,14 @@ export const IDENTITY_ORIENTATION: Orientation = {
 export interface Cubie {
   /** Stable identity for the piece, independent of its current position. */
   id: string;
-  /** Current position in the 3x3x3 grid. */
+  /** Current position in the grid ({-1, 0, 1} per axis; {-1, 1} on a 2×2). */
   position: Vec3;
   orientation: Orientation;
   /** Fixed set of colored stickers glued to this piece's local faces. */
   stickers: Sticker[];
 }
 
-/** Full state of the cube: just the 26 visible pieces. */
+/** Full state of the cube: just the visible pieces (26 on a 3×3, 8 on a 2×2). */
 export interface CubeState {
   cubies: Cubie[];
 }

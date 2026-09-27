@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Vector3, type Group } from "three";
 import { baseQuarterAngle, parseMove } from "../moves";
 import type { Move } from "../moves";
-import type { Cubie as CubieState } from "../types";
+import type { CubeSize, Cubie as CubieState } from "../types";
 import { Cubie } from "./Cubie";
 
 const AXIS_VECTOR: Record<0 | 1 | 2, Vector3> = {
@@ -33,11 +33,13 @@ export function AnimatedLayer({
   move,
   axis,
   cubies,
+  size = 3,
   onComplete,
 }: {
   move: Move;
   axis: 0 | 1 | 2;
   cubies: CubieState[];
+  size?: CubeSize;
   onComplete: () => void;
 }) {
   const groupRef = useRef<Group>(null);
@@ -61,7 +63,7 @@ export function AnimatedLayer({
   return (
     <group ref={groupRef}>
       {cubies.map((cubie) => (
-        <Cubie key={cubie.id} cubie={cubie} />
+        <Cubie key={cubie.id} cubie={cubie} size={size} />
       ))}
     </group>
   );

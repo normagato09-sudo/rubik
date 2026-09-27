@@ -1,23 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { CameraIcon, ChevronRightIcon, GridIcon } from "@/components/ui/icons";
 import type { Move } from "@/features/cube/moves";
 import { CUBE_COLOR_HEX } from "@/features/cube/palette";
-import type { CubeColor, CubeState } from "@/features/cube/types";
+import type { CubeColor, CubeSize, CubeState } from "@/features/cube/types";
+import type { TurnedFace2, Validation2 } from "@/features/solver2x2/facelets";
+import { METHOD_LABELS, type Method2x2, type SolutionStep } from "@/features/solver2x2/methods";
+import { cubeStateForSolution2 } from "@/features/solver2x2/sticker-moves";
 import { FACE_NAMES, type FaceName } from "../cubie";
 import { cubeStateForSolution } from "../cube-state";
 import {
   CENTER_COLORS,
-  CENTER_INDEX,
   COLOR_NAMES,
   FACE_LABELS,
-  colorCounts,
-  emptyFacelets,
-  faceOffset,
-  turnFace,
-  validateFacelets,
   type Facelets,
   type TurnedFace,
   type Validation,
@@ -27,12 +24,14 @@ import { CameraScanner } from "./CameraScanner";
 import {
   ACCENT,
   ColorPalette,
-  FACE_HINTS,
   FACE_ORDER,
   FaceFrame,
+  HOLD_2X2,
   OK_GREEN,
+  REFERENCE_MARK,
   StickerButton,
 } from "./face-guide";
+import { PUZZLES, PUZZLE_IDS, puzzleStore, savePuzzle, type Puzzle, type PuzzleId } from "./puzzles";
 import { SolutionPlayer } from "./SolutionPlayer";
 
 /** Where each face sits in the 4×3 net: [column, row]. */
@@ -45,9 +44,7 @@ const NET_POSITION: Record<FaceName, [number, number]> = {
   D: [2, 3],
 };
 
-const isCenter = (index: number) => FACE_NAMES.some((name) => CENTER_INDEX(name) === index);
-
-const turnLabel = ({ turns }: TurnedFace) =>
+const turnLabel = ({ turns }: TurnedFace | TurnedFace2) =>
   turns === 2 ? "media vuelta" : "un cuarto de vuelta";
 
 /** How the stickers are entered: chosen on arrival, changeable any time. */
@@ -58,28 +55,53 @@ type Result =
   | { kind: "solving" }
   | { kind: "error"; message: string }
   | { kind: "already-solved" }
-  | { kind: "solved"; id: number; moves: Move[]; start: CubeState };
+  | { kind: "solved"; id: number; moves: Move[]; start: CubeState; size: CubeSize; steps?: SolutionStep[] };
+
+const METHOD_HINTS: Record<Method2x2, string> = {
+  optimal: "La solución más corta posible (11 movimientos como mucho).",
+  ortega: "Por pasos: primera cara, OLL y PBL.",
+  cll: "Por pasos: primera capa y CLL.",
+};
+
+const METHODS_2X2: Method2x2[] = ["optimal", "ortega", "cll"];
+
+/** " (centro blanco)" on a 3×3, nothing on a 2×2. */
+const withDetail = (puzzle: Puzzle, face: FaceName) =>
+  puzzle.faceDetail(face) ? `${FACE_LABELS[face]} (${puzzle.faceDetail(face)})` : FACE_LABELS[face];
 
 export function SolverScreen() {
+  const puzzleId = useSyncExternalStore(puzzleStore.subscribe, puzzleStore.getSnapshot, puzzleStore.getServerSnapshot);
+  const puzzle = PUZZLES[puzzleId];
   const [mode, setMode] = useState<Mode>("choose");
   const [fromCamera, setFromCamera] = useState(false);
-  const [facelets, setFacelets] = useState<Facelets>(emptyFacelets);
+  // Each cube keeps its own stickers: switching back and forth loses nothing.
+  const [stickers, setStickers] = useState<Record<PuzzleId, Facelets>>(() => ({
+    "3x3": PUZZLES["3x3"].empty(),
+    "2x2": PUZZLES["2x2"].empty(),
+  }));
+  const facelets = stickers[puzzleId];
   const [face, setFace] = useState<FaceName>("U");
   const [brush, setBrush] = useState<CubeColor | null>("white");
+  const [method, setMethod] = useState<Method2x2>("optimal");
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [confirmReset, setConfirmReset] = useState(false);
-  const { ready, solve } = useSolver();
+  const { ready, ready2x2, solve, solve2x2, warmup2x2 } = useSolver();
   // Bumped on every edit: a solution that arrives for older stickers is dropped.
   const run = useRef(0);
   const resultRef = useRef<HTMLDivElement>(null);
   const modeHeading = useRef<HTMLHeadingElement>(null);
 
-  const validation = useMemo(() => validateFacelets(facelets), [facelets]);
-  const counts = colorCounts(facelets);
+  const validation = useMemo(() => puzzle.validate(facelets), [puzzle, facelets]);
+  const counts = puzzle.counts(facelets);
   const painted = facelets.filter((sticker) => sticker !== null).length;
   const problemStickers = new Set(
     validation.kind === "valid" ? [] : validation.issues.flatMap((issue) => issue.stickers),
   );
+
+  // The 2×2 tables are only built once the 2×2 is on screen.
+  useEffect(() => {
+    if (puzzleId === "2x2") warmup2x2();
+  }, [puzzleId, warmup2x2]);
 
   useEffect(() => {
     if (result.kind !== "idle" && result.kind !== "solving") {
@@ -89,7 +111,7 @@ export function SolverScreen() {
 
   const edit = (next: Facelets) => {
     run.current++;
-    setFacelets(next);
+    setStickers((current) => ({ ...current, [puzzleId]: next }));
     setResult({ kind: "idle" });
     setConfirmReset(false);
   };
@@ -102,6 +124,24 @@ export function SolverScreen() {
     requestAnimationFrame(() => modeHeading.current?.focus());
   };
 
+  const changePuzzle = (next: PuzzleId) => {
+    if (next === puzzleId) return;
+    run.current++;
+    savePuzzle(next);
+    setFace("U");
+    setFromCamera(false);
+    setResult({ kind: "idle" });
+    setConfirmReset(false);
+    // The camera reads one cube; switching mid-scan starts that cube over.
+    if (mode === "camera") setMode("choose");
+  };
+
+  const changeMethod = (next: Method2x2) => {
+    run.current++;
+    setMethod(next);
+    setResult({ kind: "idle" });
+  };
+
   /** The camera read all six faces: the editor and its validation take over. */
   const scanned = (next: Facelets) => {
     edit(next);
@@ -111,22 +151,22 @@ export function SolverScreen() {
   };
 
   const paint = (index: number) => {
-    if (isCenter(index)) return;
+    if (puzzle.isFixed(index)) return;
     edit(facelets.map((color, i) => (i === index ? brush : color)));
   };
 
-  const fixTurnedFaces = (turned: TurnedFace[]) => {
-    edit(turned.reduce(turnFace, facelets));
+  const fixTurnedFaces = (turned: (TurnedFace | TurnedFace2)[]) => {
+    edit(turned.reduce(puzzle.turnFace, facelets));
   };
 
   const clearAll = () => {
-    edit(emptyFacelets());
+    edit(puzzle.empty());
     setFace("U");
     setBrush("white");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  /** Clearing 48 stickers by accident hurts: ask for a second tap. */
+  /** Clearing a whole cube by accident hurts: ask for a second tap. */
   const reset = () => {
     if (painted > 6 && !confirmReset) {
       setConfirmReset(true);
@@ -134,6 +174,22 @@ export function SolverScreen() {
       return;
     }
     clearAll();
+  };
+
+  const failed = (id: number) => {
+    // The input was already validated, so this is the solver itself
+    // failing: never show its technical message.
+    if (run.current === id) {
+      setResult({
+        kind: "error",
+        message: "No se ha podido calcular la solución. Vuelve a pulsar Resolver para intentarlo de nuevo.",
+      });
+    }
+  };
+
+  const unchecked = {
+    kind: "error" as const,
+    message: "La solución calculada no ha superado la comprobación. Vuelve a pulsar Resolver.",
   };
 
   const handleSolve = async () => {
@@ -144,39 +200,46 @@ export function SolverScreen() {
       return;
     }
     setResult({ kind: "solving" });
+
+    if (puzzleId === "2x2") {
+      const colors = (validation as Extract<Validation2, { kind: "valid" }>).facelets;
+      let solution;
+      try {
+        solution = await solve2x2(colors, method);
+      } catch {
+        failed(id);
+        return;
+      }
+      if (run.current !== id) return;
+      // Replayed with RUBIKO's 3D engine on the exact stickers painted.
+      const start = cubeStateForSolution2(colors, solution.moves);
+      setResult(
+        start
+          ? { kind: "solved", id, moves: solution.moves, start, size: 2, steps: solution.steps }
+          : unchecked,
+      );
+      return;
+    }
+
     const snapshot = facelets;
     let moves: string[];
     try {
-      moves = await solve(validation.cube);
+      moves = await solve((validation as Extract<Validation, { kind: "valid" }>).cube);
     } catch {
-      // The input was already validated, so this is the solver itself
-      // failing: never show its technical message.
-      if (run.current === id) {
-        setResult({
-          kind: "error",
-          message: "No se ha podido calcular la solución. Vuelve a pulsar Resolver para intentarlo de nuevo.",
-        });
-      }
+      failed(id);
       return;
     }
     if (run.current !== id) return;
     // Replay the moves with RUBIKO's own cube engine on the exact stickers
     // painted: only moves that really solve this cube are ever shown.
     const start = cubeStateForSolution(snapshot, moves);
-    setResult(
-      start
-        ? { kind: "solved", id, moves: moves as Move[], start }
-        : {
-            kind: "error",
-            message: "La solución calculada no ha superado la comprobación. Vuelve a pulsar Resolver.",
-          },
-    );
+    setResult(start ? { kind: "solved", id, moves: moves as Move[], start, size: 3 } : unchecked);
   };
 
   const faceIndex = FACE_ORDER.indexOf(face);
-  const faceMissing = facelets
-    .slice(faceOffset(face), faceOffset(face) + 9)
-    .filter((color) => color === null).length;
+  const faceStickers = facelets.slice(puzzle.offset(face), puzzle.offset(face) + puzzle.perFace);
+  const faceMissing = faceStickers.filter((color) => color === null).length;
+  const isReady = puzzleId === "2x2" ? ready2x2 : ready;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
@@ -190,17 +253,18 @@ export function SolverScreen() {
         </Link>
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: ACCENT }}>
-            3×3
+            {puzzle.label}
           </p>
           <h1 className="text-3xl font-bold tracking-tight">Solucionador</h1>
           <p className="text-sm text-navy-muted">
             Introduce los colores de tu cubo, a mano o con la cámara, y obtén los movimientos para resolverlo.
           </p>
         </div>
+        <PuzzlePicker selected={puzzleId} onPick={changePuzzle} />
       </div>
 
       {mode === "choose" ? (
-        <ModePicker headingRef={modeHeading} onPick={changeMode} />
+        <ModePicker headingRef={modeHeading} onPick={changeMode} total={puzzle.total} />
       ) : (
         <div className="flex items-center justify-between gap-3">
           <h2 ref={modeHeading} tabIndex={-1} className="text-sm font-semibold outline-none">
@@ -216,7 +280,7 @@ export function SolverScreen() {
         </div>
       )}
 
-      {mode === "camera" && <CameraScanner onDone={scanned} />}
+      {mode === "camera" && <CameraScanner key={puzzleId} puzzle={puzzle} onDone={scanned} />}
 
       {mode === "manual" && (
         <>
@@ -231,20 +295,24 @@ export function SolverScreen() {
         </p>
       )}
 
-      <div className="flex gap-3 rounded-2xl border border-navy-border bg-navy-2 px-4 py-3 text-sm">
-        <span
-          className="mt-0.5 h-8 w-8 shrink-0 rounded-lg border-t-[6px]"
-          style={{ backgroundColor: CUBE_COLOR_HEX.green, borderTopColor: CUBE_COLOR_HEX.white }}
-          aria-hidden
-        />
-        <p className="text-foreground">
-          <span className="font-semibold">Sujeta el cubo con el centro blanco arriba y el verde delante.</span>{" "}
-          <span className="text-navy-muted">
-            Esa es la posición inicial. Los centros no se mueven: ya están puestos. Las barras de color junto a
-            cada cara indican qué centro toca ese lado.
-          </span>
-        </p>
-      </div>
+      {puzzleId === "3x3" ? (
+        <div className="flex gap-3 rounded-2xl border border-navy-border bg-navy-2 px-4 py-3 text-sm">
+          <span
+            className="mt-0.5 h-8 w-8 shrink-0 rounded-lg border-t-[6px]"
+            style={{ backgroundColor: CUBE_COLOR_HEX.green, borderTopColor: CUBE_COLOR_HEX.white }}
+            aria-hidden
+          />
+          <p className="text-foreground">
+            <span className="font-semibold">Sujeta el cubo con el centro blanco arriba y el verde delante.</span>{" "}
+            <span className="text-navy-muted">
+              Esa es la posición inicial. Los centros no se mueven: ya están puestos. Las barras de color junto a
+              cada cara indican qué centro toca ese lado.
+            </span>
+          </p>
+        </div>
+      ) : (
+        <HoldReference />
+      )}
 
       {/* Whole cube as a net; tapping a face opens it below. */}
       <div
@@ -261,8 +329,8 @@ export function SolverScreen() {
               type="button"
               onClick={() => setFace(name)}
               aria-pressed={selected}
-              aria-label={`Editar cara ${FACE_LABELS[name]} (centro ${COLOR_NAMES[CENTER_COLORS[name]]})`}
-              className="grid grid-cols-3 gap-[2px] rounded-lg p-1 transition-colors"
+              aria-label={`Editar cara ${withDetail(puzzle, name)}`}
+              className={`grid ${puzzle.size === 3 ? "grid-cols-3" : "grid-cols-2"} gap-[2px] rounded-lg p-1 transition-colors`}
               style={{
                 gridColumn: column,
                 gridRow: row,
@@ -270,13 +338,13 @@ export function SolverScreen() {
                 outline: selected ? `2px solid ${ACCENT}` : "none",
               }}
             >
-              {facelets.slice(faceOffset(name), faceOffset(name) + 9).map((color, i) => (
+              {facelets.slice(puzzle.offset(name), puzzle.offset(name) + puzzle.perFace).map((color, i) => (
                 <span
                   key={i}
                   className="aspect-square rounded-[3px]"
                   style={{
                     backgroundColor: color ? CUBE_COLOR_HEX[color] : "var(--navy-3)",
-                    boxShadow: problemStickers.has(faceOffset(name) + i)
+                    boxShadow: problemStickers.has(puzzle.offset(name) + i)
                       ? "0 0 0 2px var(--cube-red)"
                       : undefined,
                   }}
@@ -299,14 +367,17 @@ export function SolverScreen() {
           </button>
           <div className="flex flex-col items-center text-center">
             <h2 id="cara-actual" className="text-lg font-semibold">
-              {FACE_LABELS[face]}{" "}
-              <span className="text-sm font-normal text-navy-muted">
-                · centro {COLOR_NAMES[CENTER_COLORS[face]]}
-              </span>
+              {FACE_LABELS[face]}
+              {puzzle.faceDetail(face) && (
+                <>
+                  {" "}
+                  <span className="text-sm font-normal text-navy-muted">· {puzzle.faceDetail(face)}</span>
+                </>
+              )}
             </h2>
             <span className="text-xs text-navy-muted tabular-nums">
               Cara {faceIndex + 1} de 6 · {faceMissing === 0 ? "completa" : `faltan ${faceMissing}`} ·{" "}
-              {painted}/54 en total
+              {painted}/{puzzle.total} en total
             </span>
           </div>
           <button
@@ -318,25 +389,27 @@ export function SolverScreen() {
             <ChevronRightIcon className="h-5 w-5" />
           </button>
         </div>
-        <p className="text-sm text-navy-muted">{FACE_HINTS[face]}</p>
+        <p className="text-sm text-navy-muted">{puzzle.hints[face]}</p>
 
-        {/* Each border shows the color of the face it touches, so the face is read the right way round. */}
-        <FaceFrame face={face}>
-          {facelets.slice(faceOffset(face), faceOffset(face) + 9).map((color, i) => {
-            const index = faceOffset(face) + i;
-            const center = i === 4;
+        {/* Each border shows what that side touches, so the face is read the right way round. */}
+        <FaceFrame face={face} size={puzzle.size}>
+          {faceStickers.map((color, i) => {
+            const index = puzzle.offset(face) + i;
+            const center = puzzle.isFixed(index);
             const problem = problemStickers.has(index);
+            const guide = puzzleId === "2x2" && REFERENCE_MARK[face]?.index === i ? REFERENCE_MARK[face]!.color : null;
             return (
               <StickerButton
                 key={index}
                 color={color}
                 center={center}
                 flag={problem ? "problem" : null}
+                guide={guide}
                 onPaint={() => paint(index)}
                 label={
                   center
                     ? `Centro ${COLOR_NAMES[CENTER_COLORS[face]]} (fijo)`
-                    : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}${problem ? ", revisar" : ""}`
+                    : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}${problem ? ", revisar" : ""}${guide ? `, aquí va la pegatina ${COLOR_NAMES[guide]} de la esquina guía` : ""}`
                 }
               />
             );
@@ -344,9 +417,11 @@ export function SolverScreen() {
         </FaceFrame>
       </section>
 
-      <ColorPalette brush={brush} onBrush={setBrush} counts={counts} />
+      <ColorPalette brush={brush} onBrush={setBrush} counts={counts} perColor={puzzle.perFace} />
 
-      <StatusPanel validation={validation} onFix={fixTurnedFaces} onSelectFace={setFace} />
+      <StatusPanel puzzle={puzzle} validation={validation} onFix={fixTurnedFaces} onSelectFace={setFace} />
+
+      {puzzleId === "2x2" && <MethodPicker selected={method} onPick={changeMethod} />}
 
       <div className="grid grid-cols-[1fr_auto] gap-3">
         <button
@@ -359,7 +434,7 @@ export function SolverScreen() {
           {result.kind === "solving" && (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-navy border-t-transparent" aria-hidden />
           )}
-          {result.kind === "solving" ? (ready ? "Calculando…" : "Preparando…") : "Resolver"}
+          {result.kind === "solving" ? (isReady ? "Calculando…" : "Preparando…") : "Resolver"}
         </button>
         <button
           type="button"
@@ -398,14 +473,20 @@ export function SolverScreen() {
           </p>
         )}
 
-        {result.kind === "solved" && (
-          <SolutionPlayer
-            key={result.id}
-            moves={result.moves}
-            start={result.start}
-            onNewCube={clearAll}
-          />
-        )}
+        {result.kind === "solved" &&
+          (result.size === 2 ? (
+            <SolutionPlayer
+              key={result.id}
+              moves={result.moves}
+              start={result.start}
+              onNewCube={clearAll}
+              size={2}
+              steps={result.steps}
+              note={`${METHOD_LABELS[method]}. Empieza sujetando el cubo como lo copiaste (la esquina amarilla-azul-naranja abajo, detrás y a la izquierda, si seguiste las indicaciones). x, y y z giran el cubo entero.`}
+            />
+          ) : (
+            <SolutionPlayer key={result.id} moves={result.moves} start={result.start} onNewCube={clearAll} />
+          ))}
       </div>
         </>
       )}
@@ -413,19 +494,101 @@ export function SolverScreen() {
   );
 }
 
+/** 3×3 or 2×2: two big buttons, easy to hit at 360 px. */
+function PuzzlePicker({ selected, onPick }: { selected: PuzzleId; onPick: (id: PuzzleId) => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-1 rounded-2xl bg-navy-2 p-1" role="radiogroup" aria-label="Cubo">
+      {PUZZLE_IDS.map((id) => {
+        const active = id === selected;
+        return (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onPick(id)}
+            className="h-11 rounded-xl text-base font-semibold transition-colors"
+            style={
+              active
+                ? { backgroundColor: ACCENT, color: "var(--navy)" }
+                : { color: "var(--navy-muted)" }
+            }
+          >
+            {PUZZLES[id].label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** How to hold a 2×2: its reference corner, drawn with its three colors. */
+function HoldReference() {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-navy-border bg-navy-2 px-4 py-3 text-sm">
+      <span className="mt-0.5 grid h-8 w-8 shrink-0 grid-cols-2 grid-rows-2 gap-0.5" aria-hidden>
+        <span className="rounded-sm" style={{ backgroundColor: CUBE_COLOR_HEX.blue }} />
+        <span className="rounded-sm bg-navy-3" />
+        <span className="rounded-sm" style={{ backgroundColor: CUBE_COLOR_HEX.orange }} />
+        <span className="rounded-sm" style={{ backgroundColor: CUBE_COLOR_HEX.yellow }} />
+      </span>
+      <p className="text-foreground">
+        <span className="font-semibold">{HOLD_2X2}</span>{" "}
+        <span className="text-navy-muted">
+          El 2×2 no tiene centros: esa esquina es la guía, y el punto de color marca dónde se ve en cada cara. Si lo
+          copias en otra posición no pasa nada: RUBIKO lo reorienta antes de resolver.
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/** The three ways of solving a 2×2, chosen before solving. */
+function MethodPicker({ selected, onPick }: { selected: Method2x2; onPick: (method: Method2x2) => void }) {
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 text-sm font-semibold">¿Cómo quieres resolverlo?</legend>
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Forma de resolver">
+        {METHODS_2X2.map((method) => {
+          const active = method === selected;
+          return (
+            <button
+              key={method}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => onPick(method)}
+              className="flex min-h-12 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-colors"
+              style={{
+                borderColor: active ? ACCENT : "var(--navy-border)",
+                backgroundColor: active ? `${ACCENT}26` : "var(--navy-2)",
+              }}
+            >
+              {METHOD_LABELS[method].replace("Método ", "")}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs text-navy-muted">{METHOD_HINTS[selected]}</p>
+    </fieldset>
+  );
+}
+
 /** The two ways in, as big cards that are easy to hit on a phone. */
 function ModePicker({
   headingRef,
   onPick,
+  total,
 }: {
   headingRef: RefObject<HTMLHeadingElement | null>;
   onPick: (mode: "manual" | "camera") => void;
+  total: number;
 }) {
   const options = [
     {
       mode: "manual" as const,
       title: "Manual",
-      text: "Pinta las 54 pegatinas cara a cara con la paleta de colores.",
+      text: `Pinta las ${total} pegatinas cara a cara con la paleta de colores.`,
       Icon: GridIcon,
     },
     {
@@ -470,12 +633,14 @@ function ModePicker({
 
 /** Live feedback on the stickers, updated on every tap. */
 function StatusPanel({
+  puzzle,
   validation,
   onFix,
   onSelectFace,
 }: {
-  validation: Validation;
-  onFix: (turned: TurnedFace[]) => void;
+  puzzle: Puzzle;
+  validation: Validation | Validation2;
+  onFix: (turned: (TurnedFace | TurnedFace2)[]) => void;
   onSelectFace: (face: FaceName) => void;
 }) {
   if (validation.kind === "valid") {
@@ -509,7 +674,9 @@ function StatusPanel({
               >
                 <span
                   className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: CUBE_COLOR_HEX[CENTER_COLORS[face]] }}
+                  style={{
+                    backgroundColor: puzzle.size === 3 ? CUBE_COLOR_HEX[CENTER_COLORS[face]] : "var(--navy-muted)",
+                  }}
                   aria-hidden
                 />
                 {FACE_LABELS[face]}: {missing}
@@ -533,9 +700,7 @@ function StatusPanel({
 
   const { turned } = validation;
   if (turned) {
-    const names = turned.map(
-      (fix) => `${FACE_LABELS[fix.face]} (centro ${COLOR_NAMES[CENTER_COLORS[fix.face]]})`,
-    );
+    const names = turned.map((fix) => withDetail(puzzle, fix.face));
     return (
       <div
         role="alert"
@@ -547,8 +712,11 @@ function StatusPanel({
             : `Parece que las caras ${names.join(" y ")} están copiadas giradas.`}
         </p>
         <p className="text-navy-muted">
-          {FACE_HINTS[turned[0].face]} Comprueba que cada lado coincide con la barra de color que tiene al
-          lado. Si al girarla coincide con tu cubo, pulsa el botón.
+          {puzzle.hints[turned[0].face]}{" "}
+          {puzzle.size === 3
+            ? "Comprueba que cada lado coincide con la barra de color que tiene al lado."
+            : "Comprueba que cada lado toca la cara que indica el marco."}{" "}
+          Si al girarla coincide con tu cubo, pulsa el botón.
         </p>
         <p className="text-navy-muted">Detalle: {validation.message}</p>
         <button
@@ -564,7 +732,7 @@ function StatusPanel({
 
   return (
     <ErrorBox
-      title="Estos colores no corresponden a un cubo 3×3 real."
+      title={`Estos colores no corresponden a un cubo ${puzzle.label} real.`}
       lines={[
         validation.message,
         "Revisa las pegatinas marcadas (si las hay) y que cada cara esté copiada con el cubo en la posición que se indica. Si alguna vez desmontaste el cubo o cambiaste pegatinas, puede que de verdad no tenga solución.",
