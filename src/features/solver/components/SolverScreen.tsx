@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRightIcon } from "@/components/ui/icons";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { CameraIcon, ChevronRightIcon, GridIcon } from "@/components/ui/icons";
 import type { Move } from "@/features/cube/moves";
 import { CUBE_COLOR_HEX } from "@/features/cube/palette";
 import type { CubeColor, CubeState } from "@/features/cube/types";
@@ -16,7 +16,6 @@ import {
   colorCounts,
   emptyFacelets,
   faceOffset,
-  neighborFace,
   turnFace,
   validateFacelets,
   type Facelets,
@@ -24,24 +23,17 @@ import {
   type Validation,
 } from "../facelets";
 import { useSolver } from "../use-solver";
+import { CameraScanner } from "./CameraScanner";
+import {
+  ACCENT,
+  ColorPalette,
+  FACE_HINTS,
+  FACE_ORDER,
+  FaceFrame,
+  OK_GREEN,
+  StickerButton,
+} from "./face-guide";
 import { SolutionPlayer } from "./SolutionPlayer";
-
-const ACCENT = "#22d3ee";
-const OK_GREEN = "#34d399";
-const COLORS: CubeColor[] = ["white", "yellow", "green", "blue", "red", "orange"];
-
-/** Order to copy the faces in: each hint starts from the previous position. */
-const FACE_ORDER: FaceName[] = ["U", "F", "R", "B", "L", "D"];
-
-/** How to hold the cube to read each face the way the grid expects. */
-const FACE_HINTS: Record<FaceName, string> = {
-  U: "Desde la posición inicial, inclina el cubo hacia ti hasta ver la cara blanca de frente: el verde queda abajo.",
-  F: "Posición inicial: blanco arriba y verde delante. Copia la cara que tienes de frente.",
-  R: "Gira el cubo entero hacia la izquierda: cara roja delante, blanco arriba.",
-  B: "Gira el cubo entero otra vez hacia la izquierda: cara azul delante, blanco arriba.",
-  L: "Una vez más hacia la izquierda: cara naranja delante, blanco arriba.",
-  D: "Vuelve a la posición inicial e inclina el cubo alejándolo de ti hasta ver la cara amarilla de frente: el verde queda arriba.",
-};
 
 /** Where each face sits in the 4×3 net: [column, row]. */
 const NET_POSITION: Record<FaceName, [number, number]> = {
@@ -53,18 +45,13 @@ const NET_POSITION: Record<FaceName, [number, number]> = {
   D: [2, 3],
 };
 
-/** Border sticker (2 top, 4 left, 6 right, 8 bottom) → where its marker goes. */
-const BORDERS = [
-  { n: 2, className: "col-start-2 row-start-1 h-1.5 w-1/2 self-center justify-self-center" },
-  { n: 4, className: "col-start-1 row-start-2 h-1/2 w-1.5 self-center justify-self-center" },
-  { n: 6, className: "col-start-3 row-start-2 h-1/2 w-1.5 self-center justify-self-center" },
-  { n: 8, className: "col-start-2 row-start-3 h-1.5 w-1/2 self-center justify-self-center" },
-] as const;
-
 const isCenter = (index: number) => FACE_NAMES.some((name) => CENTER_INDEX(name) === index);
 
 const turnLabel = ({ turns }: TurnedFace) =>
   turns === 2 ? "media vuelta" : "un cuarto de vuelta";
+
+/** How the stickers are entered: chosen on arrival, changeable any time. */
+type Mode = "choose" | "manual" | "camera";
 
 type Result =
   | { kind: "idle" }
@@ -74,6 +61,8 @@ type Result =
   | { kind: "solved"; id: number; moves: Move[]; start: CubeState };
 
 export function SolverScreen() {
+  const [mode, setMode] = useState<Mode>("choose");
+  const [fromCamera, setFromCamera] = useState(false);
   const [facelets, setFacelets] = useState<Facelets>(emptyFacelets);
   const [face, setFace] = useState<FaceName>("U");
   const [brush, setBrush] = useState<CubeColor | null>("white");
@@ -83,6 +72,7 @@ export function SolverScreen() {
   // Bumped on every edit: a solution that arrives for older stickers is dropped.
   const run = useRef(0);
   const resultRef = useRef<HTMLDivElement>(null);
+  const modeHeading = useRef<HTMLHeadingElement>(null);
 
   const validation = useMemo(() => validateFacelets(facelets), [facelets]);
   const counts = colorCounts(facelets);
@@ -102,6 +92,22 @@ export function SolverScreen() {
     setFacelets(next);
     setResult({ kind: "idle" });
     setConfirmReset(false);
+  };
+
+  const changeMode = (next: Mode) => {
+    run.current++;
+    setMode(next);
+    setResult({ kind: "idle" });
+    // Focus the new section's heading once it is on screen.
+    requestAnimationFrame(() => modeHeading.current?.focus());
+  };
+
+  /** The camera read all six faces: the editor and its validation take over. */
+  const scanned = (next: Facelets) => {
+    edit(next);
+    setFace("U");
+    setFromCamera(true);
+    changeMode("manual");
   };
 
   const paint = (index: number) => {
@@ -188,10 +194,42 @@ export function SolverScreen() {
           </p>
           <h1 className="text-3xl font-bold tracking-tight">Solucionador</h1>
           <p className="text-sm text-navy-muted">
-            Copia los colores de tu cubo cara a cara y obtén los movimientos para resolverlo.
+            Introduce los colores de tu cubo, a mano o con la cámara, y obtén los movimientos para resolverlo.
           </p>
         </div>
       </div>
+
+      {mode === "choose" ? (
+        <ModePicker headingRef={modeHeading} onPick={changeMode} />
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <h2 ref={modeHeading} tabIndex={-1} className="text-sm font-semibold outline-none">
+            {mode === "manual" ? "Modo manual" : "Modo cámara / foto"}
+          </h2>
+          <button
+            type="button"
+            onClick={() => changeMode("choose")}
+            className="h-11 rounded-xl bg-navy-2 px-4 text-sm font-medium text-foreground hover:bg-navy-3"
+          >
+            Cambiar forma
+          </button>
+        </div>
+      )}
+
+      {mode === "camera" && <CameraScanner onDone={scanned} />}
+
+      {mode === "manual" && (
+        <>
+      {fromCamera && (
+        <p
+          className="rounded-2xl border px-4 py-3 text-sm text-foreground"
+          style={{ borderColor: `${ACCENT}66`, backgroundColor: `${ACCENT}14` }}
+          role="status"
+        >
+          Colores leídos con la cámara. Mira el aviso de abajo y corrige aquí lo que haga falta antes de
+          pulsar Resolver.
+        </p>
+      )}
 
       <div className="flex gap-3 rounded-2xl border border-navy-border bg-navy-2 px-4 py-3 text-sm">
         <span
@@ -283,103 +321,30 @@ export function SolverScreen() {
         <p className="text-sm text-navy-muted">{FACE_HINTS[face]}</p>
 
         {/* Each border shows the color of the face it touches, so the face is read the right way round. */}
-        <div className="mx-auto grid w-full max-w-[288px] grid-cols-[14px_1fr_14px] grid-rows-[14px_auto_14px]">
-          {BORDERS.map(({ n, className }) => {
-            const color = CENTER_COLORS[neighborFace(face, n)];
+        <FaceFrame face={face}>
+          {facelets.slice(faceOffset(face), faceOffset(face) + 9).map((color, i) => {
+            const index = faceOffset(face) + i;
+            const center = i === 4;
+            const problem = problemStickers.has(index);
             return (
-              <span
-                key={n}
-                className={`rounded-full ${className}`}
-                style={{ backgroundColor: CUBE_COLOR_HEX[color] }}
-                title={`Este lado toca el centro ${COLOR_NAMES[color]}`}
-                aria-hidden
+              <StickerButton
+                key={index}
+                color={color}
+                center={center}
+                flag={problem ? "problem" : null}
+                onPaint={() => paint(index)}
+                label={
+                  center
+                    ? `Centro ${COLOR_NAMES[CENTER_COLORS[face]]} (fijo)`
+                    : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}${problem ? ", revisar" : ""}`
+                }
               />
             );
           })}
-          <div className="col-start-2 row-start-2 grid grid-cols-3 gap-2 rounded-2xl bg-black/40 p-2">
-            {facelets.slice(faceOffset(face), faceOffset(face) + 9).map((color, i) => {
-              const index = faceOffset(face) + i;
-              const center = i === 4;
-              const problem = problemStickers.has(index);
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => paint(index)}
-                  disabled={center}
-                  aria-label={
-                    center
-                      ? `Centro ${COLOR_NAMES[CENTER_COLORS[face]]} (fijo)`
-                      : `Pegatina ${i + 1}${color ? `, ${COLOR_NAMES[color]}` : ", sin color"}${problem ? ", revisar" : ""}`
-                  }
-                  className="relative flex aspect-square items-center justify-center rounded-xl border-2 transition-transform active:scale-95 disabled:cursor-default"
-                  style={{
-                    backgroundColor: color ? CUBE_COLOR_HEX[color] : "var(--navy-3)",
-                    borderColor: problem ? "var(--cube-red)" : color ? "rgb(0 0 0 / 25%)" : "var(--navy-border)",
-                    boxShadow: problem ? "0 0 0 2px var(--cube-red)" : undefined,
-                  }}
-                >
-                  {center && (
-                    <span className="h-2 w-2 rounded-full bg-black/30" aria-hidden />
-                  )}
-                  {problem && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-cube-red text-[11px] font-bold text-white" aria-hidden>
-                      !
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        </FaceFrame>
       </section>
 
-      <div className="grid grid-cols-7 gap-1.5" role="radiogroup" aria-label="Color para pintar">
-        {COLORS.map((color) => (
-          <button
-            key={color}
-            type="button"
-            role="radio"
-            aria-checked={brush === color}
-            aria-label={`${COLOR_NAMES[color]}, ${counts[color]} de 9`}
-            onClick={() => setBrush(color)}
-            className="flex min-w-0 flex-col items-center gap-1"
-          >
-            <span
-              className="aspect-square w-full max-w-12 rounded-xl border-[3px] transition-transform"
-              style={{
-                backgroundColor: CUBE_COLOR_HEX[color],
-                borderColor: brush === color ? ACCENT : "transparent",
-                transform: brush === color ? "scale(1.08)" : undefined,
-              }}
-            />
-            <span
-              className={`text-[11px] tabular-nums ${
-                counts[color] > 9 ? "font-semibold text-cube-red" : "text-navy-muted"
-              }`}
-              style={counts[color] === 9 ? { color: OK_GREEN } : undefined}
-            >
-              {counts[color]}/9
-            </span>
-          </button>
-        ))}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={brush === null}
-          aria-label="Borrar pegatina"
-          onClick={() => setBrush(null)}
-          className="flex min-w-0 flex-col items-center gap-1"
-        >
-          <span
-            className="flex aspect-square w-full max-w-12 items-center justify-center rounded-xl border-[3px] bg-navy-3 text-navy-muted"
-            style={{ borderColor: brush === null ? ACCENT : "var(--navy-border)" }}
-          >
-            ✕
-          </span>
-          <span className="text-[11px] text-navy-muted">Borrar</span>
-        </button>
-      </div>
+      <ColorPalette brush={brush} onBrush={setBrush} counts={counts} />
 
       <StatusPanel validation={validation} onFix={fixTurnedFaces} onSelectFace={setFace} />
 
@@ -442,7 +407,64 @@ export function SolverScreen() {
           />
         )}
       </div>
+        </>
+      )}
     </div>
+  );
+}
+
+/** The two ways in, as big cards that are easy to hit on a phone. */
+function ModePicker({
+  headingRef,
+  onPick,
+}: {
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  onPick: (mode: "manual" | "camera") => void;
+}) {
+  const options = [
+    {
+      mode: "manual" as const,
+      title: "Manual",
+      text: "Pinta las 54 pegatinas cara a cara con la paleta de colores.",
+      Icon: GridIcon,
+    },
+    {
+      mode: "camera" as const,
+      title: "Cámara / foto",
+      text: "Enseña cada cara a la cámara o haz una foto: los colores se leen solos y puedes corregirlos.",
+      Icon: CameraIcon,
+    },
+  ];
+  return (
+    <section className="flex flex-col gap-3" aria-labelledby="elige-forma">
+      <h2 id="elige-forma" ref={headingRef} tabIndex={-1} className="text-lg font-semibold outline-none">
+        ¿Cómo quieres introducir el cubo?
+      </h2>
+      {options.map(({ mode, title, text, Icon }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => onPick(mode)}
+          className="flex min-h-24 items-center gap-4 rounded-2xl border border-navy-border bg-navy-2 px-4 py-4 text-left transition-colors hover:bg-navy-3 active:scale-[0.99]"
+        >
+          <span
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `${ACCENT}1a`, color: ACCENT }}
+            aria-hidden
+          >
+            <Icon className="h-6 w-6" />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-base font-semibold text-foreground">{title}</span>
+            <span className="text-sm text-navy-muted">{text}</span>
+          </span>
+          <ChevronRightIcon className="h-5 w-5 shrink-0 text-navy-muted" />
+        </button>
+      ))}
+      <p className="text-xs text-navy-muted">
+        Con la cámara todo pasa en tu dispositivo: las imágenes no se envían a ningún sitio.
+      </p>
+    </section>
   );
 }
 
