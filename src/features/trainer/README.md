@@ -10,7 +10,9 @@ Relación Cubo → Método → Etapa: cada `MethodOption` tiene un `cubeType`
 (`getStagesForMethod`). Un método nunca aparece para un cubo al que no
 pertenece — CFOP nunca se ofrece fuera de `cubeType: "3x3"`. `store.ts`
 aplica la cascada: cambiar de cubo recalcula el método por defecto para
-ese tipo de cubo.
+ese tipo de cubo. Activos hoy: 3x3 con CFOP, y 2x2 con Ortega y CLL. El
+botón Aprender de Inicio lleva al contenido del método elegido
+(`learnHref`, en `features/learning/categories.ts`).
 
 `cfop.ts` describe las cuatro etapas de CFOP (Cross, F2L, OLL, PLL) que se
 muestran en /entrenar: nombre, descripción breve y color de acento.
@@ -29,4 +31,4 @@ lo que llevan asociados los solves y los `TrainingAttempt`.
 
 Preparado para crecer hacia: casos, algoritmos, práctica y progreso por
 etapa, y para añadir más métodos (Roux, ZZ, Petrus, LBL) y más cubos
-(2x2, Pyraminx, 4x4...) cuando se implementen.
+(Pyraminx, 4x4...) cuando se implementen.

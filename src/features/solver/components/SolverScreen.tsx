@@ -7,7 +7,6 @@ import type { Move } from "@/features/cube/moves";
 import { CUBE_COLOR_HEX } from "@/features/cube/palette";
 import type { CubeColor, CubeSize, CubeState } from "@/features/cube/types";
 import type { TurnedFace2, Validation2 } from "@/features/solver2x2/facelets";
-import { METHOD_LABELS, type Method2x2, type SolutionStep } from "@/features/solver2x2/methods";
 import { cubeStateForSolution2 } from "@/features/solver2x2/sticker-moves";
 import { FACE_NAMES, type FaceName } from "../cubie";
 import { cubeStateForSolution } from "../cube-state";
@@ -55,15 +54,11 @@ type Result =
   | { kind: "solving" }
   | { kind: "error"; message: string }
   | { kind: "already-solved" }
-  | { kind: "solved"; id: number; moves: Move[]; start: CubeState; size: CubeSize; steps?: SolutionStep[] };
+  | { kind: "solved"; id: number; moves: Move[]; start: CubeState; size: CubeSize };
 
-const METHOD_HINTS: Record<Method2x2, string> = {
-  optimal: "La solución más corta posible (11 movimientos como mucho).",
-  ortega: "Por pasos: primera cara, OLL y PBL.",
-  cll: "Por pasos: primera capa y CLL.",
-};
-
-const METHODS_2X2: Method2x2[] = ["optimal", "ortega", "cll"];
+/** How to follow a 2×2 solution: its fixed corner plays the part of the 3×3's centers. */
+const HOLD_SOLUTION_2X2 =
+  "Hazlos con la esquina amarilla-azul-naranja abajo, detrás y a la izquierda (como copiaste el cubo), sin girar el cubo entero: esa esquina no se mueve en toda la solución.";
 
 /** " (centro blanco)" on a 3×3, nothing on a 2×2. */
 const withDetail = (puzzle: Puzzle, face: FaceName) =>
@@ -82,7 +77,6 @@ export function SolverScreen() {
   const facelets = stickers[puzzleId];
   const [face, setFace] = useState<FaceName>("U");
   const [brush, setBrush] = useState<CubeColor | null>("white");
-  const [method, setMethod] = useState<Method2x2>("optimal");
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [confirmReset, setConfirmReset] = useState(false);
   const { ready, ready2x2, solve, solve2x2, warmup2x2 } = useSolver();
@@ -134,12 +128,6 @@ export function SolverScreen() {
     setConfirmReset(false);
     // The camera reads one cube; switching mid-scan starts that cube over.
     if (mode === "camera") setMode("choose");
-  };
-
-  const changeMethod = (next: Method2x2) => {
-    run.current++;
-    setMethod(next);
-    setResult({ kind: "idle" });
   };
 
   /** The camera read all six faces: the editor and its validation take over. */
@@ -203,21 +191,17 @@ export function SolverScreen() {
 
     if (puzzleId === "2x2") {
       const colors = (validation as Extract<Validation2, { kind: "valid" }>).facelets;
-      let solution;
+      let moves: string[];
       try {
-        solution = await solve2x2(colors, method);
+        moves = await solve2x2(colors);
       } catch {
         failed(id);
         return;
       }
       if (run.current !== id) return;
       // Replayed with RUBIKO's 3D engine on the exact stickers painted.
-      const start = cubeStateForSolution2(colors, solution.moves);
-      setResult(
-        start
-          ? { kind: "solved", id, moves: solution.moves, start, size: 2, steps: solution.steps }
-          : unchecked,
-      );
+      const start = cubeStateForSolution2(colors, moves as Move[]);
+      setResult(start ? { kind: "solved", id, moves: moves as Move[], start, size: 2 } : unchecked);
       return;
     }
 
@@ -421,8 +405,6 @@ export function SolverScreen() {
 
       <StatusPanel puzzle={puzzle} validation={validation} onFix={fixTurnedFaces} onSelectFace={setFace} />
 
-      {puzzleId === "2x2" && <MethodPicker selected={method} onPick={changeMethod} />}
-
       <div className="grid grid-cols-[1fr_auto] gap-3">
         <button
           type="button"
@@ -481,8 +463,7 @@ export function SolverScreen() {
               start={result.start}
               onNewCube={clearAll}
               size={2}
-              steps={result.steps}
-              note={`${METHOD_LABELS[method]}. Empieza sujetando el cubo como lo copiaste (la esquina amarilla-azul-naranja abajo, detrás y a la izquierda, si seguiste las indicaciones). x, y y z giran el cubo entero.`}
+              hold={HOLD_SOLUTION_2X2}
             />
           ) : (
             <SolutionPlayer key={result.id} moves={result.moves} start={result.start} onNewCube={clearAll} />
@@ -536,41 +517,11 @@ function HoldReference() {
         <span className="font-semibold">{HOLD_2X2}</span>{" "}
         <span className="text-navy-muted">
           El 2×2 no tiene centros: esa esquina es la guía, y el punto de color marca dónde se ve en cada cara. Si lo
-          copias en otra posición no pasa nada: RUBIKO lo reorienta antes de resolver.
+          copias en otra posición no pasa nada: la solución toma como fija la esquina que tengas abajo, detrás y a la
+          izquierda.
         </span>
       </p>
     </div>
-  );
-}
-
-/** The three ways of solving a 2×2, chosen before solving. */
-function MethodPicker({ selected, onPick }: { selected: Method2x2; onPick: (method: Method2x2) => void }) {
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-sm font-semibold">¿Cómo quieres resolverlo?</legend>
-      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Forma de resolver">
-        {METHODS_2X2.map((method) => {
-          const active = method === selected;
-          return (
-            <button
-              key={method}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => onPick(method)}
-              className="flex min-h-12 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition-colors"
-              style={{
-                borderColor: active ? ACCENT : "var(--navy-border)",
-                backgroundColor: active ? `${ACCENT}26` : "var(--navy-2)",
-              }}
-            >
-              {METHOD_LABELS[method].replace("Método ", "")}
-            </button>
-          );
-        })}
-      </div>
-      <p className="text-xs text-navy-muted">{METHOD_HINTS[selected]}</p>
-    </fieldset>
   );
 }
 

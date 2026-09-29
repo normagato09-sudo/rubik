@@ -7,6 +7,11 @@ export interface NotationMove {
   label: string;
   /** Diagram of the move and its inverse, from the source document (lines recolored white). */
   image: string;
+  /** Natural size of the diagram, for next/image. */
+  width: number;
+  height: number;
+  /** Set when the diagram is not from the source document, saying so. */
+  note?: string;
 }
 
 /**
@@ -30,8 +35,54 @@ const MOVES: { move: string; label: string }[] = [
 
 export const NOTATION_MOVES: NotationMove[] = MOVES.map(({ move, label }) => {
   const id = move.toLowerCase();
-  return { id, move, label, image: `/learning/notation/notation-${id}.png` };
+  return { id, move, label, image: `/learning/notation/notation-${id}.png`, width: 270, height: 100 };
 });
+
+/**
+ * The 2×2 notation: the 5 diagrams of `docs/source/Notacion 2x2.docx`, in
+ * document order (labels recolored white, like the 3×3 ones), then the
+ * moves it lacks — B, drawn in the same style (diagrams-2x2.ts), and x
+ * and y, which two CLL algorithms use, with the 3×3 diagrams (a whole-cube
+ * turn is the same on both). No middle layers: a 2×2 does not have them.
+ * Ids start with "2x2-" so their progress is kept apart from the 3×3.
+ */
+export const NOTATION_MOVES_2X2: NotationMove[] = [
+  ...[
+    { move: "U", label: "Cara superior (Up)" },
+    { move: "D", label: "Cara inferior (Down)" },
+    { move: "R", label: "Cara derecha (Right)" },
+    { move: "L", label: "Cara izquierda (Left)" },
+    { move: "F", label: "Cara frontal (Front)" },
+  ].map(({ move, label }) => {
+    const id = `2x2-${move.toLowerCase()}`;
+    return { id, move, label, image: `/learning/notation-2x2/notation-${id}.png`, width: 200, height: 137 };
+  }),
+  {
+    id: "2x2-b",
+    move: "B",
+    label: "Cara trasera (Back)",
+    image: "/learning/notation-2x2/notation-2x2-b.svg",
+    width: 200,
+    height: 137,
+    note: "Añadido: tu documento no trae B. Dibujado con su mismo estilo.",
+  },
+  ...[
+    { move: "y", label: "Giro de todo el cubo, como U" },
+    { move: "x", label: "Giro de todo el cubo, como R" },
+  ].map(({ move, label }) => ({
+    id: `2x2-${move}`,
+    move,
+    label,
+    image: `/learning/notation/notation-${move}.png`,
+    width: 270,
+    height: 100,
+    note: "Añadido: lo usan dos casos de CLL. Diagrama del 3×3 (girar todo el cubo es igual).",
+  })),
+];
+
+export function notationMovesFor(cube: "3x3" | "2x2"): NotationMove[] {
+  return cube === "2x2" ? NOTATION_MOVES_2X2 : NOTATION_MOVES;
+}
 
 export interface WideMove {
   /** Lowercase letter, as written in algorithms: "r", "u"... */

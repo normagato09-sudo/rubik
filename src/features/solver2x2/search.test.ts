@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createSolvedCube } from "@/features/cube/model";
 import { applyMoves, inverseMove, type Move } from "@/features/cube/moves";
 import { faceletsFromCorners, isSolved2, parseFacelets2 } from "./facelets";
-import { solve2x2 } from "./methods";
+import { solve2x2 } from "./solve";
 import { N_STATES, initTables2x2, optimalLength, solveOptimal } from "./search";
 import { applyMoves2, cubeStateForSolution2, faceletsFromCubeState2, solvedFacelets2 } from "./sticker-moves";
 
@@ -58,7 +58,7 @@ describe("optimal 2×2 solver", () => {
     for (let i = 0; i < 50; i++) {
       const scramble = Array.from({ length: 15 }, () => RUF[Math.floor(next() * RUF.length)]);
       const start = applyMoves(createSolvedCube(2), scramble);
-      const { moves } = solve2x2(faceletsFromCubeState2(start), "optimal");
+      const moves = solve2x2(faceletsFromCubeState2(start));
       expect(isSolved2(faceletsFromCubeState2(applyMoves(start, moves)))).toBe(true);
     }
   });
@@ -68,15 +68,15 @@ describe("optimal 2×2 solver", () => {
     // One corner twisted on itself.
     const twisted = [...solved];
     [twisted[3], twisted[4], twisted[9]] = [solved[9], solved[3], solved[4]];
-    expect(() => solve2x2(twisted, "optimal")).toThrow(/girada sobre sí misma/);
+    expect(() => solve2x2(twisted)).toThrow(/girada sobre sí misma/);
     // Two stickers of one corner swapped: its mirror image.
     const mirrored = [...solved];
     [mirrored[4], mirrored[9]] = [solved[9], solved[4]];
-    expect(() => solve2x2(mirrored, "optimal")).toThrow(/espejo/);
+    expect(() => solve2x2(mirrored)).toThrow(/espejo/);
     // A color five times.
     const counted = [...solved];
     counted[0] = "yellow";
-    expect(() => solve2x2(counted, "ortega")).toThrow(/4 veces/);
+    expect(() => solve2x2(counted)).toThrow(/4 veces/);
     expect(cubeStateForSolution2(twisted, [])).toBeNull();
   });
 });

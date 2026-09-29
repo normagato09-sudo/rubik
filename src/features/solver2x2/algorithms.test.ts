@@ -9,7 +9,7 @@ import { parseAlgorithm } from "./algorithm";
 import { CLL_CASES, ORTEGA_OLL, ORTEGA_PBL, type CaseAlgorithm } from "./algorithms";
 import { CORNER_COLORS, faceOffset2, faceletsFromCorners, identifyCorner, isSolved2, type CornerState } from "./facelets";
 import { MOVE_CUBES, multiply, solvedCube } from "@/features/solver/cubie";
-import { adjustments, layerSwap } from "./methods";
+import { adjustments, layerSwap } from "./case-check";
 import { applyMoves2, cubeStateForSolution2, faceletsFromCubeState2, solvedFacelets2 } from "./sticker-moves";
 
 /**

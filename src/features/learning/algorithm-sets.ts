@@ -1,6 +1,17 @@
 import { splitAlgorithm } from "./algorithm";
 
-export type AlgorithmSetId = "cruz" | "esquinas" | "f2l" | "oll" | "pll";
+export type AlgorithmSetId =
+  | "cruz"
+  | "esquinas"
+  | "f2l"
+  | "oll"
+  | "pll"
+  // 2×2 (cases-2x2.ts)
+  | "primera-cara"
+  | "primera-capa"
+  | "ortega-oll"
+  | "ortega-pbl"
+  | "cll";
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -13,6 +24,10 @@ export interface AlgorithmCase {
   algorithm: string;
   /** Static diagram taken from the same row/cell of the source. */
   image: string;
+  /** Short explanation in Spanish of how to recognize the case (2×2 sets). */
+  explanation?: string;
+  /** Where the algorithm or diagram does not come from the source, why. */
+  note?: string;
 }
 
 /** Natural size of each set's diagrams, for next/image. */
@@ -22,6 +37,11 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   f2l: { width: 151, height: 161 },
   oll: { width: 200, height: 200 },
   pll: { width: 200, height: 200 },
+  "primera-cara": { width: 200, height: 200 },
+  "primera-capa": { width: 200, height: 200 },
+  "ortega-oll": { width: 200, height: 200 },
+  "ortega-pbl": { width: 200, height: 200 },
+  cll: { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -74,7 +94,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

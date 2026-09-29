@@ -1,7 +1,7 @@
 /**
- * The 2×2 algorithms the solver uses, taken from the method sheets in
- * docs/source/Ortega.docx and docs/source/CLL.docx (the same ones RUBIKO
- * teaches), written exactly as there. Every one is checked with the 3D
+ * The 2×2 algorithms Aprender teaches (features/learning/cases-2x2.ts),
+ * taken from the method sheets in docs/source/Ortega.docx and
+ * docs/source/CLL.docx, written exactly as there. Every one is checked with the 3D
  * engine in algorithms.test.ts against the case its diagram shows, not
  * just against whatever it happens to do.
  *
@@ -35,7 +35,7 @@ export interface CaseAlgorithm {
   doc: number | null;
   algorithm: string;
   source: AlgorithmSource;
-  /** What the sheet says, when the solver does not use it. */
+  /** What the sheet says, when RUBIKO does not use it. */
   docAlgorithm?: string;
 }
 

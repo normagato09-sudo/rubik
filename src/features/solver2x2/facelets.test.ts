@@ -12,8 +12,7 @@ import {
   turnFace2,
   validateFacelets2,
 } from "./facelets";
-import { referenceOrientation } from "./methods";
-import { ORIENTATIONS, applyMoves2, solvedFacelets2 } from "./sticker-moves";
+import { applyMoves2, solvedFacelets2 } from "./sticker-moves";
 
 const solved = solvedFacelets2();
 const scrambled = applyMoves2(solved, ["R", "U", "F'", "R2", "U'", "F", "R'"]);
@@ -126,22 +125,5 @@ describe("live validation", () => {
       expect(fix.reduce(turnFace2, wrong)).toEqual(scrambled);
     }
     expect(findTurnedFaces2(scrambled)).toBeNull();
-  });
-});
-
-describe("reorientation", () => {
-  it("a cube copied in any of the 24 ways is still valid, and is turned back to the reference", () => {
-    expect(ORIENTATIONS).toHaveLength(24);
-    for (const rotation of ORIENTATIONS) {
-      const held = applyMoves2(scrambled, rotation);
-      expect(validateFacelets2(held).kind).toBe("valid");
-      const back = applyMoves2(held, referenceOrientation(held));
-      expect(CORNER_FACELETS_2[6].map((i) => back[i])).toEqual(["yellow", "blue", "orange"]);
-    }
-  });
-
-  it("no rotation when the reference corner is already down-back-left", () => {
-    expect(referenceOrientation(scrambled)).toEqual([]);
-    expect(referenceOrientation(applyMoves2(solved, ["y2"]))).toEqual(["y2"]);
   });
 });

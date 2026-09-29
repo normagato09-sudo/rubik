@@ -7,6 +7,7 @@ import { ProgressBar } from "./ProgressBar";
 /** One expandable block of the Aprender screen, with its X/Y progress. */
 export function CategoryCard({
   category,
+  cube = "3x3",
   total,
   learned,
   expanded,
@@ -14,6 +15,8 @@ export function CategoryCard({
   children,
 }: {
   category: LearningCategory;
+  /** Which cube the block's icon draws. */
+  cube?: "3x3" | "2x2";
   total: number;
   /** `null` while saved progress is still loading — never show a false count. */
   learned: number | null;
@@ -40,7 +43,7 @@ export function CategoryCard({
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-navy-muted"
           style={{ backgroundColor: `${accent}1f` }}
         >
-          <CategoryIcon id={category.id} accent={accent} className="h-6 w-6" />
+          <CategoryIcon id={category.id} cube={cube} accent={accent} className="h-6 w-6" />
         </span>
 
         <span className="flex min-w-0 flex-1 flex-col gap-1">

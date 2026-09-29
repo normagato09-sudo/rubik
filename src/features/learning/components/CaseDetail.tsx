@@ -4,13 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { IMAGE_SIZE, getAdjacentCases, getSteps, type AlgorithmSetId } from "../algorithm-sets";
+import { learnHref } from "../categories";
 import { caseItemId, useLearningProgress } from "../progress-store";
 import { ALGORITHM_SETS, getCase, getSetInfo } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CheckIcon } from "./CheckIcon";
 
 /**
- * Read-only guide for one F2L/OLL/PLL case: diagram, algorithm and its
+ * Read-only guide for one case (F2L, OLL, PLL, or a 2×2 one, which also
+ * says how to recognize it): diagram, algorithm and its
  * moves as numbered steps, to reproduce on a physical cube. Nothing here
  * moves or animates a cube — the only interaction is marking it learned.
  */
@@ -32,7 +34,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <Link
-        href={`/entrenar?abierto=${info.categoryId}`}
+        href={learnHref(info.method, info.categoryId)}
         className="flex w-fit items-center gap-1 text-sm text-navy-muted hover:text-foreground"
       >
         <ChevronRightIcon className="h-4 w-4 rotate-180" />
@@ -66,6 +68,15 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
         />
       </div>
 
+      {algorithmCase.explanation && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-xs font-semibold tracking-wide text-navy-muted uppercase">
+            Cómo reconocerlo
+          </h2>
+          <p className="text-base leading-relaxed text-foreground">{algorithmCase.explanation}</p>
+        </section>
+      )}
+
       <section className="flex flex-col gap-2">
         <h2 className="text-xs font-semibold tracking-wide text-navy-muted uppercase">
           Algoritmo
@@ -76,6 +87,11 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
         >
           {algorithmCase.algorithm}
         </p>
+        {algorithmCase.note && (
+          <p className="rounded-xl border border-navy-border bg-navy-2 px-3 py-2 text-sm leading-snug text-navy-muted">
+            {algorithmCase.note}
+          </p>
+        )}
       </section>
 
       <section className="flex flex-col gap-2">

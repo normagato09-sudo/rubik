@@ -1,9 +1,9 @@
 import type { TrainerOption } from "./types";
 
-/** Cubes the trainer can eventually support. Only 3x3 is active today. */
+/** Cubes the trainer can eventually support. 3x3 and 2x2 are active today. */
 export const CUBES: TrainerOption[] = [
   { id: "3x3", label: "3×3", status: "active" },
-  { id: "2x2", label: "2×2", status: "coming-soon" },
+  { id: "2x2", label: "2×2", status: "active" },
   { id: "pyraminx", label: "Pyraminx", status: "coming-soon" },
   { id: "skewb", label: "Skewb", status: "coming-soon" },
   { id: "megaminx", label: "Megaminx", status: "coming-soon" },

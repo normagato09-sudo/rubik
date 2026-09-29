@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 137" width="200" height="137" role="img" aria-label="Giros B y B'">
+<title>Giros B y B'</title>
+<text x="45" y="29" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#ffffff">B</text>
+<g transform="rotate(-12 45 91)"><rect x="6" y="52" width="78" height="78" fill="#ffffff" stroke="#262626" stroke-width="2"/></g>
+<rect x="6" y="52" width="78" height="78" fill="#a0a0a0" stroke="#262626" stroke-width="2"/>
+<line x1="45" y1="52" x2="45" y2="130" stroke="#262626" stroke-width="1.5"/>
+<line x1="6" y1="91" x2="84" y2="91" stroke="#262626" stroke-width="1.5"/>
+<path d="M 53.0 120.9 A 31 31 0 1 0 16.9 104.1" fill="none" stroke="#111" stroke-width="6"/>
+<polygon points="22.8,116.8 7.8,108.3 26.0,99.9" fill="#111"/>
+<text x="155" y="29" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#ffffff">B’</text>
+<g transform="rotate(12 155 91)"><rect x="116" y="52" width="78" height="78" fill="#ffffff" stroke="#262626" stroke-width="2"/></g>
+<rect x="116" y="52" width="78" height="78" fill="#a0a0a0" stroke="#262626" stroke-width="2"/>
+<line x1="155" y1="52" x2="155" y2="130" stroke="#262626" stroke-width="1.5"/>
+<line x1="116" y1="91" x2="194" y2="91" stroke="#262626" stroke-width="1.5"/>
+<path d="M 147.0 120.9 A 31 31 0 1 1 183.1 104.1" fill="none" stroke="#111" stroke-width="6"/>
+<polygon points="177.2,116.8 192.2,108.3 174.0,99.9" fill="#111"/>
+</svg>

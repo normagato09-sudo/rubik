@@ -4,20 +4,22 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { matchesCase, type AlgorithmSetId } from "../algorithm-sets";
-import { LEARNING_CATEGORIES, getCategory, type LearningCategoryId } from "../categories";
 import {
-  NOTATION_MOVES,
-  WIDE_MOVES,
-  matchesNotationMove,
-  matchesWideMove,
-} from "../notation";
+  DEFAULT_LEARNING_METHOD,
+  METHOD_CATEGORIES,
+  METHOD_CUBE,
+  getCategory,
+  type LearningCategoryId,
+  type LearningMethodId,
+} from "../categories";
+import { WIDE_MOVES, matchesNotationMove, matchesWideMove, notationMovesFor } from "../notation";
 import {
   caseItemId,
   countLearned,
   notationItemId,
   useLearningProgress,
 } from "../progress-store";
-import { ALGORITHM_SETS, LEARNING_STEPS, getSetInfo } from "../sets";
+import { ALGORITHM_SETS, METHOD_STEPS, getSetInfo } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CaseList } from "./CaseList";
 import { CategoryCard } from "./CategoryCard";
@@ -26,19 +28,24 @@ import { NotationList, WideMoveList } from "./NotationList";
 const setItemIds = (setId: AlgorithmSetId) =>
   ALGORITHM_SETS[setId].map((algorithmCase) => caseItemId(setId, algorithmCase.id));
 
-const ITEM_IDS: Record<LearningCategoryId, string[]> = {
-  notation: NOTATION_MOVES.map((notation) => notationItemId(notation.id)),
-  steps: LEARNING_STEPS.flatMap((step) => setItemIds(step.setId)),
-  f2l: setItemIds("f2l"),
-  oll: setItemIds("oll"),
-  pll: setItemIds("pll"),
-};
+/** The progress items of one block: its notation moves, its steps' cases or its own cases. */
+function itemIds(method: LearningMethodId, id: LearningCategoryId): string[] {
+  if (id === "notation") {
+    return notationMovesFor(METHOD_CUBE[method]).map((notation) => notationItemId(notation.id));
+  }
+  if (id === "steps") return METHOD_STEPS[method].flatMap((step) => setItemIds(step.setId));
+  return setItemIds(id);
+}
 
 export function LearnScreen({
+  method = DEFAULT_LEARNING_METHOD,
   initialExpanded = [],
 }: {
+  method?: LearningMethodId;
   initialExpanded?: LearningCategoryId[];
 }) {
+  const categories = METHOD_CATEGORIES[method];
+  const cube = METHOD_CUBE[method];
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<LearningCategoryId[]>(initialExpanded);
   const hydrated = useLearningProgressHydration();
@@ -50,9 +57,11 @@ export function LearnScreen({
   /** What a block shows, filtered by the search ("" shows everything). */
   const content = (id: LearningCategoryId, filter: string): { count: number; node: ReactNode } => {
     if (id === "notation") {
-      const accent = getCategory("notation").accent;
-      const moves = NOTATION_MOVES.filter((notation) => matchesNotationMove(notation, filter));
-      const wideMoves = WIDE_MOVES.filter((wide) => matchesWideMove(wide, filter));
+      const accent = getCategory("notation", method).accent;
+      const moves = notationMovesFor(cube).filter((notation) => matchesNotationMove(notation, filter));
+      // A 2×2 has no middle layers, so no wide moves either.
+      const wideMoves =
+        cube === "3x3" ? WIDE_MOVES.filter((wide) => matchesWideMove(wide, filter)) : [];
       return {
         count: moves.length + wideMoves.length,
         node: (
@@ -73,7 +82,7 @@ export function LearnScreen({
     }
 
     if (id === "steps") {
-      const steps = LEARNING_STEPS.map((step) => ({
+      const steps = METHOD_STEPS[method].map((step) => ({
         ...step,
         cases: ALGORITHM_SETS[step.setId].filter((algorithmCase) =>
           matchesCase(algorithmCase, filter),
@@ -84,17 +93,20 @@ export function LearnScreen({
         node: (
           <div className="flex flex-col gap-4">
             {steps.map((step) => {
-              const itemIds = setItemIds(step.setId);
+              const stepItemIds = setItemIds(step.setId);
               return (
                 <div key={step.setId} className="flex flex-col gap-2">
                   <h3 className="flex items-baseline justify-between px-1 text-sm font-semibold text-foreground">
                     {getSetInfo(step.setId).title}
                     {hydrated && (
                       <span className="text-xs font-semibold text-navy-muted tabular-nums">
-                        {countLearned(learned, itemIds)}/{itemIds.length}
+                        {countLearned(learned, stepItemIds)}/{stepItemIds.length}
                       </span>
                     )}
                   </h3>
+                  {step.intro && !filter && (
+                    <p className="px-1 text-sm leading-relaxed text-navy-muted">{step.intro}</p>
+                  )}
                   <CaseList cases={step.cases} learned={learned} />
                 </div>
               );
@@ -114,7 +126,7 @@ export function LearnScreen({
     );
 
   const results = trimmedQuery
-    ? LEARNING_CATEGORIES.map((category) => ({
+    ? categories.map((category) => ({
         category,
         ...content(category.id, trimmedQuery),
       })).filter((result) => result.count > 0)
@@ -132,6 +144,11 @@ export function LearnScreen({
           Inicio
         </Link>
         <h1 className="text-3xl font-bold tracking-tight">Aprender a resolver</h1>
+        {cube === "2x2" && (
+          <p className="text-sm text-navy-muted">
+            2×2 · {method === "ortega" ? "Ortega" : "CLL"}
+          </p>
+        )}
       </div>
 
       <label className="relative block">
@@ -163,12 +180,13 @@ export function LearnScreen({
         </section>
       ) : (
         <div className="flex flex-col gap-4">
-          {LEARNING_CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <CategoryCard
               key={category.id}
               category={category}
-              total={ITEM_IDS[category.id].length}
-              learned={hydrated ? countLearned(learned, ITEM_IDS[category.id]) : null}
+              cube={cube}
+              total={itemIds(method, category.id).length}
+              learned={hydrated ? countLearned(learned, itemIds(method, category.id)) : null}
               expanded={expanded.includes(category.id)}
               onToggle={() => toggle(category.id)}
             >

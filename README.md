@@ -3,19 +3,24 @@
 App (Next.js) para aprender y resolver el cubo de Rubik, en español y pensada
 para el móvil.
 
-- **Aprender** (`/entrenar`) — notación, cruz, esquinas, F2L, OLL y PLL del
-  3×3, con los algoritmos de `docs/source/`.
+- **Aprender** (`/entrenar`) — según el Cubo y el Método elegidos en Inicio:
+  - 3×3 · CFOP: notación, cruz, esquinas, F2L, OLL y PLL.
+  - 2×2 · Ortega (`?metodo=ortega`): notación 2×2, primera cara, OLL (7) y
+    PBL (5).
+  - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).
+
+  Cada caso tiene su diagrama, su algoritmo y sus movimientos numerados. Los
+  del 2×2 traen además una explicación corta. Todo sale de `docs/source/`.
 - **Solucionador** (`/solucionador`) — para **3×3** y **2×2** (selector
   arriba; se recuerda en el dispositivo). Los colores se introducen a mano o
   con la cámara / una foto por cara, con validación en vivo que marca las
   pegatinas imposibles. La solución se sigue paso a paso con un cubo 3D.
   - 3×3: algoritmo de dos fases de Kociemba.
-  - 2×2: tres formas a elegir — **Óptima** (la más corta, ≤ 11
-    movimientos), **Método Ortega** (primera cara → OLL → PBL) y **Método
-    CLL** (primera capa → CLL), con los algoritmos de
-    `docs/source/Ortega.docx` y `docs/source/CLL.docx`. Sin centros, la guía
-    es la esquina amarilla-azul-naranja abajo-detrás-izquierda; si el cubo se
-    copia en otra posición, se reorienta.
+  - 2×2: la solución más corta (≤ 11 movimientos, solo R, U y F, sin girar
+    el cubo entero), con el mismo reproductor y la misma lista que el 3×3.
+    Sin centros, la guía es la esquina amarilla-azul-naranja
+    abajo-detrás-izquierda. Si el cubo se copia en otra posición, se deja
+    quieta la esquina que haya ahí.
 
 Todo el cálculo ocurre en el navegador (Web Worker); ninguna imagen sale del
 dispositivo. Cada solución se reproduce con el motor 3D de RUBIKO antes de
@@ -27,8 +32,8 @@ mostrarse.
   render 3D.
 - `src/features/solver` — pantalla del solucionador, cámara, reproductor,
   Worker y solver 3×3.
-- `src/features/solver2x2` — solver 2×2: validación, búsqueda óptima, Ortega
-  y CLL.
+- `src/features/solver2x2` — solver 2×2 (validación y búsqueda óptima) y
+  los algoritmos de Ortega y CLL que enseña Aprender.
 - `src/features/learning`, `src/features/trainer` — Aprender y Entrenar.
 - `docs/source/` — hojas de algoritmos de las que salen los datos.
 

@@ -2,19 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CubeColor } from "@/features/cube/types";
-import type { Method2x2, Solution2x2 } from "@/features/solver2x2/methods";
 import type { CubieCube } from "./cubie";
 import type { SolverRequest, SolverResponse } from "./solver-requests";
 
 /** A search takes well under a second; past this the worker is stuck. */
 const TIMEOUT_MS = 30_000;
 
-type Pending = { resolve: (result: unknown) => void; reject: (error: Error) => void };
+type Pending = { resolve: (moves: string[]) => void; reject: (error: Error) => void };
 
 /** A solve request before it gets its id. */
 type Request =
   | { type: "solve"; cube: CubieCube }
-  | { type: "solve2x2"; facelets: CubeColor[]; method: Method2x2 };
+  | { type: "solve2x2"; facelets: CubeColor[] };
 
 /**
  * Owns the solver Web Worker for one screen: starts building its tables as
@@ -68,7 +67,6 @@ export function useSolver() {
       const request = pending.current.get(response.id);
       pending.current.delete(response.id);
       if (response.type === "solved") request?.resolve(response.moves);
-      else if (response.type === "solved2x2") request?.resolve(response.solution);
       else request?.reject(new Error(response.message));
     };
     const crash = (event: Event) => {
@@ -96,7 +94,7 @@ export function useSolver() {
 
   const request = useCallback(
     (message: Request) =>
-      new Promise<unknown>((resolve, reject) => {
+      new Promise<string[]>((resolve, reject) => {
         const worker = startWorker();
         if (!worker) {
           // No Web Worker: solve here, after letting "Calculando…" paint.
@@ -105,7 +103,6 @@ export function useSolver() {
               .then(({ handleSolverRequest }) => {
                 const response = handleSolverRequest({ ...message, id: 0 } as SolverRequest);
                 if (response?.type === "solved") resolve(response.moves);
-                else if (response?.type === "solved2x2") resolve(response.solution);
                 else reject(new Error(response?.type === "error" ? response.message : "Sin respuesta."));
               })
               .catch(reject);
@@ -119,9 +116,9 @@ export function useSolver() {
           failAll("El solucionador ha tardado demasiado.");
         }, TIMEOUT_MS);
         pending.current.set(id, {
-          resolve: (result) => {
+          resolve: (moves) => {
             clearTimeout(timer);
-            resolve(result);
+            resolve(moves);
           },
           reject: (error) => {
             clearTimeout(timer);
@@ -133,16 +130,9 @@ export function useSolver() {
     [dropWorker, failAll, startWorker],
   );
 
-  const solve = useCallback(
-    (cube: CubieCube) => request({ type: "solve", cube }) as Promise<string[]>,
-    [request],
-  );
+  const solve = useCallback((cube: CubieCube) => request({ type: "solve", cube }), [request]);
 
-  const solve2x2 = useCallback(
-    (facelets: CubeColor[], method: Method2x2) =>
-      request({ type: "solve2x2", facelets, method }) as Promise<Solution2x2>,
-    [request],
-  );
+  const solve2x2 = useCallback((facelets: CubeColor[]) => request({ type: "solve2x2", facelets }), [request]);
 
   /** Starts building the 2×2 tables (about half a second) as soon as the 2×2 is chosen. */
   const warmup2x2 = useCallback(() => {

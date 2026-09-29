@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Caso Solo intercambio diagonal">
+<title>Caso Solo intercambio diagonal</title>
+<rect x="35" y="35" width="63" height="63" rx="8" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="101" y="35" width="63" height="63" rx="8" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="35" y="101" width="63" height="63" rx="8" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="101" y="101" width="63" height="63" rx="8" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="38" y="13" width="57" height="17" rx="3" fill="#00ff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="104" y="13" width="57" height="17" rx="3" fill="#0000fd" stroke="#262626" stroke-width="1.5"/>
+<rect x="38" y="169" width="57" height="17" rx="3" fill="#00ff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="104" y="169" width="57" height="17" rx="3" fill="#0000fd" stroke="#262626" stroke-width="1.5"/>
+<rect x="13" y="38" width="17" height="57" rx="3" fill="#ff7f01" stroke="#262626" stroke-width="1.5"/>
+<rect x="13" y="104" width="17" height="57" rx="3" fill="#ff0000" stroke="#262626" stroke-width="1.5"/>
+<rect x="169" y="38" width="17" height="57" rx="3" fill="#ff7f01" stroke="#262626" stroke-width="1.5"/>
+<rect x="169" y="104" width="17" height="57" rx="3" fill="#ff0000" stroke="#262626" stroke-width="1.5"/>
+</svg>

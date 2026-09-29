@@ -33,9 +33,10 @@ export function NotationList({
             <Image
               src={notation.image}
               alt={`Diagrama de los giros ${notation.move} y ${notation.move}'`}
-              width={270}
-              height={100}
-              className="mx-auto h-auto w-full max-w-[270px]"
+              width={notation.width}
+              height={notation.height}
+              className="mx-auto h-auto w-full"
+              style={{ maxWidth: notation.width }}
             />
             <div className="flex items-center gap-3">
               <span className="flex min-w-0 flex-1 flex-col">
@@ -43,6 +44,11 @@ export function NotationList({
                   {notation.move} · {notation.move}&apos;
                 </span>
                 <span className="text-sm text-navy-muted">{notation.label}</span>
+                {notation.note && (
+                  <span className="mt-1 text-xs leading-snug text-navy-muted/80 italic">
+                    {notation.note}
+                  </span>
+                )}
               </span>
               <button
                 type="button"
