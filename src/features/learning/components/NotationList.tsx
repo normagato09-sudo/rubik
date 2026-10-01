@@ -73,15 +73,35 @@ export function NotationList({
   );
 }
 
-/** Lowercase moves: the letter stays lowercase, with "(2x)" beside it. */
-export function WideMoveList({ moves, accent }: { moves: WideMove[]; accent: string }) {
+/** What each cube's list of extra moves says above them. */
+const EXTRA_MOVES_TEXT = {
+  "3x3": {
+    title: "Movimientos en minúscula",
+    text: "Una letra en minúscula gira 2 capas a la vez. x, y y z no cambian: giran todo el cubo.",
+    badge: "(2x)",
+  },
+  pyraminx: {
+    title: "Giros de cara y del Pyraminx entero",
+    text: "Los usan los métodos Top First. Fw, Lw, Rw y Dw giran una cara entera: todo lo que no es la capa de la punta opuesta, un tercio de vuelta en sentido horario mirando esa cara. [U], [L], [R] y [B] giran todo el Pyraminx como su letra, sin cambiar nada: solo cambia cómo lo sujetas. Con ' van al revés.",
+    badge: "",
+  },
+} as const;
+
+/** 3×3: lowercase moves, with "(2x)" beside the letter. Pyraminx: face turns and whole turns. */
+export function WideMoveList({
+  moves,
+  accent,
+  cube = "3x3",
+}: {
+  moves: WideMove[];
+  accent: string;
+  cube?: keyof typeof EXTRA_MOVES_TEXT;
+}) {
+  const { title, text, badge } = EXTRA_MOVES_TEXT[cube];
   return (
     <section className="flex flex-col gap-2 rounded-2xl bg-navy px-4 py-4">
-      <h3 className="text-sm font-semibold text-foreground">Movimientos en minúscula</h3>
-      <p className="text-sm text-navy-muted">
-        Una letra en minúscula gira 2 capas a la vez. x, y y z no cambian: giran todo el
-        cubo.
-      </p>
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <p className="text-sm text-navy-muted">{text}</p>
       <ul className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {moves.map((wide) => (
           <li
@@ -89,10 +109,15 @@ export function WideMoveList({ moves, accent }: { moves: WideMove[]; accent: str
             className="flex flex-col gap-0.5 rounded-xl border border-navy-border bg-navy-2 px-3 py-2.5"
           >
             <span className="font-mono text-lg font-semibold text-foreground">
-              {wide.move}{" "}
-              <span className="text-sm font-semibold" style={{ color: accent }}>
-                (2x)
-              </span>
+              {wide.move}
+              {badge && (
+                <>
+                  {" "}
+                  <span className="text-sm font-semibold" style={{ color: accent }}>
+                    {badge}
+                  </span>
+                </>
+              )}
             </span>
             <span className="text-xs leading-snug text-navy-muted">{wide.label}</span>
           </li>

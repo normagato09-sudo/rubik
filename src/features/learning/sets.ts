@@ -15,6 +15,7 @@ import {
   PYRA_PUNTAS_CASES,
   PYRA_ULTIMA_CAPA_CASES,
 } from "./cases-pyraminx";
+import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
 import { ESQUINAS_CASES } from "./esquinas-cases";
@@ -41,10 +42,15 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   "l4e-puntas": L4E_PUNTAS_CASES,
   "l4e-v": L4E_V_CASES,
   l4e: L4E_LEARN_CASES,
+  ...SETS_PYRAMINX_RESEARCH,
 };
 
 const PUNTAS_INTRO =
   "Las puntas son las cuatro piezas pequeñas de los vértices y giran solas, sin mover nada más (u, l, r y b). Gira cada una hasta que sus tres colores coincidan con los del centro que tiene debajo. Como los giros grandes se las llevan con su centro, una vez puestas ya no se estropean: por eso se hacen al principio.";
+
+/** The Top First methods' last edge of the block, before L3E (Keyhole, L4E intuitivo). */
+const BACK_EDGE_INTRO =
+  "Falta la arista roja-azul, la de arriba detrás, que cierra el bloque. Antes de buscarla, gira U hasta que el centro de arriba coincida con los demás. Luego mira dónde está esa arista (en uno de los tres lados de la cara verde, o ya en su sitio pero dada la vuelta) y usa su caso: la sube sin tocar los centros ni las aristas roja-amarilla y azul-amarilla.";
 
 export interface LearningStep {
   setId: AlgorithmSetId;
@@ -94,6 +100,36 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
         "Coloca las tres aristas de abajo: con el amarillo abajo y el otro color igual que los centros de su lado. Las dos primeras se ponen con intuición. Para la última, sujeta el Pyraminx con su hueco delante y abajo, busca su arista en la capa de arriba y usa el caso que toque según dónde esté y hacia dónde mire el amarillo.",
     },
   ],
+  keyhole: [
+    { setId: "keyhole-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "keyhole-bloque",
+      title: "Bloque de detrás",
+      intro:
+        "Keyhole es un método Top First: primero se hace el bloque de una punta, aquí la de detrás, que es su centro con sus tres aristas. En este paso se colocan dos de ellas, la roja-amarilla (abajo a la izquierda) y la azul-amarilla (abajo a la derecha), casi siempre con intuición; estos casos ponen la segunda. La tercera, la de arriba detrás, se deja sin hacer: ese hueco libre es el «keyhole» con el que se arreglan los centros.",
+    },
+    {
+      setId: "keyhole-centros",
+      title: "Centros",
+      intro:
+        "Con el hueco de arriba detrás libre, los centros de delante se pueden girar sin romper el bloque. Fw gira la cara verde entera (todo menos el bloque de detrás) y U gira la capa de arriba. Fw sube el centro de la izquierda a la posición de arriba, U lo gira y Fw' lo devuelve; para el de la derecha es al revés: Fw', U y Fw. Arregla así el de la izquierda y el de la derecha, y deja para el final el de arriba, que se pone solo con U.",
+    },
+    { setId: "keyhole-arista", title: "Arista del hueco", intro: BACK_EDGE_INTRO },
+  ],
+  "l4e-intuitivo": [
+    { setId: "l4ei-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "l4ei-v",
+      title: "V",
+      intro:
+        "La misma V que en L4E: los tres centros de abajo con el amarillo abajo y las dos aristas de abajo de detrás, la roja-amarilla y la azul-amarilla. La primera arista se pone con intuición y la segunda con uno de estos casos.",
+    },
+    {
+      setId: "l4ei-arista",
+      title: "Arista de arriba",
+      intro: `En vez de los algoritmos de L4E, aquí se coloca primero una de las cuatro aristas que faltan y las otras tres se resuelven después con un ciclo, en L3E. ${BACK_EDGE_INTRO}`,
+    },
+  ],
   l4e: [
     { setId: "l4e-puntas", title: "Puntas", intro: PUNTAS_INTRO },
     {
@@ -127,6 +163,15 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "l4e-puntas": "l4e",
   "l4e-v": "l4e",
   l4e: "l4e",
+  "keyhole-puntas": "keyhole",
+  "keyhole-bloque": "keyhole",
+  "keyhole-centros": "keyhole",
+  "keyhole-arista": "keyhole",
+  "keyhole-l3e": "keyhole",
+  "l4ei-puntas": "l4e-intuitivo",
+  "l4ei-v": "l4e-intuitivo",
+  "l4ei-arista": "l4e-intuitivo",
+  "l4ei-l3e": "l4e-intuitivo",
 };
 
 export interface SetInfo {

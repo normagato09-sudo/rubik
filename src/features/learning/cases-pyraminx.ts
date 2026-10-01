@@ -18,32 +18,32 @@ import { L4E_CASES, POR_CAPAS_LAST_LAYER, type PyraCase } from "@/features/pyram
 import { topViewSvg } from "@/features/pyraminx/diagrams";
 import {
   applyPyraMove,
-  applyPyraMoves,
-  invertPyraMoves,
-  parsePyraAlgorithm,
+  applyPyraTokens,
+  invertPyraTokens,
+  parsePyraNotation,
   solvedPyraminx,
   type PyraColor,
-  type PyraMove,
+  type PyraToken,
 } from "@/features/pyraminx/moves";
 import { CENTER_STICKERS, EDGE_FACES, EDGE_STICKERS, TIP_STICKERS } from "@/features/pyraminx/pieces";
 import type { AlgorithmCase, AlgorithmSetId } from "./algorithm-sets";
 
 const solved = solvedPyraminx();
-const id = (index: number) => String(index + 1).padStart(2, "0");
+export const id = (index: number) => String(index + 1).padStart(2, "0");
 
-/** The case an algorithm (plus the final turn it needs) solves. */
+/** The case an algorithm (plus the final turn it needs) solves. Face turns and whole turns are read too. */
 export function pyraCaseState(algorithm: string, adjust: PyraCase["adjust"] = ""): PyraColor[] {
-  const moves: PyraMove[] = [...parsePyraAlgorithm(algorithm), ...(adjust ? [adjust as PyraMove] : [])];
-  return applyPyraMoves(solved, invertPyraMoves(moves));
+  const tokens: PyraToken[] = [...parsePyraNotation(algorithm), ...(adjust ? [adjust as PyraToken] : [])];
+  return applyPyraTokens(solved, invertPyraTokens(tokens));
 }
 
 // ---------- reading a case ----------
 
-const edgeName = (slot: number) => EDGE_FACES[slot].join("");
-const EDGE = (name: string) => EDGE_FACES.findIndex((faces) => faces.join("") === name);
+export const edgeName = (slot: number) => EDGE_FACES[slot].join("");
+export const EDGE = (name: string) => EDGE_FACES.findIndex((faces) => faces.join("") === name);
 const TOP_EDGES = ["FL", "FR", "LR"].map(EDGE);
 
-const WHERE: Record<string, string> = {
+export const WHERE: Record<string, string> = {
   FL: "arriba, en la arista de delante a la izquierda",
   FR: "arriba, en la arista de delante a la derecha",
   LR: "arriba, en la arista de detrás",
@@ -52,7 +52,7 @@ const WHERE: Record<string, string> = {
   RD: "abajo a la derecha",
 };
 
-const TOWARDS: Record<PyraFace, string> = {
+export const TOWARDS: Record<PyraFace, string> = {
   F: "hacia ti",
   L: "hacia la izquierda",
   R: "hacia la derecha",
@@ -60,7 +60,7 @@ const TOWARDS: Record<PyraFace, string> = {
 };
 
 /** Where edge `piece` (numbered by its solved place) is in `state`, and whether it is the wrong way round. */
-function locate(state: readonly PyraColor[], piece: number): { slot: number; flipped: boolean } {
+export function locate(state: readonly PyraColor[], piece: number): { slot: number; flipped: boolean } {
   const [a, b] = EDGE_STICKERS[piece].map((i) => solved[i]);
   for (let slot = 0; slot < EDGE_STICKERS.length; slot++) {
     const [x, y] = EDGE_STICKERS[slot].map((i) => state[i]);
@@ -71,7 +71,7 @@ function locate(state: readonly PyraColor[], piece: number): { slot: number; fli
 }
 
 /** The face `color` is on, at `slot`. */
-const faceShowing = (state: readonly PyraColor[], slot: number, color: PyraColor) =>
+export const faceShowing = (state: readonly PyraColor[], slot: number, color: PyraColor) =>
   faceOf(EDGE_STICKERS[slot].find((i) => state[i] === color)!);
 
 /** Whether a top edge would be the right way round once U brings it home. */
@@ -85,7 +85,7 @@ function topEdgeOriented(state: readonly PyraColor[], piece: number): boolean {
   throw new Error("Pyraminx: top edge not in the top layer");
 }
 
-const joinSpanish = (items: string[]) =>
+export const joinSpanish = (items: string[]) =>
   items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`;
 
 const TOP_NAME: Record<string, string> = { FL: "la de delante a la izquierda", FR: "la de delante a la derecha", LR: "la de detrás" };
@@ -140,7 +140,7 @@ function sheetNote(kase: PyraCase, sheet: string): string | undefined {
 // ---------- added steps ----------
 
 /** Pieces a step's diagrams color: tips and centers always, plus the edges it names. */
-const piecesShown = (edges: number[]) =>
+export const piecesShown = (edges: number[]) =>
   new Set([
     ...Object.values(TIP_STICKERS).flat(),
     ...Object.values(CENTER_STICKERS).flat(),
@@ -150,7 +150,7 @@ const piecesShown = (edges: number[]) =>
 /** RUBIKO's colors → the Por capas sheet's (red in front, blue left, green right). */
 const POR_CAPAS_COLORS: Partial<Record<PyraColor, PyraColor>> = { green: "red", red: "blue", blue: "green" };
 
-interface Added {
+export interface Added {
   name: string;
   algorithm: string;
   explanation: string;
@@ -201,12 +201,12 @@ const FD = EDGE("FD");
 const LD = EDGE("LD");
 const RD = EDGE("RD");
 
-const PUNTAS: Added[] = [tipCase("u"), tipCase("u'")];
+export const PUNTAS: Added[] = [tipCase("u"), tipCase("u'")];
 const CENTROS: Added[] = [centerCase("R"), centerCase("R'")];
 const PRIMERA_CAPA: Added[] = ["R U' R'", "L' U L", "U' R U R'"].map((algorithm) =>
   edgeCase(algorithm, FD, [LD, RD], "La arista que falta en la primera capa (la de abajo delante)"),
 );
-const V: Added[] = ["R' U' R", "R' U R", "U R' U' R"].map((algorithm) =>
+export const V: Added[] = ["R' U' R", "R' U R", "U R' U' R"].map((algorithm) =>
   edgeCase(algorithm, RD, [LD], "La segunda arista de la V (la de abajo a la derecha)"),
 );
 

@@ -9,9 +9,18 @@ import {
   applyPyraMoves,
   invertPyraMoves,
   isSolvedPyraminx,
+  FACE_TURNS,
+  ROTATIONS,
+  TOKEN_PERMUTATION,
+  applyPyraTokens,
+  inversePyraToken,
+  invertPyraTokens,
   parsePyraAlgorithm,
+  parsePyraNotation,
   solvedPyraminx,
+  turnsWith,
   type PyraMove,
+  type PyraToken,
 } from "./moves";
 
 const cross = (a: readonly number[], b: readonly number[]) => [
@@ -97,5 +106,63 @@ describe("Pyraminx moves", () => {
     expect(parsePyraAlgorithm("R' L R L2' U L")).toEqual(["R'", "L", "R", "L'", "L'", "U", "L"]);
     expect(parsePyraAlgorithm("u’ b")).toEqual(["u'", "b"] as PyraMove[]);
     expect(() => parsePyraAlgorithm("F")).toThrow();
+  });
+});
+
+describe("the wider notation (face turns and turns of the whole Pyraminx)", () => {
+  const solved = solvedPyraminx();
+  const same = (a: readonly unknown[], b: readonly unknown[]) => a.every((x, i) => x === b[i]);
+
+  it("leaves the 16 moves exactly as they were", () => {
+    for (const move of ALL_PYRA_MOVES) expect(TOKEN_PERMUTATION[move]).toEqual(MOVE_PERMUTATION[move]);
+    const text = "(R' L R L') U' l b' R2 u’";
+    expect(parsePyraNotation(text)).toEqual(parsePyraAlgorithm(text));
+  });
+
+  it("reads face turns and whole turns", () => {
+    expect(parsePyraNotation("Rw U Rw' [U] Dw2 [l']")).toEqual(["Rw", "U", "Rw'", "[U]", "Dw", "Dw", "[L']"]);
+    expect(() => parsePyraNotation("Bw")).toThrow();
+    expect(() => parsePyraNotation("[F]")).toThrow();
+  });
+
+  it("three turns of any of them are none, and ' undoes it", () => {
+    for (const token of [...FACE_TURNS, ...ROTATIONS]) {
+      expect(same(applyPyraTokens(solved, [token, token, token]), solved), token).toBe(true);
+      expect(same(applyPyraTokens(solved, [token, inversePyraToken(token)]), solved), token).toBe(true);
+    }
+    expect(invertPyraTokens(["Rw", "[U']", "L"])).toEqual(["L'", "[U]", "Rw'"]);
+  });
+
+  it("a face turn moves everything but the big layer of the tip opposite the face", () => {
+    const opposite = { F: "B", L: "R", R: "L", D: "U" } as const;
+    for (const face of ["F", "L", "R", "D"] as const) {
+      const turn = `${face}w` as const;
+      // 36 stickers less the 12 of that big layer (tip, center, 3 edges); none of the others stays put.
+      expect(TOKEN_PERMUTATION[turn].filter((to, i) => to !== i)).toHaveLength(24);
+      for (let i = 0; i < 36; i++) {
+        if (turnsWith(opposite[face], i)) expect(TOKEN_PERMUTATION[turn][i]).toBe(i);
+      }
+      // The face turns in place.
+      const start = ["F", "L", "R", "D"].indexOf(face) * 9;
+      for (let i = start; i < start + 9; i++) expect(Math.floor(TOKEN_PERMUTATION[turn][i] / 9)).toBe(start / 9);
+    }
+  });
+
+  it("a turn of the whole Pyraminx is the big layer plus the opposite face the same way", () => {
+    // [U] = U + Dw' (clockwise from the top tip is anticlockwise seen from the bottom face).
+    const pairs = { U: "Dw'", L: "Rw'", R: "Lw'", B: "Fw'" } as const;
+    for (const [vertex, face] of Object.entries(pairs)) {
+      const whole = applyPyraTokens(solved, [`[${vertex}]` as PyraToken]);
+      expect(same(whole, applyPyraTokens(solved, [vertex as PyraMove, face])), vertex).toBe(true);
+      // Whole turns keep a solved Pyraminx solved (with its faces swapped round).
+      expect(isSolvedPyraminx(whole)).toBe(true);
+    }
+  });
+
+  it("Keyhole's U and Rw: with the block at the back, Fw and U never touch its center and two bottom edges", () => {
+    const block = Array.from({ length: 36 }, (_, i) => i).filter((i) => turnsWith("B", i) && !turnsWith("U", i));
+    expect(block).toHaveLength(10);
+    const state = applyPyraTokens(solved, parsePyraNotation("Fw U Fw' U' Fw'"));
+    for (const i of block) expect(state[i]).toBe(solved[i]);
   });
 });

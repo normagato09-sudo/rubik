@@ -9,6 +9,7 @@
  * of its layer around the tip's axis and sees where they land.
  */
 import {
+  OPPOSITE_VERTEX,
   PYRA_FACES,
   PYRA_STICKERS,
   PYRA_VERTICES,
@@ -135,21 +136,120 @@ export function applyPyraMoves<T>(state: readonly T[], moves: readonly PyraMove[
   return moves.reduce<T[]>((current, move) => applyPyraMove(current, move), [...state]);
 }
 
+/** Splits an algorithm into its tokens: no brackets ( ), and ’ read as '. */
+const tokensOf = (text: string) =>
+  text
+    .replace(/[()]/g, " ")
+    .replace(/[’´`]/g, "'")
+    .split(/\s+/)
+    .filter((token) => token.length > 0);
+
 /**
  * Reads an algorithm as written in the sheets: "(R' L R L') U", "R U R')",
  * with ’ or '. A double turn is allowed where a sheet writes one: "L2'" is
  * two L' (which is the same as one L).
  */
 export function parsePyraAlgorithm(text: string): PyraMove[] {
-  return text
-    .replace(/[()]/g, " ")
-    .replace(/[’´`]/g, "'")
-    .split(/\s+/)
-    .filter((token) => token.length > 0)
-    .flatMap((token) => {
-      const match = token.match(/^([ULRBulrb])(2?)('?)$/);
-      if (!match) throw new Error(`Movimiento no válido: ${token}`);
-      const move = `${match[1]}${match[3]}` as PyraMove;
-      return match[2] ? [move, move] : [move];
+  return tokensOf(text).flatMap((token) => {
+    const match = token.match(/^([ULRBulrb])(2?)('?)$/);
+    if (!match) throw new Error(`Movimiento no válido: ${token}`);
+    const move = `${match[1]}${match[3]}` as PyraMove;
+    return match[2] ? [move, move] : [move];
+  });
+}
+
+// ---------- the wider notation of the Top First algorithms ----------
+
+/**
+ * Face turns, as in the Speedsolving wiki's Pyraminx notation: Fw, Lw, Rw
+ * and Dw turn the layer of that face — everything but the big layer of the
+ * tip opposite it — a third of a turn, clockwise looking at the face.
+ * Top First guides use them to turn the rest of the Pyraminx against the
+ * block already built (Keyhole's "U and Rw").
+ */
+export type PyraFaceTurn = "Fw" | "Fw'" | "Lw" | "Lw'" | "Rw" | "Rw'" | "Dw" | "Dw'";
+
+/**
+ * Turns of the whole Pyraminx, also from that page: [U] turns all of it
+ * like U (clockwise looking at the top tip; for a 3×3 it would be y),
+ * and the same with [L], [R] and [B].
+ */
+export type PyraRotation = "[U]" | "[U']" | "[L]" | "[L']" | "[R]" | "[R']" | "[B]" | "[B']";
+
+/** Anything an algorithm in Aprender may have: a move, a face turn or a whole-Pyraminx turn. */
+export type PyraToken = PyraMove | PyraFaceTurn | PyraRotation;
+
+export const FACE_TURNS: PyraFaceTurn[] = ["Fw", "Fw'", "Lw", "Lw'", "Rw", "Rw'", "Dw", "Dw'"];
+export const ROTATIONS: PyraRotation[] = ["[U]", "[U']", "[L]", "[L']", "[R]", "[R']", "[B]", "[B']"];
+export const ALL_PYRA_TOKENS: PyraToken[] = [...ALL_PYRA_MOVES, ...FACE_TURNS, ...ROTATIONS];
+
+const isFaceTurn = (token: PyraToken): token is PyraFaceTurn => token[1] === "w";
+const isRotation = (token: PyraToken): token is PyraRotation => token[0] === "[";
+
+/** The tip axis a token turns around, which stickers turn and by what angle. */
+function tokenTurn(token: PyraToken): { vertex: PyraVertex; turns: (index: number) => boolean; angle: number } {
+  const clockwise = !token.replace("]", "").endsWith("'");
+  if (isRotation(token)) {
+    const vertex = token[1] as PyraVertex;
+    return { vertex, turns: () => true, angle: moveAngle(clockwise ? vertex : (`${vertex}'` as PyraMove)) };
+  }
+  if (isFaceTurn(token)) {
+    const vertex = OPPOSITE_VERTEX[token[0] as PyraFace];
+    // Seen from the face, the tip is behind it: clockwise there is anticlockwise from the tip.
+    return {
+      vertex,
+      turns: (index) => dot(STICKER_CENTERS[index], VERTEX_AXIS[vertex]) < LAYER_CUT,
+      angle: -moveAngle(clockwise ? vertex : (`${vertex}'` as PyraMove)),
+    };
+  }
+  return { vertex: parsePyraMove(token).vertex, turns: (index) => turnsWith(token, index), angle: moveAngle(token) };
+}
+
+/** Like MOVE_PERMUTATION, for every token (the same permutation for the 16 moves). */
+export const TOKEN_PERMUTATION: Record<PyraToken, number[]> = Object.fromEntries(
+  ALL_PYRA_TOKENS.map((token) => {
+    const { vertex, turns, angle } = tokenTurn(token);
+    const to = Array.from({ length: PYRA_STICKERS }, (_, i) =>
+      turns(i) ? nearestSticker(rotate(STICKER_CENTERS[i], VERTEX_AXIS[vertex], angle)) : i,
+    );
+    return [token, to];
+  }),
+) as Record<PyraToken, number[]>;
+
+export function applyPyraTokens<T>(state: readonly T[], tokens: readonly PyraToken[]): T[] {
+  return tokens.reduce<T[]>((current, token) => {
+    const to = TOKEN_PERMUTATION[token];
+    const next = [...current];
+    current.forEach((color, i) => {
+      next[to[i]] = color;
     });
+    return next;
+  }, [...state]);
+}
+
+export const inversePyraToken = (token: PyraToken): PyraToken => {
+  if (isRotation(token)) return (token.includes("'") ? token.replace("'", "") : token.replace("]", "']")) as PyraToken;
+  return (token.endsWith("'") ? token.slice(0, -1) : `${token}'`) as PyraToken;
+};
+
+export function invertPyraTokens(tokens: readonly PyraToken[]): PyraToken[] {
+  return [...tokens].reverse().map(inversePyraToken);
+}
+
+/**
+ * Reads an algorithm with the wider notation too: everything
+ * parsePyraAlgorithm reads, plus face turns (Rw, Dw'...) and turns of the
+ * whole Pyraminx ([U], [L']...).
+ */
+export function parsePyraNotation(text: string): PyraToken[] {
+  return tokensOf(text).flatMap((token) => {
+    const rotation = token.match(/^\[([ULRBulrb])('?)\]$/);
+    if (rotation) return [`[${rotation[1].toUpperCase()}${rotation[2]}]` as PyraRotation];
+    const face = token.match(/^([FLRD])w(2?)('?)$/);
+    if (face) {
+      const turn = `${face[1]}w${face[3]}` as PyraFaceTurn;
+      return face[2] ? [turn, turn] : [turn];
+    }
+    return parsePyraAlgorithm(token);
+  });
 }

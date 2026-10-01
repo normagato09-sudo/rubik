@@ -11,8 +11,9 @@ import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CheckIcon } from "./CheckIcon";
 
 /**
- * Read-only guide for one case (F2L, OLL, PLL, or a 2×2 one, which also
- * says how to recognize it): diagram, algorithm and its
+ * Read-only guide for one case (F2L, OLL, PLL, or a 2×2 or Pyraminx one,
+ * which also says how to recognize it, and where it comes from when it
+ * was researched rather than taken from a document): diagram, algorithm and its
  * moves as numbered steps, to reproduce on a physical cube. Nothing here
  * moves or animates a cube — the only interaction is marking it learned.
  */
@@ -90,6 +91,27 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
         {algorithmCase.note && (
           <p className="rounded-xl border border-navy-border bg-navy-2 px-3 py-2 text-sm leading-snug text-navy-muted">
             {algorithmCase.note}
+          </p>
+        )}
+        {algorithmCase.research && (
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-snug text-navy-muted">
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={{ backgroundColor: `${accent}1f`, color: accent }}
+            >
+              Investigado
+            </span>
+            <span>
+              Fuente:{" "}
+              <a
+                href={algorithmCase.research.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                {algorithmCase.research.name}
+              </a>
+            </span>
           </p>
         )}
       </section>

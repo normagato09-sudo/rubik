@@ -11,6 +11,10 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   - CLL (2×2): Notación 2×2, Pasos (Primera capa) y CLL.
   - Por capas (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Centros,
     Primera capa) y Última capa.
+  - Keyhole (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Bloque de
+    detrás, Centros, Arista del hueco) y L3E.
+  - L4E intuitivo (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V,
+    Arista de arriba) y L3E.
   - L4E (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V) y L4E.
 
   Cada bloque tiene contenido real de `docs/source` y muestra su progreso
@@ -90,6 +94,17 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     diagrama.
 - `notation.ts` (Pyraminx) — `NOTATION_MOVES_PYRAMINX`: los diagramas de
   `docs/source/Notacion Pyraminx.docx`, en `public/learning/notation-pyraminx/`.
+- `cases-pyraminx-research.ts` — Keyhole y L4E intuitivo, con los
+  algoritmos de `features/pyraminx/research.ts`. Cada caso lleva
+  `research` (nombre y enlace de la fuente) y la ficha lo muestra como
+  «Investigado». Lo que dos métodos comparten (Puntas, V, la arista del
+  hueco, L3E) se escribe una vez y se lista en cada método. Explicaciones
+  sacadas de las pegatinas de cada caso y diagramas dibujados por la app
+  (`WRITE_DIAGRAMS=1 npx vitest run cases-pyraminx-research` los reescribe).
+- `notation.ts` (Pyraminx, ampliada) — `PYRAMINX_EXTRA_MOVES`: Fw, Lw, Rw,
+  Dw y [U], [L], [R], [B], que usan los métodos Top First. Sin diagrama en
+  el documento, así que van aparte y no cuentan en el progreso, como las
+  minúsculas del 3×3.
 - `algorithm.ts` — `splitAlgorithm()`: un paso por movimiento, tal cual. Un
   `'` suelto (`U2 '`) se une al movimiento anterior.
 - `progress-store.ts` — lo aprendido (Zustand + localStorage, clave
@@ -100,10 +115,12 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
 
 Rutas:
 - `/entrenar` — pantalla Aprender. `?metodo=ortega|cll` muestra el 2×2,
-  `?metodo=por-capas|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
+  `?metodo=por-capas|keyhole|l4e-intuitivo|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
   `esquinas`, `f2l`, `oll`, `pll`, `primera-cara`, `primera-capa`,
   `ortega-oll`, `ortega-pbl`, `cll`, `pyra-puntas`, `pyra-centros`,
-  `pyra-primera-capa`, `pyra-ultima-capa`, `l4e-puntas`, `l4e-v` y `l4e`.
+  `pyra-primera-capa`, `pyra-ultima-capa`, `l4e-puntas`, `l4e-v`, `l4e`,
+  `keyhole-puntas`, `keyhole-bloque`, `keyhole-centros`, `keyhole-arista`,
+  `keyhole-l3e`, `l4ei-puntas`, `l4ei-v`, `l4ei-arista` y `l4ei-l3e`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

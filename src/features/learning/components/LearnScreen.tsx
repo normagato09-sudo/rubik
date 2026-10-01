@@ -13,7 +13,13 @@ import {
   type LearningCategoryId,
   type LearningMethodId,
 } from "../categories";
-import { WIDE_MOVES, matchesNotationMove, matchesWideMove, notationMovesFor } from "../notation";
+import {
+  PYRAMINX_EXTRA_MOVES,
+  WIDE_MOVES,
+  matchesNotationMove,
+  matchesWideMove,
+  notationMovesFor,
+} from "../notation";
 import {
   caseItemId,
   countLearned,
@@ -60,9 +66,9 @@ export function LearnScreen({
     if (id === "notation") {
       const accent = getCategory("notation", method).accent;
       const moves = notationMovesFor(cube).filter((notation) => matchesNotationMove(notation, filter));
-      // A 2×2 or a Pyraminx has no middle layers, so no wide moves either.
-      const wideMoves =
-        cube === "3x3" ? WIDE_MOVES.filter((wide) => matchesWideMove(wide, filter)) : [];
+      // A 2×2 has no middle layers, so no wide moves; the Pyraminx has its face and whole turns.
+      const extra = cube === "3x3" ? WIDE_MOVES : cube === "pyraminx" ? PYRAMINX_EXTRA_MOVES : [];
+      const wideMoves = extra.filter((wide) => matchesWideMove(wide, filter));
       return {
         count: moves.length + wideMoves.length,
         node: (
@@ -76,7 +82,9 @@ export function LearnScreen({
                 onToggle={toggleLearned}
               />
             )}
-            {wideMoves.length > 0 && <WideMoveList moves={wideMoves} accent={accent} />}
+            {wideMoves.length > 0 && (
+              <WideMoveList moves={wideMoves} accent={accent} cube={cube === "pyraminx" ? "pyraminx" : "3x3"} />
+            )}
           </div>
         ),
       };

@@ -1,7 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { NOTATION_MOVES, WIDE_MOVES, matchesNotationMove, matchesWideMove } from "./notation";
+import { parsePyraNotation } from "@/features/pyraminx/moves";
+import {
+  NOTATION_MOVES,
+  NOTATION_MOVES_PYRAMINX,
+  PYRAMINX_EXTRA_MOVES,
+  WIDE_MOVES,
+  matchesNotationMove,
+  matchesWideMove,
+} from "./notation";
 import { countLearned, createLearningProgressStore, notationItemId } from "./progress-store";
 
 describe("NOTATION_MOVES", () => {
@@ -68,5 +76,23 @@ describe("notation progress", () => {
     store.getState().toggleLearned("f2l-01");
     expect(countLearned(store.getState().learned, ids)).toBe(1);
     expect(ids).toHaveLength(12);
+  });
+});
+
+describe("PYRAMINX_EXTRA_MOVES", () => {
+  it("lists the face turns and the whole turns the engine reads, apart from the counted moves", () => {
+    expect(PYRAMINX_EXTRA_MOVES.map((extra) => extra.move)).toEqual(["Fw", "Lw", "Rw", "Dw", "[U]", "[L]", "[R]", "[B]"]);
+    for (const extra of PYRAMINX_EXTRA_MOVES) {
+      expect(() => parsePyraNotation(`${extra.move} ${extra.move.replace(/\]?$/, (end) => `'${end}`)}`)).not.toThrow();
+    }
+    expect(NOTATION_MOVES_PYRAMINX).toHaveLength(8);
+  });
+
+  it("finds them by what is written, ' included, but not by \"2x\"", () => {
+    const search = (query: string) =>
+      PYRAMINX_EXTRA_MOVES.filter((extra) => matchesWideMove(extra, query)).map((extra) => extra.move);
+    expect(search("Fw'")).toEqual(["Fw"]);
+    expect(search("[u']")).toEqual(["[U]"]);
+    expect(search("2x")).toEqual([]);
   });
 });

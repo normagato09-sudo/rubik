@@ -22,7 +22,12 @@ describe("getSelectableMethodsForCubeType", () => {
     expect(getSelectableMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll"]);
   });
 
-  it("lists Por capas and L4E for the Pyraminx", () => {
-    expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual(["por-capas", "l4e"]);
+  it("lists the Pyraminx methods, easiest first", () => {
+    expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual([
+      "por-capas",
+      "keyhole",
+      "l4e-intuitivo",
+      "l4e",
+    ]);
   });
 });

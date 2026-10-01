@@ -1,4 +1,6 @@
+import type { ResearchSource } from "@/features/pyraminx/research";
 import { splitAlgorithm } from "./algorithm";
+import type { ResearchSetId } from "./cases-pyraminx-research";
 
 export type AlgorithmSetId =
   | "cruz"
@@ -19,7 +21,9 @@ export type AlgorithmSetId =
   | "pyra-ultima-capa"
   | "l4e-puntas"
   | "l4e-v"
-  | "l4e";
+  | "l4e"
+  // Pyraminx methods taught from research (cases-pyraminx-research.ts)
+  | ResearchSetId;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -36,6 +40,8 @@ export interface AlgorithmCase {
   explanation?: string;
   /** Where the algorithm or diagram does not come from the source, why. */
   note?: string;
+  /** Content RUBIKO researched (not from the user's documents): where it comes from. */
+  research?: ResearchSource;
 }
 
 /** Natural size of each set's diagrams, for next/image. */
@@ -57,6 +63,15 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "l4e-puntas": { width: 200, height: 200 },
   "l4e-v": { width: 200, height: 200 },
   l4e: { width: 200, height: 200 },
+  "keyhole-puntas": { width: 200, height: 200 },
+  "keyhole-bloque": { width: 200, height: 200 },
+  "keyhole-centros": { width: 200, height: 200 },
+  "keyhole-arista": { width: 200, height: 200 },
+  "keyhole-l3e": { width: 200, height: 200 },
+  "l4ei-puntas": { width: 200, height: 200 },
+  "l4ei-v": { width: 200, height: 200 },
+  "l4ei-arista": { width: 200, height: 200 },
+  "l4ei-l3e": { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -109,7 +124,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e|l3e)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

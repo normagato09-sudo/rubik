@@ -130,13 +130,33 @@ export const WIDE_MOVES: WideMove[] = [
   { move: "d", label: "D y la capa ecuatorial (E)" },
 ];
 
-/** "r", "r'", "2x" or "minúscula" find the wide moves. */
+/**
+ * The Pyraminx's wider notation, used by the Top First algorithms
+ * (features/pyraminx/moves.ts reads it): face turns and turns of the whole
+ * Pyraminx, as the Speedsolving wiki writes them. No diagram in the user's
+ * notation document, so — like the 3×3's lowercase moves — they are listed
+ * apart and not counted in the progress.
+ */
+export const PYRAMINX_EXTRA_MOVES: WideMove[] = [
+  { move: "Fw", label: "La cara de delante: todo menos la capa de la punta de detrás" },
+  { move: "Lw", label: "La cara izquierda: todo menos la capa de la punta derecha" },
+  { move: "Rw", label: "La cara derecha: todo menos la capa de la punta izquierda" },
+  { move: "Dw", label: "La cara de abajo: todo menos la capa de arriba" },
+  { move: "[U]", label: "Todo el Pyraminx, como U" },
+  { move: "[L]", label: "Todo el Pyraminx, como L" },
+  { move: "[R]", label: "Todo el Pyraminx, como R" },
+  { move: "[B]", label: "Todo el Pyraminx, como B" },
+];
+
+/** "r", "r'", "2x" or "minúscula" find the wide moves; "Fw" or "[U]" the Pyraminx ones. */
 export function matchesWideMove(wide: WideMove, query: string): boolean {
   const q = query.trim().toLowerCase().replace(/’/g, "'");
   if (q.length === 0) return true;
-  if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2;
+  if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2 && /^[a-z]$/.test(wide.move);
   const tokens = q.split(/\s+/);
-  return tokens.every((token) => token === wide.move || token === `${wide.move}'`);
+  const move = wide.move.toLowerCase();
+  const inverse = move.endsWith("]") ? `${move.slice(0, -1)}']` : `${move}'`;
+  return tokens.every((token) => token === move || token === `${move}'` || token === inverse);
 }
 
 /** Matches "R", "r'", "R R'" or words of the label ("capa media"). */

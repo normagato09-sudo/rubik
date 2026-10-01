@@ -30,6 +30,8 @@ const HIGHLIGHTED_PYRAMINX: Partial<Record<LearningCategoryId, number[]>> = {
   steps: [0, 4, 8],
   "pyra-ultima-capa": [1, 3],
   l4e: [1, 3, 6],
+  "keyhole-l3e": [1, 3, 6],
+  "l4ei-l3e": [1, 3, 6],
 };
 
 const PYRA_FACE: [Vec2, Vec2, Vec2] = [

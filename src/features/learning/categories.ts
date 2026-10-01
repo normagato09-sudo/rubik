@@ -8,7 +8,9 @@ export type LearningCategoryId =
   | "ortega-pbl"
   | "cll"
   | "pyra-ultima-capa"
-  | "l4e";
+  | "l4e"
+  | "keyhole-l3e"
+  | "l4ei-l3e";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -18,7 +20,7 @@ export interface LearningCategory {
 }
 
 /** The methods Aprender teaches — the active ones of features/trainer/methods.ts. */
-export type LearningMethodId = "cfop" | "ortega" | "cll" | "por-capas" | "l4e";
+export type LearningMethodId = "cfop" | "ortega" | "cll" | "por-capas" | "keyhole" | "l4e-intuitivo" | "l4e";
 
 /** The cubes Aprender teaches. */
 export type LearningCube = "3x3" | "2x2" | "pyraminx";
@@ -31,6 +33,8 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   ortega: "2x2",
   cll: "2x2",
   "por-capas": "pyraminx",
+  keyhole: "pyraminx",
+  "l4e-intuitivo": "pyraminx",
   l4e: "pyraminx",
 };
 
@@ -40,6 +44,8 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
   "por-capas": "Pyraminx · Por capas",
+  keyhole: "Pyraminx · Keyhole",
+  "l4e-intuitivo": "Pyraminx · L4E intuitivo",
   l4e: "Pyraminx · L4E",
 };
 
@@ -144,6 +150,42 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       id: "pyra-ultima-capa",
       title: "Última capa (Por capas)",
       description: "Coloca las tres aristas de arriba",
+      accent: "#facc15",
+    },
+  ],
+  keyhole: [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Los giros del Pyraminx, y también Fw y los giros enteros",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas, el bloque de detrás, los centros y su última arista",
+    },
+    {
+      id: "keyhole-l3e",
+      title: "L3E (Keyhole)",
+      description: "Coloca las tres aristas de la cara de delante",
+      accent: "#facc15",
+    },
+  ],
+  "l4e-intuitivo": [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Aprende los giros del Pyraminx para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas, la V y una arista de arriba",
+    },
+    {
+      id: "l4ei-l3e",
+      title: "L3E (L4E intuitivo)",
+      description: "Termina con las tres aristas de la cara de delante",
       accent: "#facc15",
     },
   ],

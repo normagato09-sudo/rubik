@@ -10,12 +10,21 @@ para el móvil.
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).
   - Pyraminx · Por capas (`?metodo=por-capas`): notación del Pyraminx,
     puntas, centros, primera capa y última capa (5).
+  - Pyraminx · Keyhole (`?metodo=keyhole`): notación, puntas, bloque de
+    detrás, centros con el hueco, arista del hueco (7) y L3E (5).
+  - Pyraminx · L4E intuitivo (`?metodo=l4e-intuitivo`): notación, puntas,
+    V, arista de arriba (7) y L3E (5).
   - Pyraminx · L4E (`?metodo=l4e`): notación del Pyraminx, puntas, V y
     L4E (30).
 
+  Keyhole y L4E intuitivo no salen de `docs/source/` sino de investigación
+  (Speedsolving Wiki, guía Keyhole de Andy Klise): cada ficha lo marca como
+  «Investigado» con su fuente, y cada algoritmo está comprobado con el
+  motor del Pyraminx.
+
   Cada caso tiene su diagrama, su algoritmo y sus movimientos numerados. Los
-  del 2×2 y del Pyraminx traen además una explicación corta. Todo sale de
-  `docs/source/`.
+  del 2×2 y del Pyraminx traen además una explicación corta. Todo lo demás
+  sale de `docs/source/`.
 - **Solucionador** (`/solucionador`) — para **3×3**, **2×2** y **Pyraminx**
   (selector arriba; se recuerda en el dispositivo). Los colores se introducen a mano o
   con la cámara / una foto por cara, con validación en vivo que marca las

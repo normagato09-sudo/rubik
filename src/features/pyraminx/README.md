@@ -15,7 +15,12 @@ azul a la derecha. Las 4 puntas se llaman como los giros que las mueven: U
 - `moves.ts` — los giros sobre las pegatinas: U, L, R, B (capa grande) y
   u, l, r, b (solo la punta), un tercio de vuelta en sentido horario mirando
   la punta; `'` al revés. Las permutaciones no se escriben a mano: se
-  calculan girando la capa sobre el eje de su punta.
+  calculan girando la capa sobre el eje de su punta. Para los algoritmos de
+  Aprender lee además la notación ampliada de la Speedsolving Wiki
+  (`parsePyraNotation`, `applyPyraTokens`): giros de cara Fw, Lw, Rw y Dw
+  (todo menos la capa de la punta opuesta, en sentido horario mirando la
+  cara) y giros del Pyraminx entero [U], [L], [R] y [B]. Los 16 giros de
+  siempre no cambian: el solucionador sigue usando solo `PyraMove`.
 - `pieces.ts` — las piezas como grupos de pegatinas: 4 puntas y 4 centros
   (3 pegatinas, solo giran) y 6 aristas (2, se mueven).
 - `facelets.ts` — validación en vivo con mensajes en español (incompleto,
@@ -32,6 +37,13 @@ azul a la derecha. Las 4 puntas se llaman como los giros que las mueven: U
   tal como están en las hojas de `docs/source/`, cada uno con el dibujo de
   su caso. Donde la hoja se equivoca se usa el correcto y `source:
   "corregido"` lo dice, con el texto de la hoja en `docAlgorithm`.
+- `research.ts` — los algoritmos que no salen de las hojas sino de
+  investigación, cada uno con su fuente (`SOURCES`): L3E (las 3 aristas de
+  la cara de delante, 5 casos, Speedsolving Wiki), la arista que cierra el
+  bloque de detrás en Keyhole (7, guía de Andy Klise) y los casos básicos de
+  centros de Keyhole (calculados con el motor con U y Fw, el método de la
+  guía). En los métodos Top First el bloque es la capa de la punta de
+  detrás (B) y la última capa, la cara verde.
 - `diagrams.ts` — dibuja, con el estilo de las hojas, los casos que estas no
   traen, a partir del propio caso: el dibujo no puede contradecir al
   algoritmo.
@@ -44,4 +56,9 @@ cualquier forma de sujetarlo, validación y caras giradas), `scan.test.ts`
 (caras sintéticas con ruido y poca luz, 4 caras → editor) y
 `algorithms.test.ts` (cada algoritmo, más su ajuste final, resuelve el caso
 de su dibujo; el de la hoja corregido de verdad no lo resuelve; y los textos
-coinciden con los .docx de `docs/source/`).
+coinciden con los .docx de `docs/source/`). `moves.test.ts` comprueba también
+la notación ampliada (los 16 giros de siempre siguen igual) y
+`research.test.ts` cada algoritmo investigado, además de contar los casos
+con el motor: L3E 6 (uno resuelto) de 12 posiciones, la arista del hueco 7,
+y los centros de Keyhole 81 posiciones, 26 casos si el de arriba se deja
+para el final.
