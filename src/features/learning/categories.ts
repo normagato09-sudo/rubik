@@ -6,7 +6,9 @@ export type LearningCategoryId =
   | "pll"
   | "ortega-oll"
   | "ortega-pbl"
-  | "cll";
+  | "cll"
+  | "pyra-ultima-capa"
+  | "l4e";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -16,15 +18,29 @@ export interface LearningCategory {
 }
 
 /** The methods Aprender teaches — the active ones of features/trainer/methods.ts. */
-export type LearningMethodId = "cfop" | "ortega" | "cll";
+export type LearningMethodId = "cfop" | "ortega" | "cll" | "por-capas" | "l4e";
+
+/** The cubes Aprender teaches. */
+export type LearningCube = "3x3" | "2x2" | "pyraminx";
 
 export const DEFAULT_LEARNING_METHOD: LearningMethodId = "cfop";
 
 /** Which cube each method is for (matches features/trainer/methods.ts). */
-export const METHOD_CUBE: Record<LearningMethodId, "3x3" | "2x2"> = {
+export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   cfop: "3x3",
   ortega: "2x2",
   cll: "2x2",
+  "por-capas": "pyraminx",
+  l4e: "pyraminx",
+};
+
+/** How the Aprender screen names each method under its title. */
+export const METHOD_LABEL: Record<LearningMethodId, string> = {
+  cfop: "3×3 · CFOP",
+  ortega: "2×2 · Ortega",
+  cll: "2×2 · CLL",
+  "por-capas": "Pyraminx · Por capas",
+  l4e: "Pyraminx · L4E",
 };
 
 export function isLearningMethodId(id: string): id is LearningMethodId {
@@ -110,6 +126,42 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       id: "cll",
       title: "CLL",
       description: "Resuelve la última capa del 2×2 con un solo algoritmo",
+      accent: "#f472b6",
+    },
+  ],
+  "por-capas": [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Aprende los giros del Pyraminx para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas, centros y la primera capa del Pyraminx",
+    },
+    {
+      id: "pyra-ultima-capa",
+      title: "Última capa (Por capas)",
+      description: "Coloca las tres aristas de arriba",
+      accent: "#facc15",
+    },
+  ],
+  l4e: [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Aprende los giros del Pyraminx para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas y la V del Pyraminx",
+    },
+    {
+      id: "l4e",
+      title: "L4E",
+      description: "Resuelve las cuatro últimas aristas a la vez",
       accent: "#f472b6",
     },
   ],

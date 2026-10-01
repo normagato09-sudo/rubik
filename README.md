@@ -8,11 +8,16 @@ para el móvil.
   - 2×2 · Ortega (`?metodo=ortega`): notación 2×2, primera cara, OLL (7) y
     PBL (5).
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).
+  - Pyraminx · Por capas (`?metodo=por-capas`): notación del Pyraminx,
+    puntas, centros, primera capa y última capa (5).
+  - Pyraminx · L4E (`?metodo=l4e`): notación del Pyraminx, puntas, V y
+    L4E (30).
 
   Cada caso tiene su diagrama, su algoritmo y sus movimientos numerados. Los
-  del 2×2 traen además una explicación corta. Todo sale de `docs/source/`.
-- **Solucionador** (`/solucionador`) — para **3×3** y **2×2** (selector
-  arriba; se recuerda en el dispositivo). Los colores se introducen a mano o
+  del 2×2 y del Pyraminx traen además una explicación corta. Todo sale de
+  `docs/source/`.
+- **Solucionador** (`/solucionador`) — para **3×3**, **2×2** y **Pyraminx**
+  (selector arriba; se recuerda en el dispositivo). Los colores se introducen a mano o
   con la cámara / una foto por cara, con validación en vivo que marca las
   pegatinas imposibles. La solución se sigue paso a paso con un cubo 3D.
   - 3×3: algoritmo de dos fases de Kociemba.
@@ -21,6 +26,10 @@ para el móvil.
     Sin centros, la guía es la esquina amarilla-azul-naranja
     abajo-detrás-izquierda. Si el cubo se copia en otra posición, se deja
     quieta la esquina que haya ahí.
+  - Pyraminx: 36 pegatinas (4 caras triangulares de 9), a mano o con la
+    cámara (guía triangular). La solución más corta: como mucho 11 giros
+    grandes (U, L, R, B) más un giro por punta (u, l, r, b), con su propio
+    reproductor paso a paso y el Pyraminx en 3D.
 
 Todo el cálculo ocurre en el navegador (Web Worker); ninguna imagen sale del
 dispositivo. Cada solución se reproduce con el motor 3D de RUBIKO antes de
@@ -34,6 +43,9 @@ mostrarse.
   Worker y solver 3×3.
 - `src/features/solver2x2` — solver 2×2 (validación y búsqueda óptima) y
   los algoritmos de Ortega y CLL que enseña Aprender.
+- `src/features/pyraminx` — motor del Pyraminx (geometría, giros, piezas),
+  validación, lectura con cámara, búsqueda óptima, render 3D y los
+  algoritmos de Por capas y L4E que enseña Aprender.
 - `src/features/learning`, `src/features/trainer` — Aprender y Entrenar.
 - `docs/source/` — hojas de algoritmos de las que salen los datos.
 

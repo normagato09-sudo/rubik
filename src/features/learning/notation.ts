@@ -80,7 +80,32 @@ export const NOTATION_MOVES_2X2: NotationMove[] = [
   })),
 ];
 
-export function notationMovesFor(cube: "3x3" | "2x2"): NotationMove[] {
+/**
+ * The Pyraminx notation: the diagrams of `docs/source/Notacion Pyraminx.docx`
+ * — each big layer (U, L, R, B: the tip with its center and three edges)
+ * and each tip on its own (u, l, r, b). A third of a turn, clockwise looking
+ * at the tip. Ids start with "pyraminx-" so their progress is kept apart.
+ */
+export const NOTATION_MOVES_PYRAMINX: NotationMove[] = [
+  ...[
+    { move: "U", label: "Capa de arriba: la punta de arriba con su centro y sus 3 aristas" },
+    { move: "L", label: "Capa de la izquierda: la punta de la izquierda con su centro y sus 3 aristas" },
+    { move: "R", label: "Capa de la derecha: la punta de la derecha con su centro y sus 3 aristas" },
+    { move: "B", label: "Capa de detrás: la punta de detrás con su centro y sus 3 aristas" },
+  ].map(({ move, label }) => ({ move, label, file: move.toLowerCase() })),
+  ...[
+    { move: "u", label: "Solo la punta de arriba" },
+    { move: "l", label: "Solo la punta de la izquierda" },
+    { move: "r", label: "Solo la punta de la derecha" },
+    { move: "b", label: "Solo la punta de detrás" },
+  ].map(({ move, label }) => ({ move, label, file: `${move}-tip` })),
+].map(({ move, label, file }) => {
+  const id = `pyraminx-${file}`;
+  return { id, move, label, image: `/learning/notation-pyraminx/notation-${id}.png`, width: 340, height: 160 };
+});
+
+export function notationMovesFor(cube: "3x3" | "2x2" | "pyraminx"): NotationMove[] {
+  if (cube === "pyraminx") return NOTATION_MOVES_PYRAMINX;
   return cube === "2x2" ? NOTATION_MOVES_2X2 : NOTATION_MOVES;
 }
 
@@ -120,6 +145,10 @@ export function matchesNotationMove(notation: NotationMove, query: string): bool
   if (q.length === 0) return true;
   const letter = notation.move.toLowerCase();
   const tokens = q.split(/\s+/);
-  if (tokens.every((token) => token === letter || token === `${letter}'`)) return true;
+  if (tokens.every((token) => token === letter || token === `${letter}'`)) {
+    // On the Pyraminx "U" and "u" are different moves: an uppercase letter only finds the big one.
+    const typed = query.trim().split(/\s+/);
+    return typed.every((token) => token[0] === token[0].toLowerCase() || token[0] === notation.move);
+  }
   return q.length >= 3 && notation.label.toLowerCase().includes(q);
 }

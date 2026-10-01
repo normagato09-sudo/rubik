@@ -13,7 +13,6 @@ import {
   classifyFace2x2,
   createStabilityTracker,
   emptyCalibration,
-  guideSquare,
   isNewFace,
   looksLikeSticker,
   sampleFace,
@@ -25,16 +24,12 @@ import type { FaceName } from "../cubie";
 import { CENTER_COLORS, COLOR_NAMES, FACE_LABELS, neighborFace, type Facelets } from "../facelets";
 import { ACCENT, ColorPalette, FACE_ORDER, FaceFrame, HOLD_2X2, REFERENCE_MARK, StickerButton } from "./face-guide";
 import type { Puzzle } from "./puzzles";
+import { drawScaled, snapshotOf as snapshotSquare, useCamera } from "./use-camera";
 
-/** Frames are analysed at this size (short side, px): plenty for 9 samples, cheap on phones. */
-const ANALYSIS_SIZE = 180;
+const snapshotOf = (canvas: HTMLCanvasElement) => snapshotSquare(canvas, GUIDE_FRACTION);
+
 const ANALYSIS_EVERY_MS = 120;
 const HOLD_MS = 1000;
-
-type Camera =
-  | { status: "starting" }
-  | { status: "live" }
-  | { status: "off"; message: string };
 
 type Review = {
   stickers: (CubeColor | null)[];
@@ -45,38 +40,6 @@ type Review = {
   /** The guide square of the frame, as a data URL: stays on the device. */
   snapshot: string;
 };
-
-const cameraError = (error: unknown) => {
-  const name = error instanceof DOMException ? error.name : "";
-  if (name === "NotAllowedError" || name === "SecurityError")
-    return "No hay permiso para usar la cámara. Puedes darlo en los ajustes del navegador o hacer una foto de cada cara.";
-  if (name === "NotFoundError" || name === "OverconstrainedError")
-    return "No se ha encontrado ninguna cámara. Haz una foto de cada cara o elige una de la galería.";
-  if (name === "NotSupportedError")
-    return "Este navegador no deja usar la cámara aquí. Haz una foto de cada cara o elige una de la galería.";
-  if (name === "NotReadableError")
-    return "La cámara está siendo usada por otra aplicación. Ciérrala o haz una foto de cada cara.";
-  return "No se ha podido abrir la cámara. Haz una foto de cada cara o elige una de la galería.";
-};
-
-/** Draws `source` scaled so its short side is ANALYSIS_SIZE and returns the canvas. */
-function drawScaled(source: CanvasImageSource, width: number, height: number, canvas: HTMLCanvasElement) {
-  const scale = ANALYSIS_SIZE / Math.min(width, height);
-  canvas.width = Math.round(width * scale);
-  canvas.height = Math.round(height * scale);
-  const context = canvas.getContext("2d", { willReadFrequently: true })!;
-  context.drawImage(source, 0, 0, canvas.width, canvas.height);
-  return context.getImageData(0, 0, canvas.width, canvas.height);
-}
-
-/** The guide square of what is on `canvas`, as a small JPEG for the review. */
-function snapshotOf(canvas: HTMLCanvasElement) {
-  const square = guideSquare(canvas.width, canvas.height);
-  const out = document.createElement("canvas");
-  out.width = out.height = 120;
-  out.getContext("2d")!.drawImage(canvas, square.x, square.y, square.size, square.size, 0, 0, 120, 120);
-  return out.toDataURL("image/jpeg", 0.8);
-}
 
 /** The editor's stickers from the faces read so far (each read row by row, held as the hints say). */
 function faceletsFromScans(puzzle: Puzzle, scans: ScannedFaces): Facelets {
@@ -106,8 +69,6 @@ export function CameraScanner({ puzzle, onDone }: { puzzle: Puzzle; onDone: (fac
   const [calibration, setCalibration] = useState<Calibration>(emptyCalibration);
   const [review, setReview] = useState<Review | null>(null);
   const [brush, setBrush] = useState<CubeColor | null>("white");
-  const [camera, setCamera] = useState<Camera>({ status: "starting" });
-  const [visible, setVisible] = useState(true);
   /** What each cell reads right now; null where there is no sticker in view. */
   const [live, setLive] = useState<(CubeColor | null)[] | null>(null);
   const [progress, setProgress] = useState(0);
@@ -121,6 +82,7 @@ export function CameraScanner({ puzzle, onDone }: { puzzle: Puzzle; onDone: (fac
   const galleryRef = useRef<HTMLInputElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const tracker = useRef(createStabilityTracker(HOLD_MS));
+  const camera = useCamera(videoRef);
 
   const face = FACE_ORDER[index];
   const scanned = useMemo(() => FACE_ORDER.filter((name) => scans[name] !== undefined), [scans]);
@@ -131,53 +93,6 @@ export function CameraScanner({ puzzle, onDone }: { puzzle: Puzzle; onDone: (fac
     (samples: Rgb[]) => (size === 3 ? classifyFace(samples, face, calibration) : classifyFace2x2(samples, calibration)),
     [size, face, calibration],
   );
-
-  // The camera only runs while this mode is on screen and the page is visible.
-  useEffect(() => {
-    const onVisibility = () => {
-      const shown = document.visibilityState === "visible";
-      setVisible(shown);
-      if (shown) setCamera({ status: "starting" });
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, []);
-
-  useEffect(() => {
-    if (!visible) return;
-    const video = videoRef.current;
-    let stream: MediaStream | null = null;
-    let cancelled = false;
-    const open = async () => {
-      // Not over HTTPS, or an old browser: same way out as a denied permission.
-      if (!navigator.mediaDevices?.getUserMedia) throw new DOMException("", "NotSupportedError");
-      return navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-      });
-    };
-    open()
-      .then(async (media) => {
-        if (cancelled) {
-          media.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        stream = media;
-        if (video) {
-          video.srcObject = media;
-          await video.play().catch(() => {});
-        }
-        if (!cancelled) setCamera({ status: "live" });
-      })
-      .catch((error) => {
-        if (!cancelled) setCamera({ status: "off", message: cameraError(error) });
-      });
-    return () => {
-      cancelled = true;
-      stream?.getTracks().forEach((track) => track.stop());
-      if (video) video.srcObject = null;
-    };
-  }, [visible]);
 
   const openReview = useCallback(
     (samples: Rgb[], canvas: HTMLCanvasElement) => {

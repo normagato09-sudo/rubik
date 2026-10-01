@@ -6,6 +6,7 @@ import { CameraIcon, ChevronRightIcon, GridIcon } from "@/components/ui/icons";
 import type { Move } from "@/features/cube/moves";
 import { CUBE_COLOR_HEX } from "@/features/cube/palette";
 import type { CubeColor, CubeSize, CubeState } from "@/features/cube/types";
+import { emptyPyraFacelets, type PyraFacelets } from "@/features/pyraminx/facelets";
 import type { TurnedFace2, Validation2 } from "@/features/solver2x2/facelets";
 import { cubeStateForSolution2 } from "@/features/solver2x2/sticker-moves";
 import { FACE_NAMES, type FaceName } from "../cubie";
@@ -30,7 +31,17 @@ import {
   REFERENCE_MARK,
   StickerButton,
 } from "./face-guide";
-import { PUZZLES, PUZZLE_IDS, puzzleStore, savePuzzle, type Puzzle, type PuzzleId } from "./puzzles";
+import {
+  PUZZLES,
+  PUZZLE_IDS,
+  PUZZLE_LABELS,
+  puzzleStore,
+  savePuzzle,
+  type CubePuzzleId,
+  type Puzzle,
+  type PuzzleId,
+} from "./puzzles";
+import { PyraminxSolver } from "./PyraminxSolver";
 import { SolutionPlayer } from "./SolutionPlayer";
 
 /** Where each face sits in the 4×3 net: [column, row]. */
@@ -66,20 +77,24 @@ const withDetail = (puzzle: Puzzle, face: FaceName) =>
 
 export function SolverScreen() {
   const puzzleId = useSyncExternalStore(puzzleStore.subscribe, puzzleStore.getSnapshot, puzzleStore.getServerSnapshot);
-  const puzzle = PUZZLES[puzzleId];
+  const isPyraminx = puzzleId === "pyraminx";
+  // The Pyraminx has its own editor (PyraminxSolver); the cube one keeps the 3×3 meanwhile.
+  const cubeId: CubePuzzleId = isPyraminx ? "3x3" : puzzleId;
+  const puzzle = PUZZLES[cubeId];
   const [mode, setMode] = useState<Mode>("choose");
   const [fromCamera, setFromCamera] = useState(false);
   // Each cube keeps its own stickers: switching back and forth loses nothing.
-  const [stickers, setStickers] = useState<Record<PuzzleId, Facelets>>(() => ({
+  const [stickers, setStickers] = useState<Record<CubePuzzleId, Facelets>>(() => ({
     "3x3": PUZZLES["3x3"].empty(),
     "2x2": PUZZLES["2x2"].empty(),
   }));
-  const facelets = stickers[puzzleId];
+  const facelets = stickers[cubeId];
+  const [pyraFacelets, setPyraFacelets] = useState<PyraFacelets>(emptyPyraFacelets);
   const [face, setFace] = useState<FaceName>("U");
   const [brush, setBrush] = useState<CubeColor | null>("white");
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [confirmReset, setConfirmReset] = useState(false);
-  const { ready, ready2x2, solve, solve2x2, warmup2x2 } = useSolver();
+  const { ready, ready2x2, readyPyraminx, solve, solve2x2, solvePyraminx, warmup2x2, warmupPyraminx } = useSolver();
   // Bumped on every edit: a solution that arrives for older stickers is dropped.
   const run = useRef(0);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -92,10 +107,11 @@ export function SolverScreen() {
     validation.kind === "valid" ? [] : validation.issues.flatMap((issue) => issue.stickers),
   );
 
-  // The 2×2 tables are only built once the 2×2 is on screen.
+  // The 2×2 and Pyraminx tables are only built once that puzzle is on screen.
   useEffect(() => {
     if (puzzleId === "2x2") warmup2x2();
-  }, [puzzleId, warmup2x2]);
+    if (puzzleId === "pyraminx") warmupPyraminx();
+  }, [puzzleId, warmup2x2, warmupPyraminx]);
 
   useEffect(() => {
     if (result.kind !== "idle" && result.kind !== "solving") {
@@ -105,7 +121,7 @@ export function SolverScreen() {
 
   const edit = (next: Facelets) => {
     run.current++;
-    setStickers((current) => ({ ...current, [puzzleId]: next }));
+    setStickers((current) => ({ ...current, [cubeId]: next }));
     setResult({ kind: "idle" });
     setConfirmReset(false);
   };
@@ -128,6 +144,13 @@ export function SolverScreen() {
     setConfirmReset(false);
     // The camera reads one cube; switching mid-scan starts that cube over.
     if (mode === "camera") setMode("choose");
+  };
+
+  /** The camera read the four faces of the Pyraminx: its editor takes over. */
+  const scannedPyraminx = (next: PyraFacelets) => {
+    setPyraFacelets(next);
+    setFromCamera(true);
+    changeMode("manual");
   };
 
   /** The camera read all six faces: the editor and its validation take over. */
@@ -237,18 +260,19 @@ export function SolverScreen() {
         </Link>
         <div className="flex flex-col gap-1">
           <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: ACCENT }}>
-            {puzzle.label}
+            {PUZZLE_LABELS[puzzleId]}
           </p>
           <h1 className="text-3xl font-bold tracking-tight">Solucionador</h1>
           <p className="text-sm text-navy-muted">
-            Introduce los colores de tu cubo, a mano o con la cámara, y obtén los movimientos para resolverlo.
+            Introduce los colores de tu {isPyraminx ? "Pyraminx" : "cubo"}, a mano o con la cámara, y obtén los movimientos
+            para resolverlo.
           </p>
         </div>
         <PuzzlePicker selected={puzzleId} onPick={changePuzzle} />
       </div>
 
       {mode === "choose" ? (
-        <ModePicker headingRef={modeHeading} onPick={changeMode} total={puzzle.total} />
+        <ModePicker headingRef={modeHeading} onPick={changeMode} total={isPyraminx ? 36 : puzzle.total} />
       ) : (
         <div className="flex items-center justify-between gap-3">
           <h2 ref={modeHeading} tabIndex={-1} className="text-sm font-semibold outline-none">
@@ -264,9 +288,21 @@ export function SolverScreen() {
         </div>
       )}
 
-      {mode === "camera" && <CameraScanner key={puzzleId} puzzle={puzzle} onDone={scanned} />}
+      {isPyraminx && mode !== "choose" && (
+        <PyraminxSolver
+          mode={mode}
+          facelets={pyraFacelets}
+          onChange={setPyraFacelets}
+          fromCamera={fromCamera}
+          onScanned={scannedPyraminx}
+          solve={solvePyraminx}
+          ready={readyPyraminx}
+        />
+      )}
 
-      {mode === "manual" && (
+      {mode === "camera" && !isPyraminx && <CameraScanner key={puzzleId} puzzle={puzzle} onDone={scanned} />}
+
+      {mode === "manual" && !isPyraminx && (
         <>
       {fromCamera && (
         <p
@@ -475,10 +511,10 @@ export function SolverScreen() {
   );
 }
 
-/** 3×3 or 2×2: two big buttons, easy to hit at 360 px. */
+/** 3×3, 2×2 or Pyraminx: big buttons, easy to hit at 360 px. */
 function PuzzlePicker({ selected, onPick }: { selected: PuzzleId; onPick: (id: PuzzleId) => void }) {
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-2xl bg-navy-2 p-1" role="radiogroup" aria-label="Cubo">
+    <div className="grid grid-cols-3 gap-1 rounded-2xl bg-navy-2 p-1" role="radiogroup" aria-label="Cubo">
       {PUZZLE_IDS.map((id) => {
         const active = id === selected;
         return (
@@ -495,7 +531,7 @@ function PuzzlePicker({ selected, onPick }: { selected: PuzzleId; onPick: (id: P
                 : { color: "var(--navy-muted)" }
             }
           >
-            {PUZZLES[id].label}
+            {PUZZLE_LABELS[id]}
           </button>
         );
       })}

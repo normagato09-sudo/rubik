@@ -6,6 +6,15 @@ import {
   PRIMERA_CAPA_CASES,
   PRIMERA_CARA_CASES,
 } from "./cases-2x2";
+import {
+  L4E_LEARN_CASES,
+  L4E_PUNTAS_CASES,
+  L4E_V_CASES,
+  PYRA_CENTROS_CASES,
+  PYRA_PRIMERA_CAPA_CASES,
+  PYRA_PUNTAS_CASES,
+  PYRA_ULTIMA_CAPA_CASES,
+} from "./cases-pyraminx";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
 import { ESQUINAS_CASES } from "./esquinas-cases";
@@ -25,7 +34,17 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   "ortega-oll": ORTEGA_OLL_CASES,
   "ortega-pbl": ORTEGA_PBL_CASES,
   cll: CLL_LEARN_CASES,
+  "pyra-puntas": PYRA_PUNTAS_CASES,
+  "pyra-centros": PYRA_CENTROS_CASES,
+  "pyra-primera-capa": PYRA_PRIMERA_CAPA_CASES,
+  "pyra-ultima-capa": PYRA_ULTIMA_CAPA_CASES,
+  "l4e-puntas": L4E_PUNTAS_CASES,
+  "l4e-v": L4E_V_CASES,
+  l4e: L4E_LEARN_CASES,
 };
+
+const PUNTAS_INTRO =
+  "Las puntas son las cuatro piezas pequeñas de los vértices y giran solas, sin mover nada más (u, l, r y b). Gira cada una hasta que sus tres colores coincidan con los del centro que tiene debajo. Como los giros grandes se las llevan con su centro, una vez puestas ya no se estropean: por eso se hacen al principio.";
 
 export interface LearningStep {
   setId: AlgorithmSetId;
@@ -60,6 +79,30 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
         "Haz la capa de abajo completa; aquí, la blanca. Tiene que tener las cuatro esquinas con el blanco abajo y, además, con sus otros colores coincidiendo en cada lado. Así la CLL puede resolver toda la capa de arriba de una vez. Coloca las esquinas de una en una: gira U hasta dejar la esquina encima de su hueco, delante a la derecha, y usa el caso según hacia dónde mire su pegatina blanca.",
     },
   ],
+  "por-capas": [
+    { setId: "pyra-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "pyra-centros",
+      title: "Centros",
+      intro:
+        "Cada centro es la pieza de tres colores que hay bajo cada punta, y gira con su capa grande (U, L, R o B). Elige el color de abajo, aquí el amarillo, y gira L, R y B hasta que los tres centros de abajo tengan el amarillo abajo. Así cada cara de los lados queda con su color en los centros.",
+    },
+    {
+      setId: "pyra-primera-capa",
+      title: "Primera capa",
+      intro:
+        "Coloca las tres aristas de abajo: con el amarillo abajo y el otro color igual que los centros de su lado. Las dos primeras se ponen con intuición. Para la última, sujeta el Pyraminx con su hueco delante y abajo, busca su arista en la capa de arriba y usa el caso que toque según dónde esté y hacia dónde mire el amarillo.",
+    },
+  ],
+  l4e: [
+    { setId: "l4e-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "l4e-v",
+      title: "V",
+      intro:
+        "La V son los tres centros de abajo con las dos aristas de abajo de detrás (la de la izquierda y la de la derecha): vistas desde abajo forman una V. Pon los centros con el amarillo abajo, luego la primera arista con intuición y la segunda con uno de estos casos, con la V detrás. La arista de abajo delante se deja libre: la coloca L4E junto con las tres de arriba.",
+    },
+  ],
 };
 
 /** The 3×3 (CFOP) learning steps. */
@@ -77,6 +120,13 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "ortega-oll": "ortega",
   "ortega-pbl": "ortega",
   cll: "cll",
+  "pyra-puntas": "por-capas",
+  "pyra-centros": "por-capas",
+  "pyra-primera-capa": "por-capas",
+  "pyra-ultima-capa": "por-capas",
+  "l4e-puntas": "l4e",
+  "l4e-v": "l4e",
+  l4e: "l4e",
 };
 
 export interface SetInfo {

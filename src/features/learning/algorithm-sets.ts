@@ -11,7 +11,15 @@ export type AlgorithmSetId =
   | "primera-capa"
   | "ortega-oll"
   | "ortega-pbl"
-  | "cll";
+  | "cll"
+  // Pyraminx (cases-pyraminx.ts)
+  | "pyra-puntas"
+  | "pyra-centros"
+  | "pyra-primera-capa"
+  | "pyra-ultima-capa"
+  | "l4e-puntas"
+  | "l4e-v"
+  | "l4e";
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -24,7 +32,7 @@ export interface AlgorithmCase {
   algorithm: string;
   /** Static diagram taken from the same row/cell of the source. */
   image: string;
-  /** Short explanation in Spanish of how to recognize the case (2×2 sets). */
+  /** Short explanation in Spanish of how to recognize the case (2×2 and Pyraminx sets). */
   explanation?: string;
   /** Where the algorithm or diagram does not come from the source, why. */
   note?: string;
@@ -42,6 +50,13 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "ortega-oll": { width: 200, height: 200 },
   "ortega-pbl": { width: 200, height: 200 },
   cll: { width: 200, height: 200 },
+  "pyra-puntas": { width: 200, height: 200 },
+  "pyra-centros": { width: 200, height: 200 },
+  "pyra-primera-capa": { width: 200, height: 200 },
+  "pyra-ultima-capa": { width: 200, height: 200 },
+  "l4e-puntas": { width: 200, height: 200 },
+  "l4e-v": { width: 200, height: 200 },
+  l4e: { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -94,7 +109,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

@@ -8,6 +8,7 @@ import {
   DEFAULT_LEARNING_METHOD,
   METHOD_CATEGORIES,
   METHOD_CUBE,
+  METHOD_LABEL,
   getCategory,
   type LearningCategoryId,
   type LearningMethodId,
@@ -59,7 +60,7 @@ export function LearnScreen({
     if (id === "notation") {
       const accent = getCategory("notation", method).accent;
       const moves = notationMovesFor(cube).filter((notation) => matchesNotationMove(notation, filter));
-      // A 2×2 has no middle layers, so no wide moves either.
+      // A 2×2 or a Pyraminx has no middle layers, so no wide moves either.
       const wideMoves =
         cube === "3x3" ? WIDE_MOVES.filter((wide) => matchesWideMove(wide, filter)) : [];
       return {
@@ -144,11 +145,7 @@ export function LearnScreen({
           Inicio
         </Link>
         <h1 className="text-3xl font-bold tracking-tight">Aprender a resolver</h1>
-        {cube === "2x2" && (
-          <p className="text-sm text-navy-muted">
-            2×2 · {method === "ortega" ? "Ortega" : "CLL"}
-          </p>
-        )}
+        {cube !== "3x3" && <p className="text-sm text-navy-muted">{METHOD_LABEL[method]}</p>}
       </div>
 
       <label className="relative block">

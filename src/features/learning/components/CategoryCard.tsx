@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronDownIcon } from "@/components/ui/icons";
-import type { LearningCategory } from "../categories";
+import type { LearningCategory, LearningCube } from "../categories";
 import { CategoryIcon } from "./CategoryIcon";
 import { ProgressBar } from "./ProgressBar";
 
@@ -16,7 +16,7 @@ export function CategoryCard({
 }: {
   category: LearningCategory;
   /** Which cube the block's icon draws. */
-  cube?: "3x3" | "2x2";
+  cube?: LearningCube;
   total: number;
   /** `null` while saved progress is still loading — never show a false count. */
   learned: number | null;

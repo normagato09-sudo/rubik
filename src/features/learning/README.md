@@ -9,6 +9,9 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   - CFOP (3×3): Notación, Pasos de aprendizaje, F2L, OLL y PLL.
   - Ortega (2×2): Notación 2×2, Pasos (Primera cara), OLL y PBL.
   - CLL (2×2): Notación 2×2, Pasos (Primera capa) y CLL.
+  - Por capas (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Centros,
+    Primera capa) y Última capa.
+  - L4E (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V) y L4E.
 
   Cada bloque tiene contenido real de `docs/source` y muestra su progreso
   X/Y. Un método nuevo solo se añade cuando tiene su fuente. `learnHref()`
@@ -72,6 +75,21 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   - x e y usan los diagramas del 3×3, porque dos casos de CLL los usan.
   - Sin capas del medio ni minúsculas.
   - Ids `notation-2x2-*`: el progreso va aparte del 3×3.
+- `cases-pyraminx.ts` — los casos del Pyraminx, con una explicación corta
+  sacada de las pegatinas de cada caso:
+  - Última capa de Por capas (5) y L4E (30): los algoritmos de
+    `features/pyraminx/algorithms.ts`, es decir, los de
+    `docs/source/Pyraminx Por capas - ultima capa.docx` y
+    `Pyraminx L4E - ultimas 4 aristas.docx`, con la fila 5 de Por capas
+    corregida (la ficha lo dice en `note`, citando la hoja). Sus diagramas
+    son los de las hojas, en `public/learning/<pyra-ultima-capa|l4e>/`.
+  - Pasos que las hojas no traen (Puntas, Centros, Primera capa, V): casos
+    básicos añadidos a propósito, dibujados a partir del propio caso por
+    `features/pyraminx/diagrams.ts` con el estilo de las hojas.
+  - Los tests comprueban cada algoritmo con el motor del Pyraminx contra su
+    diagrama.
+- `notation.ts` (Pyraminx) — `NOTATION_MOVES_PYRAMINX`: los diagramas de
+  `docs/source/Notacion Pyraminx.docx`, en `public/learning/notation-pyraminx/`.
 - `algorithm.ts` — `splitAlgorithm()`: un paso por movimiento, tal cual. Un
   `'` suelto (`U2 '`) se une al movimiento anterior.
 - `progress-store.ts` — lo aprendido (Zustand + localStorage, clave
@@ -81,9 +99,11 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=ortega|cll` muestra el 2×2 y
-  `?abierto=<categoría>` deja ese bloque abierto.
+- `/entrenar` — pantalla Aprender. `?metodo=ortega|cll` muestra el 2×2,
+  `?metodo=por-capas|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
+  bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
   `esquinas`, `f2l`, `oll`, `pll`, `primera-cara`, `primera-capa`,
-  `ortega-oll`, `ortega-pbl` y `cll`.
+  `ortega-oll`, `ortega-pbl`, `cll`, `pyra-puntas`, `pyra-centros`,
+  `pyra-primera-capa`, `pyra-ultima-capa`, `l4e-puntas`, `l4e-v` y `l4e`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

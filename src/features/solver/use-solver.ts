@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CubeColor } from "@/features/cube/types";
+import type { PyraColor } from "@/features/pyraminx/moves";
 import type { CubieCube } from "./cubie";
 import type { SolverRequest, SolverResponse } from "./solver-requests";
 
@@ -13,12 +14,14 @@ type Pending = { resolve: (moves: string[]) => void; reject: (error: Error) => v
 /** A solve request before it gets its id. */
 type Request =
   | { type: "solve"; cube: CubieCube }
-  | { type: "solve2x2"; facelets: CubeColor[] };
+  | { type: "solve2x2"; facelets: CubeColor[] }
+  | { type: "solvePyraminx"; facelets: PyraColor[] };
 
 /**
  * Owns the solver Web Worker for one screen: starts building its tables as
  * soon as the screen opens, so the first "Resolver" is already fast (the
- * 2×2 tables only once the 2×2 is chosen: `warmup2x2`).
+ * 2×2 and Pyraminx tables only once that puzzle is chosen: `warmup2x2`,
+ * `warmupPyraminx`).
  *
  * Every request ends — with moves or an error — even if the worker fails
  * to load, crashes or hangs: a broken worker is thrown away (the next
@@ -32,6 +35,8 @@ export function useSolver() {
   const [ready, setReady] = useState(false);
   const [ready2x2, setReady2x2] = useState(false);
   const wants2x2 = useRef(false);
+  const [readyPyraminx, setReadyPyraminx] = useState(false);
+  const wantsPyraminx = useRef(false);
 
   const failAll = useCallback((message: string) => {
     for (const { reject } of pending.current.values()) reject(new Error(message));
@@ -43,6 +48,7 @@ export function useSolver() {
     workerRef.current = null;
     setReady(false);
     setReady2x2(false);
+    setReadyPyraminx(false);
   }, []);
 
   const startWorker = useCallback((): Worker | null => {
@@ -64,6 +70,10 @@ export function useSolver() {
         setReady2x2(true);
         return;
       }
+      if (response.type === "readyPyraminx") {
+        setReadyPyraminx(true);
+        return;
+      }
       const request = pending.current.get(response.id);
       pending.current.delete(response.id);
       if (response.type === "solved") request?.resolve(response.moves);
@@ -78,6 +88,7 @@ export function useSolver() {
     worker.onmessageerror = crash;
     worker.postMessage({ type: "warmup" } satisfies SolverRequest);
     if (wants2x2.current) worker.postMessage({ type: "warmup2x2" } satisfies SolverRequest);
+    if (wantsPyraminx.current) worker.postMessage({ type: "warmupPyraminx" } satisfies SolverRequest);
     workerRef.current = worker;
     return worker;
   }, [dropWorker, failAll]);
@@ -141,5 +152,17 @@ export function useSolver() {
     startWorker()?.postMessage({ type: "warmup2x2" } satisfies SolverRequest);
   }, [startWorker]);
 
-  return { ready, ready2x2, solve, solve2x2, warmup2x2 };
+  const solvePyraminx = useCallback(
+    (facelets: PyraColor[]) => request({ type: "solvePyraminx", facelets }),
+    [request],
+  );
+
+  /** Starts building the Pyraminx table (under a second) as soon as the Pyraminx is chosen. */
+  const warmupPyraminx = useCallback(() => {
+    if (wantsPyraminx.current) return;
+    wantsPyraminx.current = true;
+    startWorker()?.postMessage({ type: "warmupPyraminx" } satisfies SolverRequest);
+  }, [startWorker]);
+
+  return { ready, ready2x2, readyPyraminx, solve, solve2x2, solvePyraminx, warmup2x2, warmupPyraminx };
 }

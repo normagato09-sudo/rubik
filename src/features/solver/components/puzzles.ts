@@ -25,12 +25,16 @@ import { FACE_HINTS, FACE_HINTS_2X2 } from "./face-guide";
 /**
  * What the solver screen needs to know about each cube it takes: how many
  * stickers, which are fixed, how they are checked and how to hold it. The
- * editor and the camera are written once against this.
+ * editor and the camera are written once against this. The Pyraminx, with
+ * triangular faces, has its own editor and camera (PyraminxSolver.tsx).
  */
-export type PuzzleId = "3x3" | "2x2";
+export type PuzzleId = "3x3" | "2x2" | "pyraminx";
+
+/** The puzzles with square faces, which share the cube editor. */
+export type CubePuzzleId = Exclude<PuzzleId, "pyraminx">;
 
 export interface Puzzle {
-  id: PuzzleId;
+  id: CubePuzzleId;
   label: string;
   size: CubeSize;
   /** Stickers per face (9 or 4), and of each color. */
@@ -50,7 +54,7 @@ export interface Puzzle {
 
 const FACES: FaceName[] = ["U", "R", "F", "D", "L", "B"];
 
-export const PUZZLES: Record<PuzzleId, Puzzle> = {
+export const PUZZLES: Record<CubePuzzleId, Puzzle> = {
   "3x3": {
     id: "3x3",
     label: "3×3",
@@ -83,7 +87,9 @@ export const PUZZLES: Record<PuzzleId, Puzzle> = {
   },
 };
 
-export const PUZZLE_IDS: PuzzleId[] = ["3x3", "2x2"];
+export const PUZZLE_IDS: PuzzleId[] = ["3x3", "2x2", "pyraminx"];
+
+export const PUZZLE_LABELS: Record<PuzzleId, string> = { "3x3": "3×3", "2x2": "2×2", pyraminx: "Pyraminx" };
 
 const STORAGE_KEY = "rubiko.solucionador.cubo";
 
@@ -91,7 +97,7 @@ const STORAGE_KEY = "rubiko.solucionador.cubo";
 export function loadPuzzle(): PuzzleId {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved === "2x2" ? "2x2" : "3x3";
+    return saved === "2x2" || saved === "pyraminx" ? saved : "3x3";
   } catch {
     return "3x3";
   }

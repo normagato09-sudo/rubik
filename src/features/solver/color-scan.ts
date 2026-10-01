@@ -124,9 +124,14 @@ export function looksLikeSticker(rgb: Rgb): boolean {
  * separates them, halfway between this cube's own references: the hue for
  * red/orange, the amount of yellow (b*) for white/yellow.
  */
-export function classifyColor(rgb: Rgb, calibration: Calibration = emptyCalibration()): Classified {
+export function classifyColor(
+  rgb: Rgb,
+  calibration: Calibration = emptyCalibration(),
+  /** The colors the puzzle has (a Pyraminx only has 4). */
+  palette: readonly CubeColor[] = COLORS,
+): Classified {
   const lab = rgbToLab(rgb);
-  const ranked = COLORS.map((color) => ({ color, ...nearest(lab, references(calibration, color)) })).sort(
+  const ranked = palette.map((color) => ({ color, ...nearest(lab, references(calibration, color)) })).sort(
     (p, q) => p.d - q.d,
   );
   const [first, second] = ranked;
@@ -183,7 +188,7 @@ export function classifyFace2x2(samples: readonly Rgb[], calibration: Calibratio
  * Whether the 2×2 face in view can be a new one: not the face just
  * confirmed, still in front of the camera (the 3×3 checks its center).
  */
-export function isNewFace(colors: readonly CubeColor[], previous: readonly (CubeColor | null)[] | undefined): boolean {
+export function isNewFace(colors: readonly (CubeColor | null)[], previous: readonly (CubeColor | null)[] | undefined): boolean {
   return !previous || colors.some((color, i) => color !== previous[i]);
 }
 

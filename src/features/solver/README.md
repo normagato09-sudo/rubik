@@ -1,12 +1,14 @@
 # solver
 
-Solucionador 3×3 y 2×2 (`/solucionador`). Un selector "3×3 / 2×2" arriba
-elige el cubo; la elección se recuerda en el dispositivo (localStorage, con
-try/catch: sin almacenamiento dura hasta cerrar la página), y cada cubo
-guarda sus propias pegatinas al cambiar. El 2×2 vive en `features/solver2x2`;
-esta carpeta tiene la pantalla, la cámara, el reproductor y el Worker que
-comparten los dos (`components/puzzles.ts` describe cada cubo: pegatinas por
-cara, centros fijos, validación, indicaciones).
+Solucionador 3×3, 2×2 y Pyraminx (`/solucionador`). Un selector
+"3×3 / 2×2 / Pyraminx" arriba elige el cubo; la elección se recuerda en el
+dispositivo (localStorage, con try/catch: sin almacenamiento dura hasta
+cerrar la página), y cada cubo guarda sus propias pegatinas al cambiar. El
+2×2 vive en `features/solver2x2` y el Pyraminx en `features/pyraminx`; esta
+carpeta tiene la pantalla, la cámara, los reproductores y el Worker que
+comparten (`components/puzzles.ts` describe los cubos de caras cuadradas:
+pegatinas por cara, centros fijos, validación, indicaciones; el Pyraminx,
+de caras triangulares, tiene su propio editor y cámara).
 
 En el 3×3 el usuario introduce las 54 pegatinas de su cubo (blanco arriba,
 verde delante) y recibe los movimientos para
@@ -82,6 +84,28 @@ cara dice qué cara toca cada lado, y la cámara usa una cuadrícula 2×2 y se
 calibra con las caras ya confirmadas (las dudosas llevan "?"). Antes de
 resolver se elige Óptima, Ortega o CLL; el reproductor agrupa los movimientos
 por pasos con su explicación y enseña el cubo 3D en 2×2.
+
+En el Pyraminx (36 pegatinas: 4 caras triangulares de 9, sin posición fija:
+los centros dicen el color de cada cara) la pantalla cede el sitio a sus
+propios componentes, con el mismo "Manual / Cámara / foto":
+- `components/PyraminxSolver.tsx` — editor cara a cara (F, R, L, D; la de
+  abajo dibujada al revés, como se ve), paleta de 4 colores con recuento
+  x/9, validación en vivo (`features/pyraminx/facelets.ts`, que también
+  detecta una cara copiada girada y ofrece girarla) y "Resolver". Las
+  pegatinas viven en `SolverScreen`, así que cambiar de cubo no las pierde.
+- `components/PyraminxCamera.tsx` — la cámara con una guía triangular
+  (`features/pyraminx/scan.ts`); sin pegatina fija con la que calibrar, se
+  compara con las caras ya confirmadas y las dudosas llevan "?".
+  `components/use-camera.ts` es la cámara/foto que comparte con
+  `CameraScanner.tsx`.
+- `components/pyraminx-face.tsx` — cómo sujetarlo para cada cara y el
+  dibujo de una cara, compartidos por el editor y la cámara.
+- `components/PyraminxSolutionPlayer.tsx` — la solución óptima
+  (`features/pyraminx/search.ts`: ≤ 11 giros grandes + puntas) con cada
+  movimiento explicado y el Pyraminx 3D paso a paso.
+
+El Worker resuelve también el Pyraminx (`warmupPyraminx` /
+`solvePyraminx`); su tabla solo se construye al elegir el Pyraminx.
 
 Tests: `solver.test.ts` (movimientos, coordenadas, validación, solver y
 Worker), `cube-state.test.ts` (recorrido completo: estado 3D → pegatinas →

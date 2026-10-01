@@ -15,7 +15,7 @@ describe("useTrainerPreferences", () => {
   });
 
   it("setCube is a no-op for a cube that is not active yet", () => {
-    useTrainerPreferences.getState().setCube("pyraminx");
+    useTrainerPreferences.getState().setCube("skewb");
     expect(useTrainerPreferences.getState().cubeId).toBe("3x3");
   });
 
@@ -29,6 +29,13 @@ describe("useTrainerPreferences", () => {
     expect(useTrainerPreferences.getState().methodId).toBe("cll");
     useTrainerPreferences.getState().setCube("3x3");
     expect(useTrainerPreferences.getState()).toMatchObject({ cubeId: "3x3", methodId: "cfop" });
+  });
+
+  it("choosing the Pyraminx cascades the method to Por capas", () => {
+    useTrainerPreferences.getState().setCube("pyraminx");
+    expect(useTrainerPreferences.getState()).toMatchObject({ cubeId: "pyraminx", methodId: "por-capas" });
+    useTrainerPreferences.getState().setMethod("l4e");
+    expect(useTrainerPreferences.getState().methodId).toBe("l4e");
   });
 
   it("setMethod is a no-op for a method that is not active yet", () => {

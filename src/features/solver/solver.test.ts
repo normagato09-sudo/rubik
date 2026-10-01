@@ -17,6 +17,13 @@ import {
 } from "./facelets";
 import { handleSolverRequest } from "./solver-requests";
 import type { Move } from "@/features/cube/moves";
+import {
+  applyPyraMoves,
+  isSolvedPyraminx,
+  parsePyraAlgorithm,
+  solvedPyraminx,
+  type PyraMove,
+} from "@/features/pyraminx/moves";
 import { isSolved2 } from "@/features/solver2x2/facelets";
 import { applyMoves2, solvedFacelets2 } from "@/features/solver2x2/sticker-moves";
 import { __coordinates as c, initTables, solve } from "./twophase";
@@ -374,6 +381,31 @@ describe("solver worker requests · 2×2", () => {
     expect(handleSolverRequest({ type: "solve2x2", id: 5, facelets: twisted })).toMatchObject({
       type: "error",
       id: 5,
+    });
+  });
+});
+
+describe("solver worker requests · Pyraminx", () => {
+  const scrambled = applyPyraMoves(solvedPyraminx(), parsePyraAlgorithm("R U' L B R' U l r'"));
+
+  it("warms up the Pyraminx table", () => {
+    expect(handleSolverRequest({ type: "warmupPyraminx" })).toEqual({ type: "readyPyraminx" });
+  });
+
+  it("answers with moves that solve it", () => {
+    const response = handleSolverRequest({ type: "solvePyraminx", id: 3, facelets: scrambled });
+    expect(response).toMatchObject({ type: "solved", id: 3 });
+    const moves = response?.type === "solved" ? response.moves : [];
+    expect(moves.length).toBeLessThanOrEqual(15);
+    expect(isSolvedPyraminx(applyPyraMoves(scrambled, moves as PyraMove[]))).toBe(true);
+  });
+
+  it("answers with an error (never throws) for an impossible Pyraminx", () => {
+    const swapped = [...scrambled];
+    [swapped[1], swapped[12]] = [scrambled[12], scrambled[1]];
+    expect(handleSolverRequest({ type: "solvePyraminx", id: 6, facelets: swapped })).toMatchObject({
+      type: "error",
+      id: 6,
     });
   });
 });

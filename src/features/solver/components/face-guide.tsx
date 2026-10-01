@@ -99,21 +99,30 @@ export function FaceFrame({ face, size = 3, children }: { face: FaceName; size?:
 
 export const PALETTE_COLORS: CubeColor[] = ["white", "yellow", "green", "blue", "red", "orange"];
 
-/** The brush: the six colors with how many of each are painted (of 9, or 4 on a 2×2), plus the eraser. */
-export function ColorPalette({
+/**
+ * The brush: the colors with how many of each are painted (of 9, or 4 on a
+ * 2×2), plus the eraser. A Pyraminx passes its own 4 colors.
+ */
+export function ColorPalette<C extends CubeColor>({
   brush,
   onBrush,
   counts,
   perColor = 9,
+  colors = PALETTE_COLORS as C[],
 }: {
-  brush: CubeColor | null;
-  onBrush: (color: CubeColor | null) => void;
-  counts: Record<CubeColor, number>;
+  brush: C | null;
+  onBrush: (color: C | null) => void;
+  counts: Record<C, number>;
   perColor?: 4 | 9;
+  colors?: readonly C[];
 }) {
   return (
-    <div className="grid grid-cols-7 gap-1.5" role="radiogroup" aria-label="Color para pintar">
-      {PALETTE_COLORS.map((color) => (
+    <div
+      className={`grid ${colors.length === 4 ? "mx-auto w-full max-w-xs grid-cols-5" : "grid-cols-7"} gap-1.5`}
+      role="radiogroup"
+      aria-label="Color para pintar"
+    >
+      {colors.map((color) => (
         <button
           key={color}
           type="button"

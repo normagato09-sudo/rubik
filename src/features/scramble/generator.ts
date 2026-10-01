@@ -6,6 +6,7 @@
  */
 import { ALL_MOVES, getFaceDef } from "@/features/cube/moves";
 import type { Face, Move } from "@/features/cube/moves";
+import type { PyraMove } from "@/features/pyraminx/moves";
 
 export const DEFAULT_SCRAMBLE_LENGTH = 20;
 
@@ -52,6 +53,30 @@ export function generate2x2Scramble(
     const candidate = MOVES_2X2[randomIndex(MOVES_2X2.length)];
     if (candidate[0] === scramble.at(-1)?.[0]) continue;
     scramble.push(candidate);
+  }
+  return scramble;
+}
+
+/** Pyraminx scrambles: this many big turns (U, L, R, B), then the tips. */
+export const PYRAMINX_SCRAMBLE_LENGTH = 11;
+
+const PYRAMINX_BIG: PyraMove[] = ["U", "U'", "L", "L'", "R", "R'", "B", "B'"];
+
+/**
+ * A Pyraminx scramble in the usual format: 11 big turns, never the same
+ * tip twice in a row (U U' would undo itself, U U is just U'), then each
+ * tip turned or not at random, in the order u, l, r, b.
+ */
+export function generatePyraminxScramble(length: number = PYRAMINX_SCRAMBLE_LENGTH): PyraMove[] {
+  const scramble: PyraMove[] = [];
+  while (scramble.length < length) {
+    const candidate = PYRAMINX_BIG[randomIndex(PYRAMINX_BIG.length)];
+    if (candidate[0] === scramble.at(-1)?.[0]) continue;
+    scramble.push(candidate);
+  }
+  for (const tip of ["u", "l", "r", "b"]) {
+    const turn = randomIndex(3);
+    if (turn > 0) scramble.push((turn === 1 ? tip : `${tip}'`) as PyraMove);
   }
   return scramble;
 }

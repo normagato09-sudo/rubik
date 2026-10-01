@@ -8,7 +8,7 @@ describe("getMethodsForCubeType", () => {
   });
 
   it("returns an empty list for a cube type with no methods yet", () => {
-    expect(getMethodsForCubeType("pyraminx")).toEqual([]);
+    expect(getMethodsForCubeType("skewb")).toEqual([]);
   });
 });
 
@@ -20,5 +20,9 @@ describe("getSelectableMethodsForCubeType", () => {
 
   it("lists Ortega and CLL for 2x2, never CFOP", () => {
     expect(getSelectableMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll"]);
+  });
+
+  it("lists Por capas and L4E for the Pyraminx", () => {
+    expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual(["por-capas", "l4e"]);
   });
 });
