@@ -29,16 +29,16 @@ const all = Object.values(SETS_PYRAMINX_RESEARCH).flat();
 const algorithms = (setId: ResearchSetId) => SETS_PYRAMINX_RESEARCH[setId].map((kase) => kase.algorithm);
 
 describe("Pyraminx methods taught from research", () => {
-  it("Keyhole, L4E intuitivo, Oka, 1-Flip, WO and Nutella are in the Método selector, between Por capas and L4E", () => {
+  it("Keyhole, L4E intuitivo, Oka, 1-Flip, WO and Nutella are in the Método selector, by level", () => {
     expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual([
       "por-capas",
       "keyhole",
       "l4e-intuitivo",
+      "l4e",
       "oka",
       "1-flip",
       "wo",
       "nutella",
-      "l4e",
     ]);
     for (const method of ["keyhole", "l4e-intuitivo", "oka", "1-flip", "wo", "nutella"]) expect(isLearningMethodId(method)).toBe(true);
   });

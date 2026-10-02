@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { ChevronRightIcon } from "@/components/ui/icons";
+import { LevelBadge } from "@/components/ui/level-badge";
+import { getMethodLevel } from "@/features/trainer/methods";
 import { matchesCase, type AlgorithmSetId } from "../algorithm-sets";
 import {
   DEFAULT_LEARNING_METHOD,
@@ -53,6 +55,7 @@ export function LearnScreen({
 }) {
   const categories = METHOD_CATEGORIES[method];
   const cube = METHOD_CUBE[method];
+  const level = getMethodLevel(method);
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<LearningCategoryId[]>(initialExpanded);
   const hydrated = useLearningProgressHydration();
@@ -153,7 +156,10 @@ export function LearnScreen({
           Inicio
         </Link>
         <h1 className="text-3xl font-bold tracking-tight">Aprender a resolver</h1>
-        {cube !== "3x3" && <p className="text-sm text-navy-muted">{METHOD_LABEL[method]}</p>}
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-navy-muted">{METHOD_LABEL[method]}</p>
+          {level && <LevelBadge level={level} />}
+        </div>
       </div>
 
       <label className="relative block">

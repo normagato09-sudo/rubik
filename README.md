@@ -34,6 +34,10 @@ para el móvil.
   Cada caso tiene su diagrama, su algoritmo y sus movimientos numerados. Los
   del 2×2 y del Pyraminx traen además una explicación corta. Todo lo demás
   sale de `docs/source/`.
+Cada método lleva su nivel (Principiante, Intermedio, Avanzado o Experto),
+visible en el desplegable de Método de Inicio y arriba en Aprender. El plan
+de métodos y sus niveles está en `docs/plan-metodos.md`.
+
 - **Solucionador** (`/solucionador`) — para **3×3**, **2×2** y **Pyraminx**
   (selector arriba; se recuerda en el dispositivo). Los colores se introducen a mano o
   con la cámara / una foto por cara, con validación en vivo que marca las

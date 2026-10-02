@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { TrainerOption } from "@/features/trainer/types";
 import { ChevronDownIcon } from "@/components/ui/icons";
+import { LevelBadge } from "@/components/ui/level-badge";
 
 export function OptionDropdown({
   label,
@@ -48,7 +49,10 @@ export function OptionDropdown({
           isLarge ? "px-5 py-4 text-lg" : "px-3 py-2 text-sm"
         }`}
       >
-        {selected?.label}
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate">{selected?.label}</span>
+          {selected?.level && <LevelBadge level={selected.level} />}
+        </span>
         <ChevronDownIcon
           className={`${isLarge ? "h-5 w-5" : "h-4 w-4"} text-muted transition-transform ${open ? "rotate-180" : ""}`}
         />
@@ -81,13 +85,17 @@ export function OptionDropdown({
                   } ${isSelected ? "bg-accent-soft" : ""}`}
                 >
                   <span>{option.label}</span>
-                  <span
-                    className={`text-[10px] font-semibold tracking-wide uppercase ${
-                      isActive ? "text-cube-green" : "text-muted"
-                    }`}
-                  >
-                    {isActive ? "Activo" : "Próximamente"}
-                  </span>
+                  {isActive && option.level ? (
+                    <LevelBadge level={option.level} />
+                  ) : (
+                    <span
+                      className={`text-[10px] font-semibold tracking-wide uppercase ${
+                        isActive ? "text-cube-green" : "text-muted"
+                      }`}
+                    >
+                      {isActive ? "Activo" : "Próximamente"}
+                    </span>
+                  )}
                 </button>
               </li>
             );

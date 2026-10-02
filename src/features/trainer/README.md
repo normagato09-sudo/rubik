@@ -11,8 +11,11 @@ Relación Cubo → Método → Etapa: cada `MethodOption` tiene un `cubeType`
 pertenece — CFOP nunca se ofrece fuera de `cubeType: "3x3"`. `store.ts`
 aplica la cascada: cambiar de cubo recalcula el método por defecto para
 ese tipo de cubo. Activos hoy: 3x3 con CFOP, 2x2 con Ortega y CLL, y
-Pyraminx con Por capas, Keyhole, L4E intuitivo, Oka, 1-Flip, WO, Nutella y L4E (de más
-fácil a más difícil). El
+Pyraminx con Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO y
+Nutella. Cada método activo tiene su nivel (`level`: Principiante,
+Intermedio, Avanzado o Experto, ver `docs/plan-metodos.md`) y cada cubo los
+lista de más fácil a más difícil; el desplegable de Método de Inicio y la
+cabecera de Aprender lo muestran con `LevelBadge`. El
 botón Aprender de Inicio lleva al contenido del método elegido
 (`learnHref`, en `features/learning/categories.ts`).
 
