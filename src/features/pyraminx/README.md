@@ -43,7 +43,15 @@ azul a la derecha. Las 4 puntas se llaman como los giros que las mueven: U
   bloque de detrás en Keyhole (7, guía de Andy Klise) y los casos básicos de
   centros de Keyhole (calculados con el motor con U y Fw, el método de la
   guía). En los métodos Top First el bloque es la capa de la punta de
-  detrás (B) y la última capa, la cara verde.
+  detrás (B) y la última capa, la cara verde. Para 1-Flip y WO: los Last 3
+  Centers de Sarah's Cubing Site (WO 10, de Odder; 1-Flip 10, de Drew
+  Brads), que ella escribe con el bloque arriba: `heldWithBlockBehind()`
+  los pasa a nuestra forma de sujetarlo con media vuelta del Pyraminx
+  (U↔B, L↔R, Dw↔Fw), y `adjust` es el giro final de B que necesitan (su
+  U). GLHF (1-Flip, centros ya bien) no tiene algoritmo en la fuente: el
+  de RUBIKO es el más corto del motor. La tercera arista del bloque (7)
+  también la calcula el motor. `seenWithBlockHome()` cambia los colores
+  para ver el caso desde el lado en que el bloque está en su sitio.
 - `diagrams.ts` — dibuja, con el estilo de las hojas, los casos que estas no
   traen, a partir del propio caso: el dibujo no puede contradecir al
   algoritmo.
@@ -60,5 +68,9 @@ coinciden con los .docx de `docs/source/`). `moves.test.ts` comprueba también
 la notación ampliada (los 16 giros de siempre siguen igual) y
 `research.test.ts` cada algoritmo investigado, además de contar los casos
 con el motor: L3E 6 (uno resuelto) de 12 posiciones, la arista del hueco 7,
-y los centros de Keyhole 81 posiciones, 26 casos si el de arriba se deja
-para el final.
+los centros de Keyhole 81 posiciones, 26 casos si el de arriba se deja
+para el final, L3C de WO 27 posiciones y 11 casos (uno resuelto: los 10 de
+la fuente son los otros 10), L3C de 1-Flip 81 posiciones y 27 casos (la
+fuente enseña 10 y GLHF; 16 no tienen algoritmo en ella) y la tercera
+arista 7. Comprueba también que la media vuelta es de verdad un giro del
+Pyraminx entero.

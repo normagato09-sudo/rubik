@@ -72,6 +72,16 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "l4ei-v": { width: 200, height: 200 },
   "l4ei-arista": { width: 200, height: 200 },
   "l4ei-l3e": { width: 200, height: 200 },
+  "1flip-puntas": { width: 200, height: 200 },
+  "1flip-bloque": { width: 200, height: 200 },
+  "1flip-arista": { width: 200, height: 200 },
+  "1flip-l3c": { width: 200, height: 200 },
+  "1flip-l3e": { width: 200, height: 200 },
+  "wo-puntas": { width: 200, height: 200 },
+  "wo-bloque": { width: 200, height: 200 },
+  "wo-arista": { width: 200, height: 200 },
+  "wo-l3c": { width: 200, height: 200 },
+  "wo-l3e": { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -124,7 +134,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e|l3e)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e|l3e|l3c)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  ALL_PYRA_TOKENS,
+  ROTATIONS,
+  TOKEN_PERMUTATION,
   applyPyraTokens,
   invertPyraTokens,
   parsePyraNotation,
@@ -7,8 +10,19 @@ import {
   type PyraColor,
   type PyraToken,
 } from "./moves";
+import type { PyraVertex } from "./geometry";
 import { CENTER_STICKERS, EDGE_FACES, EDGE_STICKERS, TIP_STICKERS } from "./pieces";
-import { KEYHOLE_CENTER_CASES, KEYHOLE_EDGE_CASES, L3E_CASES, type ResearchCase } from "./research";
+import {
+  KEYHOLE_CENTER_CASES,
+  KEYHOLE_EDGE_CASES,
+  L3E_CASES,
+  ONE_FLIP_L3C_CASES,
+  THIRD_EDGE_CASES,
+  WO_L3C_CASES,
+  heldWithBlockBehind,
+  seenWithBlockHome,
+  type ResearchCase,
+} from "./research";
 import { solvePyraminx } from "./search";
 
 const solved = solvedPyraminx();
@@ -21,7 +35,9 @@ const edges = (...pieces: number[]) => pieces.flatMap((piece) => EDGE_STICKERS[p
 const backBlock = [...CENTER_STICKERS.B, ...edges(LR, LD, RD)];
 
 const done = (state: readonly PyraColor[], stickers: readonly number[]) => stickers.every((i) => state[i] === solved[i]);
-const caseOf = (kase: ResearchCase) => applyPyraTokens(solved, invertPyraTokens(parsePyraNotation(kase.algorithm)));
+/** The case an algorithm solves, with the final turn of the block it needs. */
+const caseOf = (kase: ResearchCase) =>
+  applyPyraTokens(solved, invertPyraTokens([...parsePyraNotation(kase.algorithm), ...(kase.adjust ? [kase.adjust] : [])]));
 
 /** Where edge `piece` is, and whether it is the wrong way round. */
 function locate(state: readonly PyraColor[], piece: number): string {
@@ -162,4 +178,186 @@ describe("research sources", () => {
       expect(parsePyraNotation(spaced)).toEqual(parsePyraNotation(kase.algorithm));
     }
   });
+});
+
+// ---------- 1-Flip and WO ----------
+
+/** Edge `piece` the wrong way round in its own place. */
+const flipped = (state: readonly PyraColor[], piece: number) => {
+  const next = [...state];
+  const [a, b] = EDGE_STICKERS[piece];
+  [next[a], next[b]] = [next[b], next[a]];
+  return next;
+};
+
+/** Tip and center of `vertex` twisted `times` thirds, as a big turn would, leaving everything else. */
+const twisted = (state: readonly PyraColor[], vertex: PyraVertex, times: number) => {
+  let current = [...state];
+  const own = [...TIP_STICKERS[vertex], ...CENTER_STICKERS[vertex]];
+  for (let k = 0; k < times; k++) {
+    const next = [...current];
+    for (const i of own) next[TOKEN_PERMUTATION[vertex][i]] = current[i];
+    current = next;
+  }
+  return current;
+};
+
+/** Fewest turns of U, L, R and B from each position (by `key`) to one of `goals`. */
+function bfsDistance(goals: PyraColor[][], key: (state: readonly PyraColor[]) => string): Map<string, number> {
+  const MOVES: PyraToken[] = ["U", "U'", "L", "L'", "R", "R'", "B", "B'"];
+  const seen = new Map(goals.map((goal) => [key(goal), 0]));
+  let frontier = goals;
+  for (let depth = 1; frontier.length; depth++) {
+    const next: PyraColor[][] = [];
+    for (const state of frontier) {
+      for (const move of MOVES) {
+        const moved = applyPyraTokens(state, [move]);
+        if (!seen.has(key(moved))) {
+          seen.set(key(moved), depth);
+          next.push(moved);
+        }
+      }
+    }
+    frontier = next;
+  }
+  return seen;
+}
+
+describe("Sarah's algorithms, held with the block at the back", () => {
+  it("tipping the Pyraminx over is a whole turn of it: each move becomes the swapped one", () => {
+    const stickers = Array.from({ length: 36 }, (_, i) => i);
+    const moves = ALL_PYRA_TOKENS.filter((token) => !(ROTATIONS as PyraToken[]).includes(token));
+    const turns = ROTATIONS.flatMap((a) => ROTATIONS.map((b) => [a, b] as PyraToken[]));
+    const halfTurn = turns.find((turn) =>
+      moves.every(
+        (move) =>
+          applyPyraTokens(stickers, [...turn, ...parsePyraNotation(heldWithBlockBehind(move)), ...invertPyraTokens(turn)]).join() ===
+          applyPyraTokens(stickers, [move]).join(),
+      ),
+    );
+    expect(halfTurn).toBeDefined();
+    expect(heldWithBlockBehind("R' L R' Dw' R' U' R'")).toBe("L' R L' Fw' L' B' L'");
+  });
+});
+
+describe("WO and 1-Flip: the last three centers (L3C)", () => {
+  const blockEdges = [LR, LD, RD];
+  const watched = [...tips, ...centers, ...edges(...blockEdges)];
+  const key = (state: readonly PyraColor[]) => watched.map((i) => state[i]).join();
+  const blockHome = (state: readonly PyraColor[]) =>
+    done(state, [...TIP_STICKERS.B, ...CENTER_STICKERS.B]) &&
+    blockEdges.every((piece) => locate(state, piece).replace("'", "") === `${piece}`);
+  /** Each front center shows its own colors (only twisted), as on a real Pyraminx seen with the block home. */
+  const ownCenters = (state: readonly PyraColor[]) =>
+    (["U", "L", "R"] as const).every((v) =>
+      CENTER_STICKERS[v].every((i) => CENTER_STICKERS[v].some((j) => solved[j] === state[i])),
+    );
+  const flips = (state: readonly PyraColor[]) => blockEdges.filter((piece) => locate(state, piece).endsWith("'")).length;
+
+  /**
+   * A case, whatever side it is seen from: the block home (turning it, B, or
+   * the rest, Fw, is the same as looking from another side), then the
+   * smallest of the three views round the back tip.
+   */
+  function l3cCase(state: readonly PyraColor[]): string {
+    for (const block of [[], ["B"], ["B'"]] as PyraToken[][]) {
+      for (const rest of [[], ["Fw"], ["Fw'"]] as PyraToken[][]) {
+        const seen = seenWithBlockHome(applyPyraTokens(state, [...block, ...rest]));
+        if (blockHome(seen) && ownCenters(seen)) {
+          return [seen, turnedRound(seen), turnedRound(turnedRound(seen))].map(key).sort()[0];
+        }
+      }
+    }
+    throw new Error("not an L3C position");
+  }
+
+  /** Every position of the step: the front centers twisted any way and, in 1-Flip, one block edge flipped. */
+  const positions = (oneFlip: boolean) => {
+    const states: PyraColor[][] = [];
+    for (let u = 0; u < 3; u++)
+      for (let l = 0; l < 3; l++)
+        for (let r = 0; r < 3; r++) {
+          const state = twisted(twisted(twisted(solved, "U", u), "L", l), "R", r);
+          if (oneFlip) for (const piece of blockEdges) states.push(flipped(state, piece));
+          else states.push(state);
+        }
+    return states;
+  };
+
+  it("each WO case has the block whole", () => {
+    for (const kase of WO_L3C_CASES) {
+      const state = seenWithBlockHome(caseOf(kase));
+      expect(blockHome(state) && flips(state) === 0, kase.algorithm).toBe(true);
+      expect(done(state, centers), kase.algorithm).toBe(false);
+    }
+  });
+
+  it("with its final turn of the block, each case has the front centers only twisted (each in its own place); without it, not", () => {
+    for (const kase of [...WO_L3C_CASES, ...ONE_FLIP_L3C_CASES]) {
+      expect(ownCenters(seenWithBlockHome(caseOf(kase))), kase.algorithm).toBe(true);
+      if (kase.adjust) expect(ownCenters(seenWithBlockHome(caseOf({ ...kase, adjust: undefined }))), kase.algorithm).toBe(false);
+    }
+  });
+
+  it("WO: 27 positions, 11 cases seen from any side (one is the skip); Sarah's 10 algorithms are the other 10", () => {
+    const states = positions(false);
+    expect(states).toHaveLength(27);
+    const cases = new Set(states.map(l3cCase));
+    expect(cases.size).toBe(11);
+    const ours = WO_L3C_CASES.map((kase) => l3cCase(caseOf(kase)));
+    expect(new Set(ours).size).toBe(10);
+    expect(ours).not.toContain(l3cCase(solved));
+    for (const c of ours) expect(cases.has(c)).toBe(true);
+  });
+
+  it("each 1-Flip case has the block with exactly one edge the wrong way round", () => {
+    for (const kase of ONE_FLIP_L3C_CASES) {
+      const state = seenWithBlockHome(caseOf(kase));
+      expect(blockHome(state) && flips(state) === 1, kase.algorithm).toBe(true);
+    }
+  });
+
+  it("1-Flip: 81 positions, 27 cases; Sarah's 10 plus GLHF (the centers already done) are 11 of them", () => {
+    const states = positions(true);
+    expect(states).toHaveLength(81);
+    const cases = new Set(states.map(l3cCase));
+    expect(cases.size).toBe(27);
+    const ours = ONE_FLIP_L3C_CASES.map((kase) => l3cCase(caseOf(kase)));
+    expect(new Set(ours).size).toBe(11);
+    for (const c of ours) expect(cases.has(c)).toBe(true);
+  });
+
+  it("GLHF is the case with the centers done and the top back edge flipped, and its algorithm is the shortest with U, L, R and B", () => {
+    const glhf = ONE_FLIP_L3C_CASES.find((kase) => kase.name === "GLHF")!;
+    const state = seenWithBlockHome(caseOf(glhf));
+    expect(done(state, [...tips, ...centers, ...edges(LD, RD)])).toBe(true);
+    expect(locate(state, LR)).toBe(`${LR}'`);
+    const k = (s: readonly PyraColor[]) => [centers.map((i) => s[i]).join(), ...blockEdges.map((p) => locate(s, p))].join("|");
+    expect(bfsDistance([solved], k).get(k(state))).toBe(parsePyraNotation(glhf.algorithm).length);
+    // A full search over the centers and the block: a few seconds.
+  }, 60_000);
+});
+
+describe("WO and 1-Flip: the block's third edge", () => {
+  // The back center and the block's edges; the front centers are free here.
+  const key = (state: readonly PyraColor[]) =>
+    [CENTER_STICKERS.B.map((i) => state[i]).join(), ...[LR, LD, RD].map((p) => locate(state, p))].join("|");
+
+  for (const [method, goal] of [
+    ["WO", solved],
+    ["1-Flip", flipped(solved, LR)],
+  ] as const) {
+    it(`${method}: covers the 7 places, keeps the back center and the two bottom edges, and each is the shortest`, () => {
+      const distance = bfsDistance([goal], key);
+      const states = THIRD_EDGE_CASES.map((kase) => applyPyraTokens(goal, invertPyraTokens(parsePyraNotation(kase.algorithm))));
+      const places = states.map((state) => locate(state, LR));
+      expect(new Set(places).size).toBe(7);
+      expect(places).not.toContain(locate(goal, LR));
+      states.forEach((state, k) => {
+        const { algorithm } = THIRD_EDGE_CASES[k];
+        expect(done(state, [...CENTER_STICKERS.B, ...edges(LD, RD)]), algorithm).toBe(true);
+        expect(distance.get(key(state)), algorithm).toBe(parsePyraNotation(algorithm).length);
+      });
+    });
+  }
 });

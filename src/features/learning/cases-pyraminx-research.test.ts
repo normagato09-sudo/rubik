@@ -2,11 +2,16 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { applyPyraTokens, isSolvedPyraminx, parsePyraNotation } from "@/features/pyraminx/moves";
-import { L3E_CASES } from "@/features/pyraminx/research";
+import { L3E_CASES, ONE_FLIP_L3C_CASES, THIRD_EDGE_CASES, WO_L3C_CASES } from "@/features/pyraminx/research";
 import { getSelectableMethodsForCubeType } from "@/features/trainer/methods";
 import { METHOD_CATEGORIES, isLearningMethodId } from "./categories";
-import { L4E_V_CASES, PYRA_PUNTAS_CASES, pyraCaseState } from "./cases-pyraminx";
-import { SETS_PYRAMINX_RESEARCH, generatedResearchDiagrams, type ResearchSetId } from "./cases-pyraminx-research";
+import { L4E_V_CASES, PYRA_PUNTAS_CASES } from "./cases-pyraminx";
+import {
+  SETS_PYRAMINX_RESEARCH,
+  generatedResearchDiagrams,
+  researchCaseStates,
+  type ResearchSetId,
+} from "./cases-pyraminx-research";
 import { ALGORITHM_SETS, METHOD_STEPS, getSetInfo } from "./sets";
 
 const file = (image: string) => join(process.cwd(), "public", image);
@@ -14,14 +19,16 @@ const all = Object.values(SETS_PYRAMINX_RESEARCH).flat();
 const algorithms = (setId: ResearchSetId) => SETS_PYRAMINX_RESEARCH[setId].map((kase) => kase.algorithm);
 
 describe("Pyraminx methods taught from research", () => {
-  it("Keyhole and L4E intuitivo are in the Método selector, between Por capas and L4E", () => {
+  it("Keyhole, L4E intuitivo, 1-Flip and WO are in the Método selector, between Por capas and L4E", () => {
     expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual([
       "por-capas",
       "keyhole",
       "l4e-intuitivo",
+      "1-flip",
+      "wo",
       "l4e",
     ]);
-    for (const method of ["keyhole", "l4e-intuitivo"]) expect(isLearningMethodId(method)).toBe(true);
+    for (const method of ["keyhole", "l4e-intuitivo", "1-flip", "wo"]) expect(isLearningMethodId(method)).toBe(true);
   });
 
   it("each has notation, steps and its L3E block, and its steps are explained", () => {
@@ -36,6 +43,19 @@ describe("Pyraminx methods taught from research", () => {
     expect(getSetInfo("keyhole-l3e")).toMatchObject({ method: "keyhole", title: "L3E (Keyhole)" });
   });
 
+  it("1-Flip and WO have notation, steps, L3C and L3E, and their steps are explained", () => {
+    expect(METHOD_CATEGORIES["1-flip"].map((category) => category.id)).toEqual(["notation", "steps", "1flip-l3c", "1flip-l3e"]);
+    expect(METHOD_CATEGORIES.wo.map((category) => category.id)).toEqual(["notation", "steps", "wo-l3c", "wo-l3e"]);
+    expect(METHOD_STEPS["1-flip"].map((step) => step.title)).toEqual(["Puntas", "Bloque de detrás", "Arista volteada"]);
+    expect(METHOD_STEPS.wo.map((step) => step.title)).toEqual(["Puntas", "Bloque de detrás", "Tercera arista"]);
+    for (const step of [...METHOD_STEPS["1-flip"], ...METHOD_STEPS.wo]) {
+      expect(step.intro?.length, step.setId).toBeGreaterThan(100);
+      expect(getSetInfo(step.setId).categoryId).toBe("steps");
+    }
+    expect(getSetInfo("wo-l3c")).toMatchObject({ method: "wo", title: "L3C (WO)" });
+    expect(getSetInfo("1flip-l3c")).toMatchObject({ method: "1-flip", title: "L3C (1-Flip)" });
+  });
+
   it("every case is registered, marked as researched with its source, explained and drawn", () => {
     for (const kase of all) {
       expect(ALGORITHM_SETS[kase.setId]).toContain(kase);
@@ -45,11 +65,17 @@ describe("Pyraminx methods taught from research", () => {
     }
   });
 
-  it("every algorithm solves its own case", () => {
-    for (const kase of all) {
-      const after = applyPyraTokens(pyraCaseState(kase.algorithm), parsePyraNotation(kase.algorithm));
-      expect(isSolvedPyraminx(after), `${kase.setId} ${kase.id}`).toBe(true);
+  it("every algorithm, with its final turn, solves its own case (1-Flip's edge step leaves its edge flipped on purpose)", () => {
+    for (const setId of Object.keys(SETS_PYRAMINX_RESEARCH) as ResearchSetId[]) {
+      researchCaseStates(setId).forEach(({ state, goal, adjust }, index) => {
+        const kase = SETS_PYRAMINX_RESEARCH[setId][index];
+        const after = applyPyraTokens(state, [...parsePyraNotation(kase.algorithm), ...adjust]);
+        const label = `${setId} ${kase.id}`;
+        if (setId === "1flip-arista") expect(after.join(), label).toBe(goal.join());
+        else expect(isSolvedPyraminx(after), label).toBe(true);
+      });
     }
+    expect(isSolvedPyraminx(researchCaseStates("1flip-arista")[0].goal)).toBe(false);
   });
 
   it("reuses what already exists instead of copying it: Puntas, the V, the back edge and L3E", () => {
@@ -60,6 +86,42 @@ describe("Pyraminx methods taught from research", () => {
     expect(algorithms("l4ei-arista")).toEqual(algorithms("keyhole-arista"));
     expect(algorithms("l4ei-l3e")).toEqual(algorithms("keyhole-l3e"));
     expect(algorithms("keyhole-l3e")).toEqual(L3E_CASES.map((kase) => kase.algorithm));
+    for (const method of ["1flip", "wo"]) {
+      expect(algorithms(`${method}-puntas` as ResearchSetId)).toEqual(algorithms("keyhole-puntas"));
+      expect(algorithms(`${method}-bloque` as ResearchSetId)).toEqual(algorithms("keyhole-bloque"));
+      expect(algorithms(`${method}-arista` as ResearchSetId)).toEqual(THIRD_EDGE_CASES.map((kase) => kase.algorithm));
+      expect(algorithms(`${method}-l3e` as ResearchSetId)).toEqual(algorithms("keyhole-l3e"));
+    }
+    expect(algorithms("wo-l3c")).toEqual(WO_L3C_CASES.map((kase) => kase.algorithm));
+    expect(algorithms("1flip-l3c")).toEqual(ONE_FLIP_L3C_CASES.map((kase) => kase.algorithm));
+  });
+
+  it("the L3C cases cite Sarah's text, held with the block up; GLHF says the engine worked it out", () => {
+    for (const kase of [...SETS_PYRAMINX_RESEARCH["wo-l3c"], ...SETS_PYRAMINX_RESEARCH["1flip-l3c"]]) {
+      if (kase.name === "GLHF") expect(kase.note).toMatch(/^La fuente no trae algoritmo/);
+      else expect(kase.note).toMatch(/^En la fuente está escrito «[^»]+», sujetando el Pyraminx con el bloque arriba/);
+      expect(kase.explanation).toContain("[B]");
+    }
+    expect(SETS_PYRAMINX_RESEARCH["wo-l3c"]).toHaveLength(10);
+    expect(SETS_PYRAMINX_RESEARCH["1flip-l3c"]).toHaveLength(11);
+    // WO keeps the block whole; every 1-Flip case names its flipped edge.
+    for (const kase of SETS_PYRAMINX_RESEARCH["wo-l3c"]) expect(kase.explanation).not.toContain("dada la vuelta");
+    for (const kase of SETS_PYRAMINX_RESEARCH["1flip-l3c"]) expect(kase.explanation).toMatch(/del bloque está dada la vuelta/);
+    expect(SETS_PYRAMINX_RESEARCH["1flip-l3c"].at(-1)!.explanation).toMatch(/^Los tres centros de delante ya coinciden/);
+    // A center that shows green on the front face is never called wrong.
+    for (const kase of [...SETS_PYRAMINX_RESEARCH["wo-l3c"], ...SETS_PYRAMINX_RESEARCH["1flip-l3c"]]) {
+      expect(kase.explanation).not.toContain("enseña verde");
+    }
+    expect(SETS_PYRAMINX_RESEARCH["wo-l3c"][6].explanation).toContain("Al terminar, gira B para alinear el bloque");
+  });
+
+  it("the third-edge cases say where the edge is and how it is left", () => {
+    for (const kase of SETS_PYRAMINX_RESEARCH["wo-arista"]) expect(kase.explanation).toContain("la deja bien puesta");
+    for (const kase of SETS_PYRAMINX_RESEARCH["1flip-arista"]) expect(kase.explanation).toContain("dada la vuelta a propósito");
+    for (const setId of ["wo-arista", "1flip-arista"] as const) {
+      expect(new Set(SETS_PYRAMINX_RESEARCH[setId].map((kase) => kase.name)).size).toBe(7);
+      for (const kase of SETS_PYRAMINX_RESEARCH[setId]) expect(kase.note).toMatch(/^Calculado con el motor/);
+    }
   });
 
   it("the L3E explanations say what each case is", () => {

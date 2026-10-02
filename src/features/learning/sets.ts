@@ -52,6 +52,13 @@ const PUNTAS_INTRO =
 const BACK_EDGE_INTRO =
   "Falta la arista roja-azul, la de arriba detrás, que cierra el bloque. Antes de buscarla, gira U hasta que el centro de arriba coincida con los demás. Luego mira dónde está esa arista (en uno de los tres lados de la cara verde, o ya en su sitio pero dada la vuelta) y usa su caso: la sube sin tocar los centros ni las aristas roja-amarilla y azul-amarilla.";
 
+/** The Top First methods' first two edges of the block (1-Flip, WO): the V's cases. */
+const BLOCK_INTRO = (method: string, rest: string) =>
+  `${method} es un método Top First: primero se hace el bloque de una punta, aquí la de detrás, que es su centro con sus tres aristas. ${rest} En este paso se colocan dos de ellas, la roja-amarilla (abajo a la izquierda) y la azul-amarilla (abajo a la derecha), casi siempre con intuición; estos casos ponen la segunda.`;
+
+const THIRD_EDGE_INTRO =
+  "Falta la arista roja-azul, la de arriba detrás. Los centros de delante todavía no importan, así que bastan muy pocos giros: mira dónde está (en uno de los tres lados de la cara verde, o ya en su sitio) y usa su caso.";
+
 export interface LearningStep {
   setId: AlgorithmSetId;
   title: string;
@@ -130,6 +137,34 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
       intro: `En vez de los algoritmos de L4E, aquí se coloca primero una de las cuatro aristas que faltan y las otras tres se resuelven después con un ciclo, en L3E. ${BACK_EDGE_INTRO}`,
     },
   ],
+  "1-flip": [
+    { setId: "1flip-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "1flip-bloque",
+      title: "Bloque de detrás",
+      intro: BLOCK_INTRO(
+        "1-Flip",
+        "Su truco es dejar una de esas aristas dada la vuelta a propósito: un solo algoritmo arregla después los tres centros de delante y esa arista a la vez.",
+      ),
+    },
+    {
+      setId: "1flip-arista",
+      title: "Arista volteada",
+      intro: `${THIRD_EDGE_INTRO} Aquí va en su sitio pero dada la vuelta, con el rojo hacia la derecha: el algoritmo de L3C la girará junto con los centros.`,
+    },
+  ],
+  wo: [
+    { setId: "wo-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "wo-bloque",
+      title: "Bloque de detrás",
+      intro: BLOCK_INTRO(
+        "WO (de Wedel y Odder, sus autores)",
+        "Después, un solo algoritmo arregla los tres centros de delante sin romperlo.",
+      ),
+    },
+    { setId: "wo-arista", title: "Tercera arista", intro: `${THIRD_EDGE_INTRO} Al terminar, el bloque de detrás está entero.` },
+  ],
   l4e: [
     { setId: "l4e-puntas", title: "Puntas", intro: PUNTAS_INTRO },
     {
@@ -172,6 +207,16 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "l4ei-v": "l4e-intuitivo",
   "l4ei-arista": "l4e-intuitivo",
   "l4ei-l3e": "l4e-intuitivo",
+  "1flip-puntas": "1-flip",
+  "1flip-bloque": "1-flip",
+  "1flip-arista": "1-flip",
+  "1flip-l3c": "1-flip",
+  "1flip-l3e": "1-flip",
+  "wo-puntas": "wo",
+  "wo-bloque": "wo",
+  "wo-arista": "wo",
+  "wo-l3c": "wo",
+  "wo-l3e": "wo",
 };
 
 export interface SetInfo {

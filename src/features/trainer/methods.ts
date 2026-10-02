@@ -5,7 +5,7 @@ import type { MethodOption } from "./types";
  * method never appears as an option for a cube type it doesn't belong
  * to (e.g. CFOP only ever shows up for `cubeType: "3x3"`). Active today:
  * CFOP for the 3x3, Ortega and CLL for the 2x2, and for the Pyraminx
- * Por capas, Keyhole, L4E intuitivo and L4E (easiest first) — the methods Aprender
+ * Por capas, Keyhole, L4E intuitivo, 1-Flip, WO and L4E (easiest first) — the methods Aprender
  * teaches (features/learning/categories.ts).
  */
 export const METHODS: MethodOption[] = [
@@ -19,6 +19,8 @@ export const METHODS: MethodOption[] = [
   { id: "por-capas", label: "Por capas", status: "active", cubeType: "pyraminx" },
   { id: "keyhole", label: "Keyhole", status: "active", cubeType: "pyraminx" },
   { id: "l4e-intuitivo", label: "L4E intuitivo", status: "active", cubeType: "pyraminx" },
+  { id: "1-flip", label: "1-Flip", status: "active", cubeType: "pyraminx" },
+  { id: "wo", label: "WO", status: "active", cubeType: "pyraminx" },
   { id: "l4e", label: "L4E", status: "active", cubeType: "pyraminx" },
 ];
 

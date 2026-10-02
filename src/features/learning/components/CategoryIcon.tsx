@@ -32,6 +32,10 @@ const HIGHLIGHTED_PYRAMINX: Partial<Record<LearningCategoryId, number[]>> = {
   l4e: [1, 3, 6],
   "keyhole-l3e": [1, 3, 6],
   "l4ei-l3e": [1, 3, 6],
+  "1flip-l3c": [2, 5, 7],
+  "1flip-l3e": [1, 3, 6],
+  "wo-l3c": [2, 5, 7],
+  "wo-l3e": [1, 3, 6],
 };
 
 const PYRA_FACE: [Vec2, Vec2, Vec2] = [

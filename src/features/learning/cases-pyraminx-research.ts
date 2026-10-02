@@ -1,6 +1,6 @@
 /**
  * Aprender del Pyraminx: the methods taught from research (not from the
- * user's sheets) — Keyhole and L4E intuitivo for now. Their algorithms are
+ * user's sheets) — Keyhole, L4E intuitivo, 1-Flip and WO. Their algorithms are
  * in features/pyraminx/research.ts, each with its source, and every case
  * says so on its card ("Investigado"). Steps two methods share (Puntas,
  * V, the back edge, L3E) are written once and listed in each method.
@@ -9,14 +9,25 @@
  * style, and the explanations are worked out from each case's stickers.
  */
 import { faceOf, type PyraFace } from "@/features/pyraminx/geometry";
-import { solvedPyraminx, type PyraColor } from "@/features/pyraminx/moves";
-import { CENTER_STICKERS } from "@/features/pyraminx/pieces";
+import {
+  applyPyraTokens,
+  invertPyraTokens,
+  parsePyraNotation,
+  solvedPyraminx,
+  type PyraColor,
+  type PyraToken,
+} from "@/features/pyraminx/moves";
+import { CENTER_STICKERS, EDGE_STICKERS } from "@/features/pyraminx/pieces";
 import { topViewSvg } from "@/features/pyraminx/diagrams";
 import {
   KEYHOLE_CENTER_CASES,
   KEYHOLE_EDGE_CASES,
   L3E_CASES,
+  ONE_FLIP_L3C_CASES,
   SOURCES,
+  THIRD_EDGE_CASES,
+  WO_L3C_CASES,
+  seenWithBlockHome,
   type ResearchCase,
   type ResearchSource,
 } from "@/features/pyraminx/research";
@@ -53,6 +64,12 @@ interface StepCase {
   shown: Set<number>;
   source: ResearchSource;
   note?: string;
+  /** The case as drawn, when it is not simply the algorithm undone from solved. */
+  state?: PyraColor[];
+  /** What the algorithm leaves, when it is not solved (1-Flip leaves an edge flipped on purpose). */
+  goal?: PyraColor[];
+  /** The final turn of the block the case needs after the algorithm. */
+  adjust?: "B" | "B'";
 }
 
 // ---------- L3E: the three edges of the front face ----------
@@ -124,16 +141,17 @@ function backEdgeStep(kase: ResearchCase): StepCase {
 
 const CENTER_NAME = { U: "de arriba", L: "de la izquierda", R: "de la derecha" } as const;
 
+/** The color a front center shows on the front face, where it should show green. */
+const front = (state: readonly PyraColor[], v: "U" | "L" | "R") => state[CENTER_STICKERS[v].find((i) => faceOf(i) === "F")!];
+
 function centersStep(kase: ResearchCase): StepCase {
   const state = pyraCaseState(kase.algorithm);
   const off = (["U", "L", "R"] as const).filter((v) => CENTER_STICKERS[v].some((i) => state[i] !== solved[i]));
-  // The color each wrong center shows on the front face, where it should show green.
-  const front = (v: "U" | "L" | "R") => state[CENTER_STICKERS[v].find((i) => faceOf(i) === "F")!];
   const [bring, turn, back] = kase.algorithm.split(" ");
   const what =
     off.length === 3
       ? `Los tres centros de delante (el de arriba, el de la izquierda y el de la derecha) están girados a la vez respecto al bloque de detrás: todo lo que no es el bloque está un tercio de vuelta desfasado. ${kase.algorithm} lo gira entero de una vez.`
-      : `El centro ${CENTER_NAME[off[0]]} no coincide con el bloque de detrás: en la cara verde enseña ${colorName(front(off[0]))} en vez de verde. ${
+      : `El centro ${CENTER_NAME[off[0]]} no coincide con el bloque de detrás: en la cara verde enseña ${colorName(front(state, off[0]))} en vez de verde. ${
           off[0] === "U"
             ? `Como está arriba, basta con girar la capa de arriba: ${kase.algorithm}.`
             : `${bring} lo sube a la posición de arriba, ${turn} lo gira y ${back} lo devuelve a su sitio.`
@@ -142,7 +160,7 @@ function centersStep(kase: ResearchCase): StepCase {
     name:
       off.length === 3
         ? `Todo desfasado (${kase.algorithm})`
-        : `Centro ${CENTER_NAME[off[0]]}, ${colorName(front(off[0]))} delante`,
+        : `Centro ${CENTER_NAME[off[0]]}, ${colorName(front(state, off[0]))} delante`,
     algorithm: kase.algorithm,
     explanation: `${what} La arista roja-azul de detrás puede moverse: es el hueco libre que da nombre al método.`,
     shown: piecesShown([LD, RD]),
@@ -153,6 +171,82 @@ function centersStep(kase: ResearchCase): StepCase {
 
 const COLOR_NAME: Record<PyraColor, string> = { green: "verde", red: "rojo", blue: "azul", yellow: "amarillo" };
 const colorName = (color: PyraColor) => COLOR_NAME[color];
+
+// ---------- WO and 1-Flip: the block's third edge ----------
+
+/** Solved but for the red-blue edge, in its place the wrong way round: what 1-Flip builds. */
+const LR_FLIPPED = (() => {
+  const state = [...solved];
+  const [a, b] = EDGE_STICKERS[LR];
+  [state[a], state[b]] = [state[b], state[a]];
+  return state;
+})();
+
+function thirdEdgeStep(kase: ResearchCase, oneFlip: boolean): StepCase {
+  const goal = oneFlip ? LR_FLIPPED : solved;
+  const state = applyPyraTokens(goal, invertPyraTokens(parsePyraNotation(kase.algorithm)));
+  const { slot } = locate(state, LR);
+  const red = faceShowing(state, slot, "red");
+  const inPlace = slot === LR;
+  const where = inPlace
+    ? oneFlip
+      ? "ya está en su sitio, arriba y detrás, y bien puesta: aquí hay que darle la vuelta"
+      : `ya está en su sitio, arriba y detrás, pero dada la vuelta: el rojo mira ${TOWARDS[red]}`
+    : `está ${FRONT_PLACE[edgeName(slot)]}, con el rojo mirando ${TOWARDS[red]}`;
+  const leaves = oneFlip
+    ? "la sube a su sitio, arriba detrás, pero dada la vuelta a propósito (el rojo hacia la derecha)"
+    : "la deja bien puesta, arriba y detrás";
+  return {
+    name: inPlace ? (oneFlip ? "En su sitio, bien puesta" : "En su sitio, dada la vuelta") : `${SHORT_PLACE[edgeName(slot)]}, rojo ${RED[red]}`,
+    algorithm: kase.algorithm,
+    explanation: `La arista roja-azul, la que cierra el bloque de detrás, ${where}. El algoritmo ${leaves}, sin mover el centro de detrás ni las aristas roja-amarilla y azul-amarilla. Los centros de delante pueden moverse: se arreglan en el paso siguiente.`,
+    shown: piecesShown([LD, RD, LR]),
+    source: kase.source,
+    note: "Calculado con el motor de RUBIKO: el más corto con U, L, R y B, con los centros de delante libres. Las guías enseñan este paso con intuición, sin lista de casos.",
+    state,
+    goal,
+  };
+}
+
+// ---------- WO and 1-Flip: the last three centers (L3C) ----------
+
+const BLOCK_EDGE_NAME: Record<string, string> = {
+  LR: "roja-azul (arriba detrás)",
+  LD: "roja-amarilla (abajo a la izquierda)",
+  RD: "azul-amarilla (abajo a la derecha)",
+};
+
+const TIPPED_NOTE = (sourceText: string) =>
+  `En la fuente está escrito «${sourceText}», sujetando el Pyraminx con el bloque arriba. Aquí el bloque va detrás, como en los demás métodos Top First de RUBIKO: son los mismos giros con las letras cambiadas (U↔B, L↔R, Dw↔Fw).`;
+
+function l3cStep(kase: ResearchCase, oneFlip: boolean): StepCase {
+  // Seen from the side where the block is home, so it is drawn at the back in its own colors.
+  const state = seenWithBlockHome(pyraCaseState(kase.algorithm, kase.adjust));
+  const centers = (["U", "L", "R"] as const).map((v) => {
+    const off = CENTER_STICKERS[v].some((i) => state[i] !== solved[i]);
+    return off ? `el ${CENTER_NAME[v]} enseña ${colorName(front(state, v))} en la cara verde` : `el ${CENTER_NAME[v]} está bien`;
+  });
+  const allDone = centers.every((text) => text.endsWith("está bien"));
+  const flippedEdge = [LR, LD, RD].find((piece) => locate(state, piece).flipped);
+  const what = allDone
+    ? "Los tres centros de delante ya coinciden con el bloque de detrás."
+    : `Mira los tres centros de delante respecto al bloque de detrás: ${joinSpanish(centers)}.`;
+  const flip = flippedEdge === undefined ? "" : ` La arista ${BLOCK_EDGE_NAME[edgeName(flippedEdge)]} del bloque está dada la vuelta.`;
+  const fixes = oneFlip ? "los centros y esa arista a la vez" : "los tres centros a la vez";
+  const adjust = kase.adjust ? ` Al terminar, gira ${kase.adjust} para alinear el bloque de detrás con el resto.` : "";
+  return {
+    name: kase.name,
+    algorithm: kase.algorithm,
+    explanation: `${what}${flip} El algoritmo arregla ${fixes} sin romper el bloque; las aristas de la cara verde pueden moverse, se colocan en L3E.${adjust} Si no reconoces el caso, gira el Pyraminx entero con [B] o [B'] (el bloque sigue detrás) y vuelve a mirar.`,
+    shown: piecesShown([LR, LD, RD]),
+    source: kase.source,
+    note: kase.computed
+      ? "La fuente no trae algoritmo para este caso («GLHF»: buena suerte). Este es el más corto que encuentra el motor de RUBIKO con U, L, R y B."
+      : TIPPED_NOTE(kase.sourceText!),
+    state,
+    adjust: kase.adjust,
+  };
+}
 
 // ---------- steps reused from Por capas and L4E ----------
 
@@ -170,17 +264,30 @@ export type ResearchSetId =
   | "l4ei-puntas"
   | "l4ei-v"
   | "l4ei-arista"
-  | "l4ei-l3e";
+  | "l4ei-l3e"
+  | "1flip-puntas"
+  | "1flip-bloque"
+  | "1flip-arista"
+  | "1flip-l3c"
+  | "1flip-l3e"
+  | "wo-puntas"
+  | "wo-bloque"
+  | "wo-arista"
+  | "wo-l3c"
+  | "wo-l3e";
 
 const L3E = L3E_CASES.map(l3eStep);
 const BACK_EDGE = KEYHOLE_EDGE_CASES.map(backEdgeStep);
+const PUNTAS_TOP_FIRST = PUNTAS.map((kase) => reused(kase, SOURCES.speedsolvingTopFirst));
+/** The block's first two edges: the V's cases, the V being the block without its top edge. */
+const BLOCK = V.map((kase) => ({
+  ...reused(kase, SOURCES.speedsolvingTopFirst),
+  explanation: kase.explanation.replace("La segunda arista de la V", "La segunda arista del bloque"),
+}));
 
 const RESEARCH_SETS: Record<ResearchSetId, StepCase[]> = {
-  "keyhole-puntas": PUNTAS.map((kase) => reused(kase, SOURCES.speedsolvingTopFirst)),
-  "keyhole-bloque": V.map((kase) => ({
-    ...reused(kase, SOURCES.speedsolvingTopFirst),
-    explanation: kase.explanation.replace("La segunda arista de la V", "La segunda arista del bloque"),
-  })),
+  "keyhole-puntas": PUNTAS_TOP_FIRST,
+  "keyhole-bloque": BLOCK,
   "keyhole-centros": KEYHOLE_CENTER_CASES.map(centersStep),
   "keyhole-arista": BACK_EDGE,
   "keyhole-l3e": L3E,
@@ -188,7 +295,26 @@ const RESEARCH_SETS: Record<ResearchSetId, StepCase[]> = {
   "l4ei-v": V.map((kase) => reused(kase, SOURCES.speedsolvingVFirst)),
   "l4ei-arista": BACK_EDGE,
   "l4ei-l3e": L3E,
+  "1flip-puntas": PUNTAS_TOP_FIRST,
+  "1flip-bloque": BLOCK,
+  "1flip-arista": THIRD_EDGE_CASES.map((kase) => thirdEdgeStep(kase, true)),
+  "1flip-l3c": ONE_FLIP_L3C_CASES.map((kase) => l3cStep(kase, true)),
+  "1flip-l3e": L3E,
+  "wo-puntas": PUNTAS_TOP_FIRST,
+  "wo-bloque": BLOCK,
+  "wo-arista": THIRD_EDGE_CASES.map((kase) => thirdEdgeStep(kase, false)),
+  "wo-l3c": WO_L3C_CASES.map((kase) => l3cStep(kase, false)),
+  "wo-l3e": L3E,
 };
+
+/** Each case's stickers and what its algorithm leaves (solved, unless the step says otherwise). */
+export function researchCaseStates(setId: ResearchSetId): { state: PyraColor[]; goal: PyraColor[]; adjust: PyraToken[] }[] {
+  return RESEARCH_SETS[setId].map((kase) => ({
+    state: kase.state ?? pyraCaseState(kase.algorithm),
+    goal: kase.goal ?? solved,
+    adjust: kase.adjust ? [kase.adjust] : [],
+  }));
+}
 
 function researchCases(setId: ResearchSetId): AlgorithmCase[] {
   return RESEARCH_SETS[setId].map((kase, index) => ({
@@ -214,7 +340,7 @@ export function generatedResearchDiagrams(): Record<string, string> {
   for (const [setId, cases] of Object.entries(RESEARCH_SETS)) {
     cases.forEach((kase, index) => {
       files[`/learning/${setId}/${setId}-${id(index)}.svg`] = topViewSvg(
-        pyraCaseState(kase.algorithm),
+        kase.state ?? pyraCaseState(kase.algorithm),
         kase.shown,
         kase.name ?? `Caso ${id(index)}`,
       );

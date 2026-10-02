@@ -10,7 +10,11 @@ export type LearningCategoryId =
   | "pyra-ultima-capa"
   | "l4e"
   | "keyhole-l3e"
-  | "l4ei-l3e";
+  | "l4ei-l3e"
+  | "1flip-l3c"
+  | "1flip-l3e"
+  | "wo-l3c"
+  | "wo-l3e";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -20,7 +24,16 @@ export interface LearningCategory {
 }
 
 /** The methods Aprender teaches — the active ones of features/trainer/methods.ts. */
-export type LearningMethodId = "cfop" | "ortega" | "cll" | "por-capas" | "keyhole" | "l4e-intuitivo" | "l4e";
+export type LearningMethodId =
+  | "cfop"
+  | "ortega"
+  | "cll"
+  | "por-capas"
+  | "keyhole"
+  | "l4e-intuitivo"
+  | "1-flip"
+  | "wo"
+  | "l4e";
 
 /** The cubes Aprender teaches. */
 export type LearningCube = "3x3" | "2x2" | "pyraminx";
@@ -35,6 +48,8 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   "por-capas": "pyraminx",
   keyhole: "pyraminx",
   "l4e-intuitivo": "pyraminx",
+  "1-flip": "pyraminx",
+  wo: "pyraminx",
   l4e: "pyraminx",
 };
 
@@ -46,6 +61,8 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   "por-capas": "Pyraminx · Por capas",
   keyhole: "Pyraminx · Keyhole",
   "l4e-intuitivo": "Pyraminx · L4E intuitivo",
+  "1-flip": "Pyraminx · 1-Flip",
+  wo: "Pyraminx · WO",
   l4e: "Pyraminx · L4E",
 };
 
@@ -185,6 +202,54 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
     {
       id: "l4ei-l3e",
       title: "L3E (L4E intuitivo)",
+      description: "Termina con las tres aristas de la cara de delante",
+      accent: "#facc15",
+    },
+  ],
+  "1-flip": [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Los giros del Pyraminx, y también Fw y los giros enteros",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas y el bloque de detrás, con una arista dada la vuelta",
+    },
+    {
+      id: "1flip-l3c",
+      title: "L3C (1-Flip)",
+      description: "Los tres centros de delante y la arista volteada a la vez",
+      accent: "#ff8c1a",
+    },
+    {
+      id: "1flip-l3e",
+      title: "L3E (1-Flip)",
+      description: "Termina con las tres aristas de la cara de delante",
+      accent: "#facc15",
+    },
+  ],
+  wo: [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Los giros del Pyraminx, y también Fw y los giros enteros",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas y el bloque de detrás entero",
+    },
+    {
+      id: "wo-l3c",
+      title: "L3C (WO)",
+      description: "Los tres centros de delante en un solo algoritmo",
+      accent: "#ff8c1a",
+    },
+    {
+      id: "wo-l3e",
+      title: "L3E (WO)",
       description: "Termina con las tres aristas de la cara de delante",
       accent: "#facc15",
     },

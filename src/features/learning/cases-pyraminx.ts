@@ -32,7 +32,7 @@ const solved = solvedPyraminx();
 export const id = (index: number) => String(index + 1).padStart(2, "0");
 
 /** The case an algorithm (plus the final turn it needs) solves. Face turns and whole turns are read too. */
-export function pyraCaseState(algorithm: string, adjust: PyraCase["adjust"] = ""): PyraColor[] {
+export function pyraCaseState(algorithm: string, adjust: PyraCase["adjust"] | PyraToken = ""): PyraColor[] {
   const tokens: PyraToken[] = [...parsePyraNotation(algorithm), ...(adjust ? [adjust as PyraToken] : [])];
   return applyPyraTokens(solved, invertPyraTokens(tokens));
 }
