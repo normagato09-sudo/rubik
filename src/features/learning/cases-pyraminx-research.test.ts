@@ -2,7 +2,17 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { applyPyraTokens, isSolvedPyraminx, parsePyraNotation } from "@/features/pyraminx/moves";
-import { L3E_CASES, ONE_FLIP_L3C_CASES, THIRD_EDGE_CASES, WO_L3C_CASES } from "@/features/pyraminx/research";
+import {
+  KEYHOLE_CENTER_CASES,
+  L3E_CASES,
+  NUTELLA_EDGE_CASES,
+  NUTELLA_L3C_CASES,
+  OKA_EDGE_CASES,
+  OKA_FINISH_CASES,
+  ONE_FLIP_L3C_CASES,
+  THIRD_EDGE_CASES,
+  WO_L3C_CASES,
+} from "@/features/pyraminx/research";
 import { getSelectableMethodsForCubeType } from "@/features/trainer/methods";
 import { METHOD_CATEGORIES, isLearningMethodId } from "./categories";
 import { L4E_V_CASES, PYRA_PUNTAS_CASES } from "./cases-pyraminx";
@@ -19,16 +29,18 @@ const all = Object.values(SETS_PYRAMINX_RESEARCH).flat();
 const algorithms = (setId: ResearchSetId) => SETS_PYRAMINX_RESEARCH[setId].map((kase) => kase.algorithm);
 
 describe("Pyraminx methods taught from research", () => {
-  it("Keyhole, L4E intuitivo, 1-Flip and WO are in the Método selector, between Por capas and L4E", () => {
+  it("Keyhole, L4E intuitivo, Oka, 1-Flip, WO and Nutella are in the Método selector, between Por capas and L4E", () => {
     expect(getSelectableMethodsForCubeType("pyraminx").map((method) => method.id)).toEqual([
       "por-capas",
       "keyhole",
       "l4e-intuitivo",
+      "oka",
       "1-flip",
       "wo",
+      "nutella",
       "l4e",
     ]);
-    for (const method of ["keyhole", "l4e-intuitivo", "1-flip", "wo"]) expect(isLearningMethodId(method)).toBe(true);
+    for (const method of ["keyhole", "l4e-intuitivo", "oka", "1-flip", "wo", "nutella"]) expect(isLearningMethodId(method)).toBe(true);
   });
 
   it("each has notation, steps and its L3E block, and its steps are explained", () => {
@@ -56,6 +68,62 @@ describe("Pyraminx methods taught from research", () => {
     expect(getSetInfo("1flip-l3c")).toMatchObject({ method: "1-flip", title: "L3C (1-Flip)" });
   });
 
+  it("Oka and Nutella have notation, steps, their algorithm block and L3E, and their steps are explained", () => {
+    expect(METHOD_CATEGORIES.oka.map((category) => category.id)).toEqual(["notation", "steps", "oka-cierre", "oka-l3e"]);
+    expect(METHOD_CATEGORIES.nutella.map((category) => category.id)).toEqual(["notation", "steps", "nutella-l3c", "nutella-l3e"]);
+    expect(METHOD_STEPS.oka.map((step) => step.title)).toEqual(["Puntas", "Arista Oka", "Centros"]);
+    expect(METHOD_STEPS.nutella.map((step) => step.title)).toEqual(["Puntas", "Aristas cambiadas"]);
+    for (const step of [...METHOD_STEPS.oka, ...METHOD_STEPS.nutella]) {
+      expect(step.intro?.length, step.setId).toBeGreaterThan(100);
+      expect(getSetInfo(step.setId).categoryId).toBe("steps");
+    }
+    expect(getSetInfo("oka-cierre")).toMatchObject({ method: "oka", title: "Cierre del bloque (Oka)" });
+    expect(getSetInfo("nutella-l3c")).toMatchObject({ method: "nutella", title: "L3C (Nutella)" });
+  });
+
+  it("Oka and Nutella reuse Puntas, Keyhole's centers and L3E, and teach research.ts's cases", () => {
+    for (const method of ["oka", "nutella"]) {
+      expect(algorithms(`${method}-puntas` as ResearchSetId)).toEqual(algorithms("keyhole-puntas"));
+      expect(algorithms(`${method}-l3e` as ResearchSetId)).toEqual(algorithms("keyhole-l3e"));
+    }
+    expect(algorithms("oka-centros")).toEqual(KEYHOLE_CENTER_CASES.map((kase) => kase.algorithm));
+    expect(algorithms("oka-arista")).toEqual(OKA_EDGE_CASES.map((kase) => kase.algorithm));
+    expect(algorithms("oka-cierre")).toEqual(OKA_FINISH_CASES.map((kase) => kase.algorithm));
+    expect(algorithms("nutella-aristas")).toEqual(NUTELLA_EDGE_CASES.map((kase) => kase.algorithm));
+    expect(algorithms("nutella-l3c")).toEqual(NUTELLA_L3C_CASES.map((kase) => kase.algorithm));
+  });
+
+  it("each Oka and Nutella case has its own name and says where its edges are", () => {
+    for (const [setId, count] of [["oka-arista", 9], ["oka-cierre", 16], ["nutella-aristas", 7]] as const) {
+      const cases = SETS_PYRAMINX_RESEARCH[setId];
+      expect(cases).toHaveLength(count);
+      expect(new Set(cases.map((kase) => kase.name)).size, setId).toBe(count);
+    }
+    for (const kase of SETS_PYRAMINX_RESEARCH["oka-arista"]) expect(kase.explanation).toMatch(/^La arista roja-azul \(la arista Oka\)/);
+    for (const kase of SETS_PYRAMINX_RESEARCH["nutella-aristas"]) expect(kase.explanation).toMatch(/^La arista roja-amarilla/);
+    const sides = SETS_PYRAMINX_RESEARCH["oka-cierre"].map((kase) => kase.name!.split(" · ")[0]);
+    expect(sides.filter((side) => side === "Oka a la izquierda")).toHaveLength(8);
+    expect(sides.filter((side) => side === "Oka a la derecha")).toHaveLength(8);
+    for (const kase of SETS_PYRAMINX_RESEARCH["oka-centros"]) expect(kase.explanation).toContain("La arista Oka (abajo a la izquierda)");
+  });
+
+  it("Drew Brads' cases cite his text held with the block up; the ones he does not teach say the engine worked them out", () => {
+    const oka = SETS_PYRAMINX_RESEARCH["oka-cierre"];
+    const drew = /^En la hoja de Drew Brads está escrito «[^»]+», sujetando el Pyraminx con el bloque arriba/;
+    expect(oka.filter((kase) => drew.test(kase.note!))).toHaveLength(7);
+    expect(oka.filter((kase) => kase.note!.startsWith("La hoja de Drew Brads no trae este caso"))).toHaveLength(9);
+    for (const kase of SETS_PYRAMINX_RESEARCH["nutella-l3c"]) {
+      expect(kase.note).toMatch(drew);
+      expect(kase.explanation).toContain("están cambiadas de sitio");
+    }
+    // The cases seen from another side of the back tip say so.
+    const turned = [...OKA_FINISH_CASES, ...NUTELLA_L3C_CASES].filter((kase) => kase.turnedRound).map((kase) => kase.algorithm);
+    expect(turned.length).toBeGreaterThan(0);
+    for (const kase of [...oka, ...SETS_PYRAMINX_RESEARCH["nutella-l3c"]].filter((k) => turned.includes(k.algorithm))) {
+      expect(kase.note).toContain("desde otro lado de la punta de detrás");
+    }
+  });
+
   it("every case is registered, marked as researched with its source, explained and drawn", () => {
     for (const kase of all) {
       expect(ALGORITHM_SETS[kase.setId]).toContain(kase);
@@ -65,17 +133,18 @@ describe("Pyraminx methods taught from research", () => {
     }
   });
 
-  it("every algorithm, with its final turn, solves its own case (1-Flip's edge step leaves its edge flipped on purpose)", () => {
+  it("every algorithm, with its final turn, solves its own case (some steps leave the block unfinished on purpose)", () => {
+    const unfinished = ["1flip-arista", "oka-arista", "oka-centros", "nutella-aristas"];
     for (const setId of Object.keys(SETS_PYRAMINX_RESEARCH) as ResearchSetId[]) {
       researchCaseStates(setId).forEach(({ state, goal, adjust }, index) => {
         const kase = SETS_PYRAMINX_RESEARCH[setId][index];
         const after = applyPyraTokens(state, [...parsePyraNotation(kase.algorithm), ...adjust]);
         const label = `${setId} ${kase.id}`;
-        if (setId === "1flip-arista") expect(after.join(), label).toBe(goal.join());
+        if (unfinished.includes(setId)) expect(after.join(), label).toBe(goal.join());
         else expect(isSolvedPyraminx(after), label).toBe(true);
       });
     }
-    expect(isSolvedPyraminx(researchCaseStates("1flip-arista")[0].goal)).toBe(false);
+    for (const setId of unfinished) expect(isSolvedPyraminx(researchCaseStates(setId as ResearchSetId)[0].goal), setId).toBe(false);
   });
 
   it("reuses what already exists instead of copying it: Puntas, the V, the back edge and L3E", () => {

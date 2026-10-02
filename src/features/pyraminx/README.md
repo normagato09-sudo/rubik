@@ -52,6 +52,14 @@ azul a la derecha. Las 4 puntas se llaman como los giros que las mueven: U
   de RUBIKO es el más corto del motor. La tercera arista del bloque (7)
   también la calcula el motor. `seenWithBlockHome()` cambia los colores
   para ver el caso desde el lado en que el bloque está en su sitio.
+  Oka y Nutella salen de la hoja de Drew Brads (`withEdge()`,
+  `OKA_EDGE_GOAL` y `NUTELLA_EDGE_GOAL` son lo que deja su paso 2):
+  `turnedRoundBack()` gira además el Pyraminx entero alrededor de la punta
+  de detrás ([B]) para que el hueco de Oka, o la arista bien puesta de
+  Nutella, quede arriba detrás. Oka: arista Oka (9, del motor) y cierre
+  del bloque (16: los 6 de la hoja, uno de ellos para los dos lados, y 9
+  del motor). Nutella: aristas cambiadas (7, del motor) y L3C (los 8 de
+  la hoja).
 - `diagrams.ts` — dibuja, con el estilo de las hojas, los casos que estas no
   traen, a partir del propio caso: el dibujo no puede contradecir al
   algoritmo.
@@ -72,5 +80,7 @@ los centros de Keyhole 81 posiciones, 26 casos si el de arriba se deja
 para el final, L3C de WO 27 posiciones y 11 casos (uno resuelto: los 10 de
 la fuente son los otros 10), L3C de 1-Flip 81 posiciones y 27 casos (la
 fuente enseña 10 y GLHF; 16 no tienen algoritmo en ella) y la tercera
-arista 7. Comprueba también que la media vuelta es de verdad un giro del
-Pyraminx entero.
+arista 7; Oka 9 sitios para su arista y 16 para el cierre; Nutella 7
+para la segunda arista y 27 posiciones de L3C (la hoja enseña 8).
+Comprueba también que la media vuelta y el giro alrededor de la punta de
+detrás son de verdad giros del Pyraminx entero.

@@ -16,11 +16,18 @@ import {
   KEYHOLE_CENTER_CASES,
   KEYHOLE_EDGE_CASES,
   L3E_CASES,
+  NUTELLA_EDGE_CASES,
+  NUTELLA_EDGE_GOAL,
+  NUTELLA_L3C_CASES,
+  OKA_EDGE_CASES,
+  OKA_EDGE_GOAL,
+  OKA_FINISH_CASES,
   ONE_FLIP_L3C_CASES,
   THIRD_EDGE_CASES,
   WO_L3C_CASES,
   heldWithBlockBehind,
   seenWithBlockHome,
+  turnedRoundBack,
   type ResearchCase,
 } from "./research";
 import { solvePyraminx } from "./search";
@@ -224,9 +231,9 @@ function bfsDistance(goals: PyraColor[][], key: (state: readonly PyraColor[]) =>
 }
 
 describe("Sarah's algorithms, held with the block at the back", () => {
-  it("tipping the Pyraminx over is a whole turn of it: each move becomes the swapped one", () => {
+  it("tipping the Pyraminx over is a whole turn of it: each move, tip, face turn and whole turn becomes the swapped one", () => {
     const stickers = Array.from({ length: 36 }, (_, i) => i);
-    const moves = ALL_PYRA_TOKENS.filter((token) => !(ROTATIONS as PyraToken[]).includes(token));
+    const moves = ALL_PYRA_TOKENS;
     const turns = ROTATIONS.flatMap((a) => ROTATIONS.map((b) => [a, b] as PyraToken[]));
     const halfTurn = turns.find((turn) =>
       moves.every(
@@ -360,4 +367,116 @@ describe("WO and 1-Flip: the block's third edge", () => {
       });
     });
   }
+});
+
+// ---------- Oka and Nutella ----------
+
+const blockKey = (state: readonly PyraColor[]) => [CENTER_STICKERS.B.map((i) => state[i]).join(), ...[LR, LD, RD].map((p) => locate(state, p))].join("|");
+const centersAndBlock = (state: readonly PyraColor[]) => [centers.map((i) => state[i]).join(), ...[LR, LD, RD].map((p) => locate(state, p))].join("|");
+
+describe("turning the Pyraminx round the back tip", () => {
+  it("is a whole turn of it ([B]): each move, tip, face turn and whole turn becomes the swapped one", () => {
+    const stickers = Array.from({ length: 36 }, (_, i) => i);
+    const turn = ROTATIONS.find((r) =>
+      ALL_PYRA_TOKENS.every(
+        (token) =>
+          applyPyraTokens(stickers, [r, token, ...invertPyraTokens([r])]).join() ===
+          applyPyraTokens(stickers, parsePyraNotation(turnedRoundBack(token, 1))).join(),
+      ),
+    );
+    expect(turn).toBe("[B]");
+    expect(turnedRoundBack("U' L' U B L B'", 3)).toBe("U' L' U B L B'");
+  });
+});
+
+describe("Oka: the Oka edge", () => {
+  // Blue-yellow solved; the red-blue edge bottom left, blue on the left face.
+  const goal = OKA_EDGE_GOAL;
+
+  it("goal: the red-blue edge in the bottom-left slot with blue on the left face", () => {
+    expect(locate(goal, LR)).toBe(`${LD}'`);
+    expect(goal[EDGE_STICKERS[LD][0]]).toBe("blue");
+  });
+
+  it("covers the 9 places, keeps the back center and the blue-yellow edge, and each is the shortest", () => {
+    const distance = bfsDistance([goal], (s) => [CENTER_STICKERS.B.map((i) => s[i]).join(), locate(s, LR), locate(s, RD)].join("|"));
+    const states = OKA_EDGE_CASES.map((kase) => applyPyraTokens(goal, invertPyraTokens(parsePyraNotation(kase.algorithm))));
+    const places = states.map((state) => locate(state, LR));
+    expect(new Set(places).size).toBe(9);
+    expect(places).not.toContain(`${LD}'`);
+    expect(places).not.toContain(`${RD}`);
+    states.forEach((state, k) => {
+      const { algorithm } = OKA_EDGE_CASES[k];
+      expect(done(state, [...CENTER_STICKERS.B, ...edges(RD)]), algorithm).toBe(true);
+      expect(distance.get([CENTER_STICKERS.B.map((i) => state[i]).join(), locate(state, LR), locate(state, RD)].join("|"))).toBe(
+        parsePyraNotation(algorithm).length,
+      );
+    });
+  });
+});
+
+describe("Oka: the Oka edge and the free slot", () => {
+  const places = [LR, FL, FR, FD].flatMap((slot) => [`${slot}`, `${slot}'`]);
+  const home = centers.map((i) => solved[i]).join();
+  // Bottom left: the Oka edge flipped there, blue-yellow solved. Bottom right: the mirror.
+  const expected = new Set([
+    ...places.map((p) => [home, `${LD}'`, p, `${RD}`].join("|")),
+    ...places.map((p) => [home, `${RD}`, `${LD}`, p].join("|")),
+  ]);
+
+  it("the engine counts 16 places for the third edge, and the 16 cases are exactly those", () => {
+    expect(expected.size).toBe(16);
+    const ours = OKA_FINISH_CASES.map((kase) => centersAndBlock(seenWithBlockHome(caseOf(kase))));
+    expect(new Set(ours)).toEqual(expected);
+    expect(ours).toHaveLength(16);
+  });
+
+  it("Drew Brads' cases are 7 of them (one algorithm for both sides); the engine's are the shortest with U, L, R and B", () => {
+    const distance = bfsDistance([solved], centersAndBlock);
+    expect(OKA_FINISH_CASES.filter((kase) => !kase.computed)).toHaveLength(7);
+    for (const kase of OKA_FINISH_CASES.filter((k) => k.computed)) {
+      expect(distance.get(centersAndBlock(caseOf(kase))), kase.algorithm).toBe(parsePyraNotation(kase.algorithm).length);
+      expect(kase.adjust).toBeUndefined();
+    }
+  }, 60_000);
+});
+
+describe("Nutella", () => {
+  // Red-blue solved; the other two block edges in each other's slot.
+  const swapped = NUTELLA_EDGE_GOAL;
+
+  it("the swapped block: red-blue home, red-yellow bottom right and blue-yellow bottom left", () => {
+    expect([LR, LD, RD].map((p) => locate(swapped, p))).toEqual([`${LR}`, `${RD}`, `${LD}`]);
+  });
+
+  it("the second edge covers its 7 places, keeps the rest of the block, and each is the shortest", () => {
+    const distance = bfsDistance([swapped], blockKey);
+    const states = NUTELLA_EDGE_CASES.map((kase) => applyPyraTokens(swapped, invertPyraTokens(parsePyraNotation(kase.algorithm))));
+    const places = states.map((state) => locate(state, LD));
+    expect(new Set(places).size).toBe(7);
+    expect(places).not.toContain(`${RD}`);
+    states.forEach((state, k) => {
+      const { algorithm } = NUTELLA_EDGE_CASES[k];
+      expect([locate(state, LR), locate(state, RD)], algorithm).toEqual([`${LR}`, `${LD}`]);
+      expect(distance.get(blockKey(state)), algorithm).toBe(parsePyraNotation(algorithm).length);
+    });
+  });
+
+  it("each L3C case has that block and the front centers only twisted; 27 positions, all different cases, the sheet's 8 among them", () => {
+    const watched = [...tips, ...centers, ...edges(LR, LD, RD)];
+    const key = (state: readonly PyraColor[]) => watched.map((i) => state[i]).join();
+    const positions = new Set<string>();
+    for (let u = 0; u < 3; u++)
+      for (let l = 0; l < 3; l++)
+        for (let r = 0; r < 3; r++) positions.add(key(twisted(twisted(twisted(swapped, "U", u), "L", l), "R", r)));
+    expect(positions.size).toBe(27);
+    const ours = NUTELLA_L3C_CASES.map((kase) => seenWithBlockHome(caseOf(kase)));
+    for (const [k, state] of ours.entries()) {
+      const { algorithm } = NUTELLA_L3C_CASES[k];
+      expect([LR, LD, RD].map((p) => locate(state, p)), algorithm).toEqual([`${LR}`, `${RD}`, `${LD}`]);
+      expect(positions.has(key(state)), algorithm).toBe(true);
+      expect(done(state, centers), algorithm).toBe(false);
+    }
+    expect(new Set(ours.map(key)).size).toBe(8);
+  });
 });

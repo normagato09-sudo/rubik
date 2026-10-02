@@ -14,7 +14,11 @@ export type LearningCategoryId =
   | "1flip-l3c"
   | "1flip-l3e"
   | "wo-l3c"
-  | "wo-l3e";
+  | "wo-l3e"
+  | "oka-cierre"
+  | "oka-l3e"
+  | "nutella-l3c"
+  | "nutella-l3e";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -31,8 +35,10 @@ export type LearningMethodId =
   | "por-capas"
   | "keyhole"
   | "l4e-intuitivo"
+  | "oka"
   | "1-flip"
   | "wo"
+  | "nutella"
   | "l4e";
 
 /** The cubes Aprender teaches. */
@@ -48,8 +54,10 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   "por-capas": "pyraminx",
   keyhole: "pyraminx",
   "l4e-intuitivo": "pyraminx",
+  oka: "pyraminx",
   "1-flip": "pyraminx",
   wo: "pyraminx",
+  nutella: "pyraminx",
   l4e: "pyraminx",
 };
 
@@ -61,8 +69,10 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   "por-capas": "Pyraminx · Por capas",
   keyhole: "Pyraminx · Keyhole",
   "l4e-intuitivo": "Pyraminx · L4E intuitivo",
+  oka: "Pyraminx · Oka",
   "1-flip": "Pyraminx · 1-Flip",
   wo: "Pyraminx · WO",
+  nutella: "Pyraminx · Nutella",
   l4e: "Pyraminx · L4E",
 };
 
@@ -206,6 +216,30 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       accent: "#facc15",
     },
   ],
+  oka: [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Los giros del Pyraminx, y también Fw y los giros enteros",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas, la arista Oka y los centros con el hueco",
+    },
+    {
+      id: "oka-cierre",
+      title: "Cierre del bloque (Oka)",
+      description: "La arista Oka a su sitio y la última del bloque en el hueco, a la vez",
+      accent: "#ff8c1a",
+    },
+    {
+      id: "oka-l3e",
+      title: "L3E (Oka)",
+      description: "Termina con las tres aristas de la cara de delante",
+      accent: "#facc15",
+    },
+  ],
   "1-flip": [
     {
       ...NOTATION,
@@ -250,6 +284,30 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
     {
       id: "wo-l3e",
       title: "L3E (WO)",
+      description: "Termina con las tres aristas de la cara de delante",
+      accent: "#facc15",
+    },
+  ],
+  nutella: [
+    {
+      ...NOTATION,
+      title: "Notación del Pyraminx",
+      description: "Los giros del Pyraminx, y también Fw y los giros enteros",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Puntas y el bloque de detrás, con dos aristas cambiadas",
+    },
+    {
+      id: "nutella-l3c",
+      title: "L3C (Nutella)",
+      description: "Los tres centros de delante y las dos aristas cambiadas a la vez",
+      accent: "#ff8c1a",
+    },
+    {
+      id: "nutella-l3e",
+      title: "L3E (Nutella)",
       description: "Termina con las tres aristas de la cara de delante",
       accent: "#facc15",
     },

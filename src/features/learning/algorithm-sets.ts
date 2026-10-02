@@ -82,6 +82,15 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "wo-arista": { width: 200, height: 200 },
   "wo-l3c": { width: 200, height: 200 },
   "wo-l3e": { width: 200, height: 200 },
+  "oka-puntas": { width: 200, height: 200 },
+  "oka-arista": { width: 200, height: 200 },
+  "oka-centros": { width: 200, height: 200 },
+  "oka-cierre": { width: 200, height: 200 },
+  "oka-l3e": { width: 200, height: 200 },
+  "nutella-puntas": { width: 200, height: 200 },
+  "nutella-aristas": { width: 200, height: 200 },
+  "nutella-l3c": { width: 200, height: 200 },
+  "nutella-l3e": { width: 200, height: 200 },
 };
 
 export function buildCases(

@@ -27,8 +27,10 @@ describe("getSelectableMethodsForCubeType", () => {
       "por-capas",
       "keyhole",
       "l4e-intuitivo",
+      "oka",
       "1-flip",
       "wo",
+      "nutella",
       "l4e",
     ]);
   });

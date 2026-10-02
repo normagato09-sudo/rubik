@@ -15,10 +15,14 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     detrás, Centros, Arista del hueco) y L3E.
   - L4E intuitivo (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V,
     Arista de arriba) y L3E.
+  - Oka (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Arista Oka,
+    Centros), Cierre del bloque y L3E.
   - 1-Flip (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Bloque de
     detrás, Arista volteada), L3C y L3E.
   - WO (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Bloque de detrás,
     Tercera arista), L3C y L3E.
+  - Nutella (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Aristas
+    cambiadas), L3C y L3E.
   - L4E (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V) y L4E.
 
   Cada bloque tiene contenido real de `docs/source` y muestra su progreso
@@ -98,7 +102,8 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     diagrama.
 - `notation.ts` (Pyraminx) — `NOTATION_MOVES_PYRAMINX`: los diagramas de
   `docs/source/Notacion Pyraminx.docx`, en `public/learning/notation-pyraminx/`.
-- `cases-pyraminx-research.ts` — Keyhole, L4E intuitivo, 1-Flip y WO, con
+- `cases-pyraminx-research.ts` — Keyhole, L4E intuitivo, Oka, 1-Flip, WO y
+  Nutella, con
   los algoritmos de `features/pyraminx/research.ts`. Cada caso lleva
   `research` (nombre y enlace de la fuente) y la ficha lo muestra como
   «Investigado». Lo que varios métodos comparten (Puntas, V/bloque, la
@@ -114,6 +119,12 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     arista acaba dada la vuelta a propósito, así que cada caso es otro.
     `researchCaseStates()` da el estado de cada caso y lo que deja su
     algoritmo.
+  - Oka: la arista Oka (9) y los centros (los de Keyhole, con la arista
+    Oka abajo a la izquierda) dejan el bloque a medias a propósito; el
+    cierre del bloque (16, los dos lados) cita la hoja de Drew Brads en sus
+    7 casos y dice que el motor calculó los otros 9.
+  - Nutella: las aristas cambiadas (7, del motor) y su L3C (los 8 de Drew
+    Brads, pasados al bloque detrás; la ficha cita el texto original).
 - `notation.ts` (Pyraminx, ampliada) — `PYRAMINX_EXTRA_MOVES`: Fw, Lw, Rw,
   Dw y [U], [L], [R], [B], que usan los métodos Top First. Sin diagrama en
   el documento, así que van aparte y no cuentan en el progreso, como las
@@ -128,7 +139,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
 
 Rutas:
 - `/entrenar` — pantalla Aprender. `?metodo=ortega|cll` muestra el 2×2,
-  `?metodo=por-capas|keyhole|l4e-intuitivo|1-flip|wo|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
+  `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
   `esquinas`, `f2l`, `oll`, `pll`, `primera-cara`, `primera-capa`,

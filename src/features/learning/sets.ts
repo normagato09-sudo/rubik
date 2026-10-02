@@ -137,6 +137,21 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
       intro: `En vez de los algoritmos de L4E, aquí se coloca primero una de las cuatro aristas que faltan y las otras tres se resuelven después con un ciclo, en L3E. ${BACK_EDGE_INTRO}`,
     },
   ],
+  oka: [
+    { setId: "oka-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "oka-arista",
+      title: "Arista Oka",
+      intro:
+        "Oka es un método Top First: primero se hace el bloque de una punta, aquí la de detrás, que es su centro con sus tres aristas. Empieza con una de ellas, la azul-amarilla (abajo a la derecha), con intuición. Luego viene su truco: la arista roja-azul, la «arista Oka», no va a su sitio sino abajo a la izquierda, en el de la roja-amarilla. Así el sitio de arriba detrás queda libre, como en Keyhole, y la última arista entra después a la vez que la Oka sube. Los centros de delante todavía no importan: mira dónde está la arista Oka y usa su caso. (También vale el espejo: la roja-amarilla bien y la arista Oka abajo a la derecha; el cierre del bloque trae los casos de los dos lados.)",
+    },
+    {
+      setId: "oka-centros",
+      title: "Centros",
+      intro:
+        "Los centros de delante se arreglan igual que en Keyhole, con el hueco de arriba detrás libre. Fw gira la cara verde entera (todo menos el bloque de detrás) y U gira la capa de arriba. Fw sube el centro de la izquierda a la posición de arriba, U lo gira y Fw' lo devuelve; para el de la derecha es al revés: Fw', U y Fw. Arregla así el de la izquierda y el de la derecha, y deja para el final el de arriba, que se pone solo con U. Ninguno de estos giros mueve la arista Oka ni la azul-amarilla.",
+    },
+  ],
   "1-flip": [
     { setId: "1flip-puntas", title: "Puntas", intro: PUNTAS_INTRO },
     {
@@ -164,6 +179,15 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
       ),
     },
     { setId: "wo-arista", title: "Tercera arista", intro: `${THIRD_EDGE_INTRO} Al terminar, el bloque de detrás está entero.` },
+  ],
+  nutella: [
+    { setId: "nutella-puntas", title: "Puntas", intro: PUNTAS_INTRO },
+    {
+      setId: "nutella-aristas",
+      title: "Aristas cambiadas",
+      intro:
+        "Nutella es un método Top First: primero se hace el bloque de una punta, aquí la de detrás, que es su centro con sus tres aristas. Su truco es dejar dos de ellas cambiadas de sitio a propósito: un solo algoritmo arregla después los tres centros de delante y las cambia a la vez. Pon con intuición la roja-azul en su sitio (arriba detrás) y la azul-amarilla abajo a la izquierda, en el sitio de la roja-amarilla. Estos casos ponen la roja-amarilla abajo a la derecha, en el de la azul-amarilla. Los centros de delante todavía no importan.",
+    },
   ],
   l4e: [
     { setId: "l4e-puntas", title: "Puntas", intro: PUNTAS_INTRO },
@@ -217,6 +241,15 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "wo-arista": "wo",
   "wo-l3c": "wo",
   "wo-l3e": "wo",
+  "oka-puntas": "oka",
+  "oka-arista": "oka",
+  "oka-centros": "oka",
+  "oka-cierre": "oka",
+  "oka-l3e": "oka",
+  "nutella-puntas": "nutella",
+  "nutella-aristas": "nutella",
+  "nutella-l3c": "nutella",
+  "nutella-l3e": "nutella",
 };
 
 export interface SetInfo {

@@ -14,16 +14,20 @@ para el móvil.
     detrás, centros con el hueco, arista del hueco (7) y L3E (5).
   - Pyraminx · L4E intuitivo (`?metodo=l4e-intuitivo`): notación, puntas,
     V, arista de arriba (7) y L3E (5).
+  - Pyraminx · Oka (`?metodo=oka`): notación, puntas, arista Oka (9),
+    centros con el hueco, cierre del bloque (16) y L3E (5).
   - Pyraminx · 1-Flip (`?metodo=1-flip`): notación, puntas, bloque de
     detrás, arista volteada (7), L3C (11) y L3E (5).
   - Pyraminx · WO (`?metodo=wo`): notación, puntas, bloque de detrás,
     tercera arista (7), L3C (10) y L3E (5).
+  - Pyraminx · Nutella (`?metodo=nutella`): notación, puntas, aristas
+    cambiadas (7), L3C (8) y L3E (5).
   - Pyraminx · L4E (`?metodo=l4e`): notación del Pyraminx, puntas, V y
     L4E (30).
 
-  Keyhole, L4E intuitivo, 1-Flip y WO no salen de `docs/source/` sino de
-  investigación (Speedsolving Wiki, guía Keyhole de Andy Klise, Last 3
-  Centers de Sarah's Cubing Site): cada ficha lo marca como «Investigado»
+  Keyhole, L4E intuitivo, Oka, 1-Flip, WO y Nutella no salen de
+  `docs/source/` sino de investigación (Speedsolving Wiki, guía Keyhole de
+  Andy Klise, Last 3 Centers de Sarah's Cubing Site, hoja de Drew Brads): cada ficha lo marca como «Investigado»
   con su fuente, y cada algoritmo está comprobado con el motor del
   Pyraminx, que también cuenta los casos de cada paso.
 
