@@ -100,6 +100,11 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "petrus-f2l": { width: 200, height: 200 },
   "petrus-coll": { width: 200, height: 200 },
   "petrus-epll": { width: 200, height: 200 },
+  "zz-eo": { width: 200, height: 200 },
+  "zz-linea": { width: 200, height: 200 },
+  "zz-f2l": { width: 200, height: 200 },
+  "zz-ocll": { width: 200, height: 200 },
+  "zz-pll": { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -152,7 +157,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|coll|epll|eo|l4e|l3e|l3c)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|ocll|oll|pll|pbl|cll|coll|epll|eo|l4e|l3e|l3c)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

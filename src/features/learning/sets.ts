@@ -73,6 +73,15 @@ const PETRUS_EO_INTRO =
 const PETRUS_F2L_INTRO =
   "Con las aristas orientadas, el lado derecho de las dos primeras capas se termina solo con R y U. Así nunca se estropean el bloque ni la orientación, y al acabar las aristas de arriba ya tienen el amarillo arriba. Primero la arista blanca-naranja (abajo a la derecha), luego la pareja de detrás (la esquina blanca-azul-naranja con la arista azul-naranja) y por último la de delante (la esquina blanca-verde-naranja con la arista verde-naranja). Los diagramas miran desde delante a la derecha.";
 
+const ZZ_EO_INTRO =
+  "ZZ empieza orientando las 12 aristas a la vez. Una arista es buena o mala: mira su pegatina amarilla o blanca (si no tiene, la verde o la azul). Es buena si esa pegatina mira arriba o abajo, o si la arista está en la capa del medio y la pegatina mira hacia delante o hacia atrás; si no, es mala. R, L, U y D nunca cambian si una arista es buena o mala, y un cuarto de vuelta de F o de B da la vuelta a las cuatro aristas de su capa. Siempre hay un número par de malas: con R, L, U y D junta cuatro en la capa F (o en la B) y gira F (o B), y repite hasta que no quede ninguna. Los diagramas miran desde delante a la derecha, con las aristas en color.";
+
+const ZZ_LINE_INTRO =
+  "La línea son las aristas blanca-verde (abajo delante) y blanca-azul (abajo detrás), con el centro blanco entre ellas. Con las aristas ya orientadas, colócalas sin cuartos de vuelta de F ni de B: con R, L, U, D, F2 y B2, que no cambian la orientación. Con la EO, es el paso EOLine. Estos casos ponen la blanca-verde, con la blanca-azul ya en su sitio. Los diagramas miran desde delante a la derecha.";
+
+const ZZ_F2L_INTRO =
+  "Con la EOLine hecha, las dos primeras capas se terminan solo con L, U y R, sin girar el cubo. Primero el bloque de la izquierda, con L y U: la arista blanca-roja, luego la pareja de detrás (la esquina blanca-azul-roja con la arista azul-roja) y la de delante (la blanca-verde-roja con la verde-roja). Después, el de la derecha con R y U, igual pero en espejo. Al acabar, las aristas de arriba ya tienen el amarillo arriba. Los diagramas miran desde el lado en que se trabaja.";
+
 export interface LearningStep {
   setId: AlgorithmSetId;
   title: string;
@@ -95,6 +104,11 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
     { setId: "petrus-223", title: "Bloque 2×2×3", intro: PETRUS_223_INTRO },
     { setId: "petrus-eo", title: "Orientación de aristas (EO)", intro: PETRUS_EO_INTRO },
     { setId: "petrus-f2l", title: "Resto de F2L con R y U", intro: PETRUS_F2L_INTRO },
+  ],
+  zz: [
+    { setId: "zz-eo", title: "Orientación de aristas (EO)", intro: ZZ_EO_INTRO },
+    { setId: "zz-linea", title: "Línea", intro: ZZ_LINE_INTRO },
+    { setId: "zz-f2l", title: "F2L con L, U y R", intro: ZZ_F2L_INTRO },
   ],
   ortega: [
     {
@@ -276,6 +290,11 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "petrus-f2l": "petrus",
   "petrus-coll": "petrus",
   "petrus-epll": "petrus",
+  "zz-eo": "zz",
+  "zz-linea": "zz",
+  "zz-f2l": "zz",
+  "zz-ocll": "zz",
+  "zz-pll": "zz",
 };
 
 export interface SetInfo {

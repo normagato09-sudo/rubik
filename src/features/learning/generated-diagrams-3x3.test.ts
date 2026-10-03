@@ -16,8 +16,8 @@ describe("the 3×3 diagrams RUBIKO draws", () => {
     }
   }
 
-  it("are one per case of Petrus's steps and COLL (EPLL uses the PLL sheet's)", () => {
-    const sets = ["petrus-222", "petrus-223", "petrus-eo", "petrus-f2l", "petrus-coll"] as const;
+  it("are one per case of the steps of Petrus and ZZ and of COLL (EPLL, OCLL and PLL use the sheets')", () => {
+    const sets = ["petrus-222", "petrus-223", "petrus-eo", "petrus-f2l", "petrus-coll", "zz-eo", "zz-linea", "zz-f2l"] as const;
     expect(Object.keys(diagrams).sort()).toEqual(sets.flatMap((set) => ALGORITHM_SETS[set].map((kase) => kase.image)).sort());
   });
 

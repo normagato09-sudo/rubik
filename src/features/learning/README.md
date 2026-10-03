@@ -125,8 +125,8 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     7 casos y dice que el motor calculó los otros 9.
   - Nutella: las aristas cambiadas (7, del motor) y su L3C (los 8 de Drew
     Brads, pasados al bloque detrás; la ficha cita el texto original).
-- `cases-3x3-research.ts` — los métodos del 3×3 investigados (Petrus, de
-  momento). Cada caso lleva `research` y la ficha lo muestra como
+- `cases-3x3-research.ts` — los métodos del 3×3 investigados (Petrus y
+  ZZ). Cada caso lleva `research` y la ficha lo muestra como
   «Investigado».
   - Pasos intuitivos (bloque 2×2×2, bloque 2×2×3, orientación de aristas y
     resto de F2L con R y U): casos básicos, cada uno resuelto con la
@@ -136,6 +136,11 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     (la T y la Y de la hoja de PLL). Los tests comprueban que son 42 casos
     distintos y que son todos los que cuenta el motor, y la forma de cada uno.
   - EPLL (4): Ua, Ub, H y Z de la hoja de PLL, con sus diagramas.
+  - ZZ: orientación de las 12 aristas, la línea y F2L con L, U y R (el
+    bloque de la izquierda es el espejo del de la derecha, que es el último
+    paso de Petrus). OCLL (7): los casos 21–27 de la hoja de OLL; el 26 de
+    la hoja repite el algoritmo del 27 (Sune), así que se usa el Antisune de
+    SpeedCubeDB con el diagrama de la hoja. PLL (21): la de la hoja.
   - `cube3.ts` sujeta el cubo como las hojas (amarillo arriba, verde
     delante) y describe dónde está cada pieza; `diagrams-3x3.ts` dibuja los
     diagramas y `generated-diagrams-3x3.ts` los junta
@@ -153,7 +158,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=petrus` muestra Petrus (3×3), `?metodo=ortega|cll` el 2×2,
+- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz` muestra Petrus o ZZ (3×3), `?metodo=ortega|cll` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
@@ -164,5 +169,6 @@ Rutas:
   `keyhole-l3e`, `l4ei-puntas`, `l4ei-v`, `l4ei-arista`, `l4ei-l3e`,
   `1flip-puntas`, `1flip-bloque`, `1flip-arista`, `1flip-l3c`,
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
-  `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll` y `petrus-epll`.
+  `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
+  `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll` y `zz-pll`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

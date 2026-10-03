@@ -4,7 +4,7 @@ import { LEVELS, getMethodLevel, getMethodsForCubeType, getSelectableMethodsForC
 
 describe("getMethodsForCubeType", () => {
   it("returns only methods scoped to the given cube type", () => {
-    expect(getMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "roux", "zz", "lbl"]);
+    expect(getMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "zz", "roux", "lbl"]);
     expect(getMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll"]);
   });
 
@@ -14,8 +14,8 @@ describe("getMethodsForCubeType", () => {
 });
 
 describe("getSelectableMethodsForCubeType", () => {
-  it("lists CFOP and Petrus for 3x3; coming-soon methods stay in METHODS but are hidden", () => {
-    expect(getSelectableMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus"]);
+  it("lists CFOP, Petrus and ZZ for 3x3; coming-soon methods stay in METHODS but are hidden", () => {
+    expect(getSelectableMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "zz"]);
     expect(METHODS.map((method) => method.id)).toContain("roux");
   });
 
@@ -52,6 +52,7 @@ describe("method levels", () => {
   it("the levels agreed in docs/plan-metodos.md", () => {
     expect(getMethodLevel("cfop")).toBe("Intermedio");
     expect(getMethodLevel("petrus")).toBe("Intermedio");
+    expect(getMethodLevel("zz")).toBe("Avanzado");
     expect(getMethodLevel("ortega")).toBe("Intermedio");
     expect(getMethodLevel("cll")).toBe("Avanzado");
     expect(getMethodLevel("por-capas")).toBe("Principiante");

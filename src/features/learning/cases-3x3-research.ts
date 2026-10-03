@@ -1,6 +1,6 @@
 /**
  * Aprender del 3×3: the methods taught from research (not from the user's
- * sheets) — Petrus for now. Every case says where it comes from on its card
+ * sheets) — Petrus and ZZ. Every case says where it comes from on its card
  * («Investigado»). The intuitive steps (blocks, edge orientation, the rest
  * of F2L) have no algorithm sheet: their cases are the basic ones, each
  * solved by the shortest sequence RUBIKO's engine finds with the moves the
@@ -14,6 +14,7 @@
 import type { CubeState, Vec3 } from "@/features/cube/types";
 import type { ResearchSource } from "@/features/pyraminx/research";
 import type { AlgorithmCase } from "./algorithm-sets";
+import type { CornerView } from "./diagrams-3x3";
 import {
   caseState3,
   describePiece,
@@ -22,6 +23,7 @@ import {
   placeName,
   sticker3,
 } from "./cube3";
+import { OLL_CASES } from "./oll-cases";
 import { PLL_CASES } from "./pll-cases";
 
 export const SOURCES_3X3 = {
@@ -37,6 +39,14 @@ export const SOURCES_3X3 = {
     name: "SpeedCubeDB · COLL",
     url: "https://speedcubedb.com/a/3x3/COLL",
   },
+  speedsolvingZZ: {
+    name: "Speedsolving Wiki · ZZ method",
+    url: "https://www.speedsolving.com/wiki/index.php?title=ZZ_method",
+  },
+  speedcubedbOll: {
+    name: "SpeedCubeDB · OLL",
+    url: "https://speedcubedb.com/a/3x3/OLL",
+  },
 } satisfies Record<string, ResearchSource>;
 
 export type Research3x3SetId =
@@ -45,15 +55,33 @@ export type Research3x3SetId =
   | "petrus-eo"
   | "petrus-f2l"
   | "petrus-coll"
-  | "petrus-epll";
+  | "petrus-epll"
+  | "zz-eo"
+  | "zz-linea"
+  | "zz-f2l"
+  | "zz-ocll"
+  | "zz-pll";
 
-/** The moves each intuitive step allows: they never break what is already built. */
-export const STEP_MOVES: Record<"petrus-222" | "petrus-223" | "petrus-eo" | "petrus-f2l", string[]> = {
+export type StepSetId = "petrus-222" | "petrus-223" | "petrus-eo" | "petrus-f2l" | "zz-eo" | "zz-linea" | "zz-f2l";
+
+/**
+ * The moves each intuitive step allows: they never break what is already
+ * built. A letter alone is its quarter and half turns; "F2" is only the
+ * half turn (ZZ's line keeps the edges oriented, so no quarter F or B).
+ */
+export const STEP_MOVES: Record<StepSetId, string[]> = {
   "petrus-222": ["U", "L", "F"],
   "petrus-223": ["U", "B", "R"],
   "petrus-eo": ["R", "U", "F"],
   "petrus-f2l": ["R", "U"],
+  "zz-eo": ["R", "L", "U", "D", "F", "B"],
+  "zz-linea": ["R", "L", "U", "D", "F2", "B2"],
+  "zz-f2l": ["L", "U", "R"],
 };
+
+/** Every move a STEP_MOVES list allows. */
+export const expandMoves = (letters: string[]) =>
+  letters.flatMap((letter) => (letter.endsWith("2") ? [letter] : [letter, `${letter}'`, `${letter}2`]));
 
 // ---------- the pieces of each block ----------
 
@@ -74,6 +102,8 @@ const DBR: Vec3 = [1, -1, -1];
 const BR: Vec3 = [1, 0, -1];
 const DFR: Vec3 = [1, -1, 1];
 const FR: Vec3 = [1, 0, 1];
+const B_CENTER: Vec3 = [0, 0, -1];
+const R_CENTER: Vec3 = [1, 0, 0];
 
 /** The seven edges still free after the 2×2×3: the four on top and the three on the right. */
 export const FREE_EDGES: Vec3[] = [
@@ -101,6 +131,10 @@ export interface StepCaseDef {
   does: string;
   /** Which color each piece's description follows. */
   keyColors: ("white" | "green" | "blue")[];
+  /** The moves of this case, when the step uses different ones on each side (ZZ's F2L). */
+  moves?: string[];
+  /** Where its diagram looks from, when not the step's usual corner. */
+  view?: CornerView;
 }
 
 const PAIR = "El algoritmo junta las dos piezas y las mete en su hueco sin romper lo que ya está hecho.";
@@ -137,21 +171,21 @@ export const PETRUS_223: StepCaseDef[] = [
   {
     algorithm: "B2",
     pieces: [DB],
-    goal: either(BLOCK_222, DB),
+    goal: either(BLOCK_222, DB, B_CENTER),
     does: EDGE,
     keyColors: ["white"],
   },
   {
     algorithm: "R B'",
     pieces: [DB],
-    goal: either(BLOCK_222, DB),
+    goal: either(BLOCK_222, DB, B_CENTER),
     does: EDGE,
     keyColors: ["white"],
   },
   {
     algorithm: "B",
     pieces: [DB],
-    goal: either(BLOCK_222, DB),
+    goal: either(BLOCK_222, DB, B_CENTER),
     does: EDGE,
     keyColors: ["white"],
   },
@@ -176,14 +210,14 @@ export const PETRUS_F2L: StepCaseDef[] = [
   {
     algorithm: "R2",
     pieces: [DR],
-    goal: either(BLOCK_223, DR),
+    goal: either(BLOCK_223, DR, R_CENTER),
     does: EDGE,
     keyColors: ["white"],
   },
   {
     algorithm: "R",
     pieces: [DR],
-    goal: either(BLOCK_223, DR),
+    goal: either(BLOCK_223, DR, R_CENTER),
     does: EDGE,
     keyColors: ["white"],
   },
@@ -331,6 +365,114 @@ const EPLL_EXPLANATIONS: Record<string, string> = {
   Z: "Las esquinas están bien y las aristas se cambian con una de al lado, dos a dos.",
 };
 
+// ---------- ZZ ----------
+
+/** ZZ's line: the white-green and white-blue edges with the white center between them. */
+export const LINE = (p: Vec3) => p[0] === 0 && p[1] === -1;
+/** ZZ's left block: the line and the left third of the first two layers. */
+export const LEFT_BLOCK = (p: Vec3) => LINE(p) || (p[0] === -1 && p[1] <= 0);
+/** The twelve edges, named top to bottom: front, right, back and left in each layer. */
+export const ALL_EDGES: Vec3[] = [
+  ...FREE_EDGES.slice(0, 4),
+  [1, 0, 1],
+  [1, 0, -1],
+  [-1, 0, -1],
+  [-1, 0, 1],
+  [0, -1, 1],
+  [1, -1, 0],
+  [0, -1, -1],
+  [-1, -1, 0],
+];
+
+const DF: Vec3 = [0, -1, 1];
+const DL: Vec3 = [-1, -1, 0];
+const L_CENTER: Vec3 = [-1, 0, 0];
+
+/** The same algorithm seen in a mirror between left and right: R and L swap and every turn goes the other way. */
+export function mirrorAlgorithm(algorithm: string): string {
+  return algorithm
+    .split(" ")
+    .map((move) => {
+      const face = move[0] === "R" ? "L" : move[0] === "L" ? "R" : move[0];
+      const rest = move.slice(1);
+      return face + (rest === "2" ? "2" : rest === "'" ? "" : "'");
+    })
+    .join(" ");
+}
+
+/** Paso 1 of ZZ: edge orientation of all twelve edges, with nothing built yet. */
+export const ZZ_EO: { algorithm: string; does: string }[] = [
+  { algorithm: "F", does: "F da la vuelta a las cuatro aristas de su capa." },
+  {
+    algorithm: "D F",
+    does: "D lleva la arista mala de abajo a la izquierda a abajo delante. Así las cuatro malas quedan en la capa F, y F les da la vuelta.",
+  },
+  {
+    algorithm: "L F",
+    does: "L lleva la arista mala de arriba a la izquierda a delante a la izquierda. Así las cuatro malas quedan en la capa F, y F les da la vuelta.",
+  },
+  {
+    algorithm: "F R' F'",
+    does: "F lleva la arista mala de arriba delante a delante a la derecha, R' pone allí la otra arista mala y F' lo devuelve todo: cada una pasa una vez por un cuarto de vuelta de F, y eso es lo que les da la vuelta.",
+  },
+  {
+    algorithm: "F U2 B",
+    does: "Con 6 malas hacen falta giros de F y de B: cada arista mala pasa por un solo cuarto de vuelta (de F o de B) y cada buena, por ninguno o por dos.",
+  },
+];
+
+/** Paso 2 of ZZ: the white-green edge of the line, with the white-blue one already in place and the edges oriented. */
+export const ZZ_LINE: StepCaseDef[] = ["F2", "U F2", "R U F2", "L' U' F2"].map((algorithm) => ({
+  algorithm,
+  pieces: [DF],
+  goal: LINE,
+  does: EDGE,
+  keyColors: ["white"],
+}));
+
+const ZZ_LEFT_SIDE: StepCaseDef[] = [
+  { algorithm: "L2", pieces: [DL], goal: either(LINE, DL, L_CENTER), does: EDGE, keyColors: ["white"] },
+  { algorithm: "L'", pieces: [DL], goal: either(LINE, DL, L_CENTER), does: EDGE, keyColors: ["white"] },
+  ...["R' U' R", "U' R' U R"].map(
+    (right): StepCaseDef => ({
+      algorithm: mirrorAlgorithm(right),
+      pieces: [DBL, BL],
+      goal: (p) => LINE(p) || (p[0] === -1 && p[1] <= 0 && p[2] <= 0),
+      does: PAIR,
+      keyColors: ["white", "blue"],
+    }),
+  ),
+  ...["R U R'", "U R U' R'", "R U2 R' U' R U R'"].map(
+    (right): StepCaseDef => ({ algorithm: mirrorAlgorithm(right), pieces: [DFL, FL], goal: LEFT_BLOCK, does: PAIR, keyColors: ["white", "green"] }),
+  ),
+];
+
+const ZZ_LEFT = ZZ_LEFT_SIDE.map((def): StepCaseDef => ({ ...def, moves: ["L", "U"], view: "delante-izquierda" }));
+
+/**
+ * Paso 3 of ZZ: the first two layers with L, U and R — the left block
+ * (the mirror of the right one), then the right block, which is Petrus's
+ * last step.
+ */
+export const ZZ_F2L: StepCaseDef[] = [
+  ...ZZ_LEFT,
+  ...PETRUS_F2L.map((def): StepCaseDef => ({ ...def, moves: ["R", "U"], view: "delante-derecha" })),
+];
+
+/** The OCLL cases of the user's OLL sheet (21 to 27): the ones with the top edges already oriented. */
+const OCLL = [
+  { oll: "21", name: "H", family: "H" },
+  { oll: "22", name: "Pi", family: "Pi" },
+  { oll: "23", name: "U", family: "U" },
+  { oll: "24", name: "T", family: "T" },
+  { oll: "25", name: "L", family: "L" },
+  { oll: "26", name: "Antisune", family: "AS" },
+  { oll: "27", name: "Sune", family: "S" },
+];
+
+/** SpeedCubeDB's Antisune (OLL 26), since the sheet's row 26 repeats the Sune of row 27. */
+export const ANTISUNE = "y R U2 R' U' R U' R'";
+
 // ---------- the cases as Aprender shows them ----------
 
 const id = (index: number) => String(index + 1).padStart(2, "0");
@@ -338,7 +480,11 @@ const id = (index: number) => String(index + 1).padStart(2, "0");
 const COMPUTED_NOTE = (moves: string[]) =>
   `Calculado por RUBIKO: es el más corto que encuentra su motor con ${joinSpanish(moves)}, los giros que no rompen lo que ya está hecho.`;
 
-function stepCases(setId: "petrus-222" | "petrus-223" | "petrus-f2l", defs: StepCaseDef[]): AlgorithmCase[] {
+function stepCases(
+  setId: "petrus-222" | "petrus-223" | "petrus-f2l" | "zz-linea" | "zz-f2l",
+  defs: StepCaseDef[],
+  source: ResearchSource = SOURCES_3X3.speedsolvingPetrus,
+): AlgorithmCase[] {
   return defs.map((def, index) => ({
     setId,
     id: id(index),
@@ -346,8 +492,8 @@ function stepCases(setId: "petrus-222" | "petrus-223" | "petrus-f2l", defs: Step
     algorithm: def.algorithm,
     image: `/learning/${setId}/${setId}-${id(index)}.svg`,
     explanation: `${describePieces(caseState3(def.algorithm), def)} ${def.does}`,
-    note: COMPUTED_NOTE(STEP_MOVES[setId]),
-    research: SOURCES_3X3.speedsolvingPetrus,
+    note: COMPUTED_NOTE(def.moves ?? STEP_MOVES[setId]),
+    research: source,
   }));
 }
 
@@ -396,6 +542,50 @@ export const PETRUS_EPLL_CASES: AlgorithmCase[] = EPLL_NAMES.map((name, index) =
   note: `El mismo algoritmo y diagrama que la ${name} de tu hoja de PLL.`,
 }));
 
+export const ZZ_EO_CASES: AlgorithmCase[] = ZZ_EO.map(({ algorithm, does }, index) => {
+  const bad = ALL_EDGES.filter((edge) => !edgeIsGood(caseState3(algorithm), edge)).map(placeName);
+  return {
+    setId: "zz-eo",
+    id: id(index),
+    number: index + 1,
+    algorithm,
+    image: `/learning/zz-eo/zz-eo-${id(index)}.svg`,
+    explanation: `${bad.length} aristas malas: ${joinSpanish(bad)}. ${does}`,
+    note: COMPUTED_NOTE(STEP_MOVES["zz-eo"]),
+    research: SOURCES_3X3.speedsolvingZZ,
+  };
+});
+
+export const ZZ_LINE_CASES = stepCases("zz-linea", ZZ_LINE, SOURCES_3X3.speedsolvingZZ);
+export const ZZ_F2L_CASES = stepCases("zz-f2l", ZZ_F2L, SOURCES_3X3.speedsolvingZZ);
+
+const OCLL_DOES =
+  "El algoritmo pone el amarillo arriba en las cuatro esquinas sin tocar las dos primeras capas ni dar la vuelta a ninguna arista. Después, la PLL coloca toda la capa.";
+
+export const ZZ_OCLL_CASES: AlgorithmCase[] = OCLL.map(({ oll, name, family }, index) => {
+  const sheet = OLL_CASES.find((kase) => kase.id === oll)!;
+  const fromSheet = oll !== "26";
+  return {
+    setId: "zz-ocll",
+    id: id(index),
+    number: index + 1,
+    name,
+    algorithm: fromSheet ? sheet.algorithm : ANTISUNE,
+    image: sheet.image,
+    explanation: `Las cuatro aristas de arriba ya tienen el amarillo arriba. Forma de ${FAMILY[family]}. Gira U hasta verlo como en el diagrama. ${OCLL_DOES}`,
+    note: fromSheet
+      ? `El mismo algoritmo y diagrama que la OLL ${oll} de tu hoja.`
+      : `El diagrama es el de la OLL 26 de tu hoja, pero en esa fila pone «${sheet.algorithm}», el algoritmo del Sune (OLL 27), que no resuelve este caso. Se usa el de SpeedCubeDB.`,
+    ...(fromSheet ? {} : { research: SOURCES_3X3.speedcubedbOll }),
+  };
+});
+
+export const ZZ_PLL_CASES: AlgorithmCase[] = PLL_CASES.map((kase) => ({
+  ...kase,
+  setId: "zz-pll",
+  note: `El mismo algoritmo y diagrama que la ${kase.name} de tu hoja de PLL (la de CFOP).`,
+}));
+
 export const SETS_3X3_RESEARCH: Record<Research3x3SetId, AlgorithmCase[]> = {
   "petrus-222": PETRUS_222_CASES,
   "petrus-223": PETRUS_223_CASES,
@@ -403,5 +593,10 @@ export const SETS_3X3_RESEARCH: Record<Research3x3SetId, AlgorithmCase[]> = {
   "petrus-f2l": PETRUS_F2L_CASES,
   "petrus-coll": PETRUS_COLL_CASES,
   "petrus-epll": PETRUS_EPLL_CASES,
+  "zz-eo": ZZ_EO_CASES,
+  "zz-linea": ZZ_LINE_CASES,
+  "zz-f2l": ZZ_F2L_CASES,
+  "zz-ocll": ZZ_OCLL_CASES,
+  "zz-pll": ZZ_PLL_CASES,
 };
 

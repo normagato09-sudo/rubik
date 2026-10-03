@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseCubeAlgorithm } from "@/features/cube/algorithm";
-import { applyMoves, invertMoves } from "@/features/cube/moves";
+import { applyMoves, invertMoves, type Move } from "@/features/cube/moves";
 import type { CubeState, Vec3 } from "@/features/cube/types";
 import { FACELET_GEOMETRY } from "@/features/solver/cube-state";
 import {
@@ -17,8 +17,19 @@ import {
   PETRUS_EPLL_CASES,
   PETRUS_F2L,
   STEP_MOVES,
+  ALL_EDGES,
+  LEFT_BLOCK,
+  ZZ_EO,
+  ZZ_EO_CASES,
+  ZZ_F2L,
+  ZZ_LINE,
+  ZZ_OCLL_CASES,
+  ZZ_PLL_CASES,
   badEdges,
+  expandMoves,
+  mirrorAlgorithm,
 } from "./cases-3x3-research";
+import { PLL_CASES } from "./pll-cases";
 import { caseState3 as unheldCase, edgeIsGood, heldLike, piecesSolved, positionsWhere, sheetSolved3, stickersAt } from "./cube3";
 import { colorsOf, shortest, solvedStickers, turnAll, turnsOf, type Stickers } from "./search-3x3";
 
@@ -35,9 +46,9 @@ const regionDone = (region: (p: Vec3) => boolean) => {
 };
 
 /** edgeIsGood on stickers, for the search. */
-function edgesGood(state: Stickers): boolean {
+function edgesGood(state: Stickers, edges: Vec3[] = FREE_EDGES): boolean {
   const colors = colorsOf(state);
-  return FREE_EDGES.every((edge) => {
+  return edges.every((edge) => {
     const places = [...stickersAt([edge])];
     const own = places.map((i) => colors[i]);
     let key = own.findIndex((c) => c === "yellow" || c === "white");
@@ -47,17 +58,19 @@ function edgesGood(state: Stickers): boolean {
   });
 }
 
-describe("Petrus: the intuitive steps' cases", () => {
+describe("Petrus and ZZ: the intuitive steps' cases", () => {
   const steps = [
     { setId: "petrus-222", defs: PETRUS_222 },
     { setId: "petrus-223", defs: PETRUS_223 },
     { setId: "petrus-f2l", defs: PETRUS_F2L },
+    { setId: "zz-linea", defs: ZZ_LINE },
+    { setId: "zz-f2l", defs: ZZ_F2L },
   ] as const;
 
   for (const { setId, defs } of steps) {
     it(`${setId}: only the step's moves, and nothing already built moves`, () => {
-      const allowed = turnsOf(STEP_MOVES[setId]);
       for (const def of defs) {
+        const allowed = expandMoves(def.moves ?? STEP_MOVES[setId]);
         expect(parseCubeAlgorithm(def.algorithm).every((move) => allowed.includes(move)), def.algorithm).toBe(true);
         const built = positionsWhere(def.goal).filter((p) => !def.pieces.some((piece) => same(piece, p)));
         expect(piecesSolved(caseState3(def.algorithm), built), def.algorithm).toBe(true);
@@ -66,16 +79,25 @@ describe("Petrus: the intuitive steps' cases", () => {
     });
 
     it(`${setId}: each algorithm is the shortest the engine finds`, () => {
-      const allowed = turnsOf(STEP_MOVES[setId]);
       for (const def of defs) {
+        const allowed = expandMoves(def.moves ?? STEP_MOVES[setId]) as Move[];
         const found = shortest(turnAll(solvedStickers(), undo(def.algorithm)), allowed, regionDone(def.goal), 8);
         expect(found?.length, def.algorithm).toBe(parseCubeAlgorithm(def.algorithm).length);
       }
     });
   }
 
-  it("the F2L step starts with the edges oriented, as EO leaves them", () => {
-    for (const def of PETRUS_F2L) expect(badEdges(caseState3(def.algorithm)), def.algorithm).toEqual([]);
+  it("the F2L and line steps start with the edges oriented, as EO leaves them", () => {
+    for (const def of [...PETRUS_F2L, ...ZZ_LINE, ...ZZ_F2L]) {
+      const state = caseState3(def.algorithm);
+      expect(ALL_EDGES.filter((edge) => !edgeIsGood(state, edge)), def.algorithm).toEqual([]);
+    }
+  });
+
+  it("ZZ's left block is the mirror of the right one", () => {
+    expect(mirrorAlgorithm("R U2 R' U' R U R'")).toBe("L' U2 L U L' U' L");
+    expect(ZZ_F2L.slice(0, 7).map((def) => def.algorithm)).toEqual(PETRUS_F2L.map((def) => mirrorAlgorithm(def.algorithm)));
+    expect(positionsWhere(LEFT_BLOCK)).toHaveLength(9);
   });
 
   it("the explanations say where the pieces are", () => {
@@ -101,6 +123,24 @@ describe("Petrus: edge orientation", () => {
       const found = shortest(turnAll(solvedStickers(), undo(algorithm)), turnsOf(STEP_MOVES["petrus-eo"]), (s) => regionDone(BLOCK_223)(s) && edgesGood(s), 5);
       expect(found?.length, algorithm).toBe(parseCubeAlgorithm(algorithm).length);
     }
+  });
+});
+
+describe("ZZ: edge orientation", () => {
+  it("every case leaves the twelve edges good, and is the shortest the engine finds", () => {
+    for (const { algorithm } of ZZ_EO) {
+      const found = shortest(turnAll(solvedStickers(), undo(algorithm)), turnsOf(STEP_MOVES["zz-eo"]), (s) => edgesGood(s, ALL_EDGES), 3);
+      expect(found?.length, algorithm).toBe(parseCubeAlgorithm(algorithm).length);
+    }
+  });
+
+  it("the explanations name the bad edges the text works with", () => {
+    const bad = (index: number) => ZZ_EO_CASES[index].explanation!.split(".")[0];
+    expect(bad(0)).toBe("4 aristas malas: arriba delante, en la capa del medio, delante a la derecha, en la capa del medio, delante a la izquierda y abajo delante");
+    expect(bad(1)).toContain("abajo a la izquierda");
+    expect(bad(2)).toContain("arriba a la izquierda");
+    expect(bad(3)).toBe("2 aristas malas: arriba delante y arriba a la derecha");
+    expect(bad(4)).toMatch(/^6 aristas malas/);
   });
 });
 
@@ -171,6 +211,27 @@ function allCornerCases(): Set<string> {
 
 const SOLVED_KEY = caseKey(topCorners(solved));
 
+const SUNE_TWIST = () => topCorners(caseState3("R U R' U R U2 R'")).find((c) => c.twist !== 0)!.twist;
+
+/** The family of the corners' shape on top: O, H, Pi, U, T, L, S (Sune) or AS (Antisune). */
+function shapeOf(state: CubeState): string {
+  const corners = topCorners(state);
+  const up = corners.filter((c) => c.twist === 0).length;
+  // Where the yellow of each turned corner looks.
+  const looks = SLOTS.flatMap((slot) => {
+    const cubie = state.cubies.find((c) => same(c.position, slot))!;
+    const yellow = cubie.stickers.find((s) => s.color === "yellow")!;
+    const normal = cubie.orientation[yellow.face[1] as "x" | "y" | "z"].map((c) => c * (yellow.face[0] === "+" ? 1 : -1));
+    return normal[1] === 1 ? [] : [normal.join()];
+  });
+  if (up === 4) return "O";
+  if (up === 0) return new Set(looks).size === 2 ? "H" : "Pi";
+  if (up === 1) return corners.every((c) => c.twist === 0 || c.twist === SUNE_TWIST()) ? "S" : "AS";
+  const diagonal = (corners[0].twist === 0 && corners[2].twist === 0) || (corners[1].twist === 0 && corners[3].twist === 0);
+  if (diagonal) return "L";
+  return looks[0] === looks[1] ? "U" : "T";
+}
+
 describe("Petrus: COLL", () => {
   it("has the 40 cases of SpeedCubeDB and the 2 with the corners already turned", () => {
     expect(COLL_ALGORITHMS).toHaveLength(40);
@@ -195,31 +256,41 @@ describe("Petrus: COLL", () => {
   });
 
   it("each case has the corner shape its name says", () => {
-    const sune = topCorners(caseState3("R U R' U R U2 R'")).find((c) => c.twist !== 0)!.twist;
-    for (const kase of PETRUS_COLL_CASES) {
+    for (const kase of PETRUS_COLL_CASES) expect(shapeOf(caseState3(kase.algorithm)), kase.name).toBe(kase.name!.split(" ")[0]);
+  });
+});
+
+describe("ZZ: OCLL and PLL", () => {
+  it("are the 7 OCLL of the OLL sheet (Antisune from SpeedCubeDB) and its 21 PLL", () => {
+    expect(ZZ_OCLL_CASES.map((kase) => kase.name)).toEqual(["H", "Pi", "U", "T", "L", "Antisune", "Sune"]);
+    expect(ZZ_OCLL_CASES[5].research?.name).toBe("SpeedCubeDB · OLL");
+    expect(ZZ_PLL_CASES.map((kase) => kase.algorithm)).toEqual(PLL_CASES.map((kase) => kase.algorithm));
+  });
+
+  it("every OCLL keeps the first two layers and the edges, and has the shape of its name", () => {
+    const family: Record<string, string> = { Antisune: "AS", Sune: "S" };
+    for (const kase of ZZ_OCLL_CASES) {
       const state = caseState3(kase.algorithm);
-      const corners = topCorners(state);
-      const up = corners.filter((c) => c.twist === 0).length;
-      const family = kase.name!.split(" ")[0];
-      // Where the yellow of each turned corner looks.
-      const looks = SLOTS.flatMap((slot) => {
-        const cubie = state.cubies.find((c) => same(c.position, slot))!;
-        const yellow = cubie.stickers.find((s) => s.color === "yellow")!;
-        const normal = cubie.orientation[yellow.face[1] as "x" | "y" | "z"].map((c) => c * (yellow.face[0] === "+" ? 1 : -1));
-        return normal[1] === 1 ? [] : [normal.join()];
-      });
-      const expected: Record<string, () => boolean> = {
-        O: () => up === 4,
-        H: () => up === 0 && new Set(looks).size === 2,
-        Pi: () => up === 0 && new Set(looks).size === 3,
-        U: () => up === 2 && looks[0] === looks[1] && corners[0].twist + corners[2].twist !== 0 && corners[1].twist + corners[3].twist !== 0,
-        T: () => up === 2 && looks[0] !== looks[1] && corners[0].twist + corners[2].twist !== 0 && corners[1].twist + corners[3].twist !== 0,
-        L: () => up === 2 && (corners[0].twist + corners[2].twist === 0 || corners[1].twist + corners[3].twist === 0),
-        S: () => up === 1 && corners.every((c) => c.twist === 0 || c.twist === sune),
-        AS: () => up === 1 && corners.every((c) => c.twist === 0 || c.twist === 3 - sune),
-      };
-      expect(expected[family](), kase.name).toBe(true);
+      expect(piecesSolved(state, positionsWhere(F2L)), kase.name).toBe(true);
+      expect(badEdges(state), kase.name).toEqual([]);
+      expect(shapeOf(state), kase.name).toBe(family[kase.name!] ?? kase.name);
     }
+  });
+
+  it("the 7 are every way the corners can be turned, as the engine counts them", () => {
+    const shapes = new Set<string>();
+    for (let t = 0; t < 27; t++) {
+      const twists = [t % 3, Math.floor(t / 3) % 3, Math.floor(t / 9) % 3];
+      twists.push((6 - twists[0] - twists[1] - twists[2]) % 3);
+      shapes.add([0, 1, 2, 3].map((k) => [0, 1, 2, 3].map((i) => twists[(i + k) % 4]).join("")).sort()[0]);
+    }
+    shapes.delete("0000");
+    expect(shapes.size).toBe(7);
+    const cases = ZZ_OCLL_CASES.map((kase) => {
+      const twists = topCorners(caseState3(kase.algorithm)).map((c) => c.twist);
+      return [0, 1, 2, 3].map((k) => [0, 1, 2, 3].map((i) => twists[(i + k) % 4]).join("")).sort()[0];
+    });
+    expect(new Set(cases)).toEqual(shapes);
   });
 });
 

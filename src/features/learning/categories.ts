@@ -20,7 +20,9 @@ export type LearningCategoryId =
   | "nutella-l3c"
   | "nutella-l3e"
   | "petrus-coll"
-  | "petrus-epll";
+  | "petrus-epll"
+  | "zz-ocll"
+  | "zz-pll";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -33,6 +35,7 @@ export interface LearningCategory {
 export type LearningMethodId =
   | "cfop"
   | "petrus"
+  | "zz"
   | "ortega"
   | "cll"
   | "por-capas"
@@ -53,6 +56,7 @@ export const DEFAULT_LEARNING_METHOD: LearningMethodId = "cfop";
 export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   cfop: "3x3",
   petrus: "3x3",
+  zz: "3x3",
   ortega: "2x2",
   cll: "2x2",
   "por-capas": "pyraminx",
@@ -69,6 +73,7 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
 export const METHOD_LABEL: Record<LearningMethodId, string> = {
   cfop: "3×3 · CFOP",
   petrus: "3×3 · Petrus",
+  zz: "3×3 · ZZ",
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
   "por-capas": "Pyraminx · Por capas",
@@ -146,6 +151,30 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       id: "petrus-epll",
       title: "EPLL (Petrus)",
       description: "Coloca las aristas de arriba: los 4 PLL que solo mueven aristas",
+      accent: "#a78bfa",
+    },
+  ],
+  zz: [
+    {
+      ...NOTATION,
+      title: "Notación del Cubo",
+      description: "Los giros básicos, y también las capas del medio y los giros anchos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Orientar las aristas, la línea y F2L solo con L, U y R",
+    },
+    {
+      id: "zz-ocll",
+      title: "OCLL (ZZ)",
+      description: "Pon el amarillo arriba en las esquinas: las aristas ya lo tienen",
+      accent: "#facc15",
+    },
+    {
+      id: "zz-pll",
+      title: "PLL (ZZ)",
+      description: "Permuta las piezas de la última capa",
       accent: "#a78bfa",
     },
   ],

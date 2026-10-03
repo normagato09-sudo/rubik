@@ -73,7 +73,7 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
    el motor, con tests, y en el bloque de notación de Aprender. De paso se
    comprueban con el motor los OLL y PLL de las hojas que usan M o giros anchos.
 3. **Petrus** (3×3) (hecho).
-4. **ZZ** (3×3).
+4. **ZZ** (3×3) (hecho).
 5. **Roux** (3×3).
 6. **EG** (2×2): EG-1 y EG-2; reutiliza CLL.
 7. **LEG y TCLL** (2×2).
