@@ -5,6 +5,9 @@ para el móvil.
 
 - **Aprender** (`/entrenar`) — según el Cubo y el Método elegidos en Inicio:
   - 3×3 · CFOP: notación, cruz, esquinas, F2L, OLL y PLL.
+  - 3×3 · Petrus (`?metodo=petrus`): notación, bloque 2×2×2 (4), bloque
+    2×2×3 (5), orientación de aristas (7), resto de F2L con R y U (7), COLL
+    (42) y EPLL (4).
   - 2×2 · Ortega (`?metodo=ortega`): notación 2×2, primera cara, OLL (7) y
     PBL (5).
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).

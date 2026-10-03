@@ -15,6 +15,8 @@ const HIGHLIGHTED_3X3: Partial<Record<LearningCategoryId, number[]>> = {
   f2l: [3, 4, 5, 6, 7, 8],
   oll: [0, 1, 2],
   pll: [0, 2],
+  "petrus-coll": [0, 2],
+  "petrus-epll": [1],
 };
 
 const HIGHLIGHTED_2X2: Partial<Record<LearningCategoryId, number[]>> = {

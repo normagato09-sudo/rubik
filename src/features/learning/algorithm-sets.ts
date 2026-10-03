@@ -1,5 +1,6 @@
 import type { ResearchSource } from "@/features/pyraminx/research";
 import { splitAlgorithm } from "./algorithm";
+import type { Research3x3SetId } from "./cases-3x3-research";
 import type { ResearchSetId } from "./cases-pyraminx-research";
 
 export type AlgorithmSetId =
@@ -23,7 +24,9 @@ export type AlgorithmSetId =
   | "l4e-v"
   | "l4e"
   // Pyraminx methods taught from research (cases-pyraminx-research.ts)
-  | ResearchSetId;
+  | ResearchSetId
+  // 3×3 methods taught from research (cases-3x3-research.ts)
+  | Research3x3SetId;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -91,6 +94,12 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "nutella-aristas": { width: 200, height: 200 },
   "nutella-l3c": { width: 200, height: 200 },
   "nutella-l3e": { width: 200, height: 200 },
+  "petrus-222": { width: 200, height: 200 },
+  "petrus-223": { width: 200, height: 200 },
+  "petrus-eo": { width: 200, height: 200 },
+  "petrus-f2l": { width: 200, height: 200 },
+  "petrus-coll": { width: 200, height: 200 },
+  "petrus-epll": { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -143,7 +152,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|l4e|l3e|l3c)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|oll|pll|pbl|cll|coll|epll|eo|l4e|l3e|l3c)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

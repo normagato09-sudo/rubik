@@ -125,6 +125,21 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     7 casos y dice que el motor calculó los otros 9.
   - Nutella: las aristas cambiadas (7, del motor) y su L3C (los 8 de Drew
     Brads, pasados al bloque detrás; la ficha cita el texto original).
+- `cases-3x3-research.ts` — los métodos del 3×3 investigados (Petrus, de
+  momento). Cada caso lleva `research` y la ficha lo muestra como
+  «Investigado».
+  - Pasos intuitivos (bloque 2×2×2, bloque 2×2×3, orientación de aristas y
+    resto de F2L con R y U): casos básicos, cada uno resuelto con la
+    secuencia más corta que encuentra el motor con los giros que permite el
+    paso (`STEP_MOVES`). Los tests lo comprueban con `search-3x3.ts`.
+  - COLL (42): los 40 de SpeedCubeDB y los 2 con las esquinas ya orientadas
+    (la T y la Y de la hoja de PLL). Los tests comprueban que son 42 casos
+    distintos y que son todos los que cuenta el motor, y la forma de cada uno.
+  - EPLL (4): Ua, Ub, H y Z de la hoja de PLL, con sus diagramas.
+  - `cube3.ts` sujeta el cubo como las hojas (amarillo arriba, verde
+    delante) y describe dónde está cada pieza; `diagrams-3x3.ts` dibuja los
+    diagramas y `generated-diagrams-3x3.ts` los junta
+    (`WRITE_DIAGRAMS=1 npx vitest run generated-diagrams` los reescribe).
 - `notation.ts` (Pyraminx, ampliada) — `PYRAMINX_EXTRA_MOVES`: Fw, Lw, Rw,
   Dw y [U], [L], [R], [B], que usan los métodos Top First. Sin diagrama en
   el documento, así que van aparte y no cuentan en el progreso, como las
@@ -138,7 +153,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=ortega|cll` muestra el 2×2,
+- `/entrenar` — pantalla Aprender. `?metodo=petrus` muestra Petrus (3×3), `?metodo=ortega|cll` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
@@ -148,5 +163,6 @@ Rutas:
   `keyhole-puntas`, `keyhole-bloque`, `keyhole-centros`, `keyhole-arista`,
   `keyhole-l3e`, `l4ei-puntas`, `l4ei-v`, `l4ei-arista`, `l4ei-l3e`,
   `1flip-puntas`, `1flip-bloque`, `1flip-arista`, `1flip-l3c`,
-  `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c` y `wo-l3e`.
+  `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
+  `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll` y `petrus-epll`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

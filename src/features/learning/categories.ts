@@ -18,7 +18,9 @@ export type LearningCategoryId =
   | "oka-cierre"
   | "oka-l3e"
   | "nutella-l3c"
-  | "nutella-l3e";
+  | "nutella-l3e"
+  | "petrus-coll"
+  | "petrus-epll";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -30,6 +32,7 @@ export interface LearningCategory {
 /** The methods Aprender teaches — the active ones of features/trainer/methods.ts. */
 export type LearningMethodId =
   | "cfop"
+  | "petrus"
   | "ortega"
   | "cll"
   | "por-capas"
@@ -49,6 +52,7 @@ export const DEFAULT_LEARNING_METHOD: LearningMethodId = "cfop";
 /** Which cube each method is for (matches features/trainer/methods.ts). */
 export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   cfop: "3x3",
+  petrus: "3x3",
   ortega: "2x2",
   cll: "2x2",
   "por-capas": "pyraminx",
@@ -64,6 +68,7 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
 /** How the Aprender screen names each method under its title. */
 export const METHOD_LABEL: Record<LearningMethodId, string> = {
   cfop: "3×3 · CFOP",
+  petrus: "3×3 · Petrus",
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
   "por-capas": "Pyraminx · Por capas",
@@ -117,6 +122,30 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       id: "pll",
       title: "PLL (CFOP)",
       description: "Permuta las piezas de la última capa",
+      accent: "#a78bfa",
+    },
+  ],
+  petrus: [
+    {
+      ...NOTATION,
+      title: "Notación del Cubo",
+      description: "Los giros básicos, y también las capas del medio y los giros anchos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Dos bloques, la orientación de las aristas y el resto de F2L con R y U",
+    },
+    {
+      id: "petrus-coll",
+      title: "COLL (Petrus)",
+      description: "Orienta y coloca las esquinas de arriba con las aristas ya orientadas",
+      accent: "#f472b6",
+    },
+    {
+      id: "petrus-epll",
+      title: "EPLL (Petrus)",
+      description: "Coloca las aristas de arriba: los 4 PLL que solo mueven aristas",
       accent: "#a78bfa",
     },
   ],

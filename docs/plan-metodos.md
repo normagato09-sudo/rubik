@@ -1,6 +1,6 @@
 # Plan de métodos
 
-Estado: **confirmado por el usuario** (2026-10-02). FH queda pendiente hasta que diga qué es. Sustituye a la
+Estado: **confirmado por el usuario** (2026-10-02). FH queda fuera hasta que diga qué es (2026-10-03). Sustituye a la
 tabla anterior de métodos del Pyraminx, que ya está terminada.
 
 ## Reglas de trabajo
@@ -72,12 +72,12 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
 2. **Notación 3×3 ampliada** (hecho): M, E, S y giros anchos (r/Rw, l, u, d, f, b) en
    el motor, con tests, y en el bloque de notación de Aprender. De paso se
    comprueban con el motor los OLL y PLL de las hojas que usan M o giros anchos.
-3. **Petrus** (3×3).
+3. **Petrus** (3×3) (hecho).
 4. **ZZ** (3×3).
 5. **Roux** (3×3).
 6. **EG** (2×2): EG-1 y EG-2; reutiliza CLL.
 7. **LEG y TCLL** (2×2).
-8. **FH**: solo si el usuario confirma qué es.
+8. **FH**: fuera del plan por ahora (el usuario, 2026-10-03). Si más adelante dice qué método es, se añade.
 
 En el selector de Método, cada cubo ordena sus métodos por nivel, de más
 fácil a más difícil.

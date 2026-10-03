@@ -15,6 +15,7 @@ import {
   PYRA_PUNTAS_CASES,
   PYRA_ULTIMA_CAPA_CASES,
 } from "./cases-pyraminx";
+import { SETS_3X3_RESEARCH } from "./cases-3x3-research";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
@@ -43,6 +44,7 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   "l4e-v": L4E_V_CASES,
   l4e: L4E_LEARN_CASES,
   ...SETS_PYRAMINX_RESEARCH,
+  ...SETS_3X3_RESEARCH,
 };
 
 const PUNTAS_INTRO =
@@ -58,6 +60,18 @@ const BLOCK_INTRO = (method: string, rest: string) =>
 
 const THIRD_EDGE_INTRO =
   "Falta la arista roja-azul, la de arriba detrás. Los centros de delante todavía no importan, así que bastan muy pocos giros: mira dónde está (en uno de los tres lados de la cara verde, o ya en su sitio) y usa su caso.";
+
+const PETRUS_222_INTRO =
+  "Petrus empieza con un bloque de 2×2×2: una esquina con sus tres aristas y sus tres centros. Se puede hacer en cualquier esquina; aquí, con el amarillo arriba y el verde delante, es el de abajo delante a la izquierda, el de la esquina blanca-verde-roja. Se hace con intuición: coloca primero las aristas blanca-roja y blanca-verde junto a sus centros, y luego junta la esquina con la arista verde-roja y métela en su hueco, como en F2L. Estos casos son esa última pareja, con U, L y F. Los diagramas miran el cubo desde delante a la izquierda, con las piezas del bloque en color.";
+
+const PETRUS_223_INTRO =
+  "Ahora el bloque crece hacia atrás hasta ocupar la parte izquierda de las dos primeras capas. Faltan la arista blanca-azul (abajo detrás), la esquina blanca-azul-roja y la arista azul-roja (detrás a la izquierda). Usa solo U, B y R, que no tocan el bloque 2×2×2: primero la arista blanca-azul y luego la pareja. Los diagramas miran el cubo desde detrás a la izquierda.";
+
+const PETRUS_EO_INTRO =
+  "Quedan 7 aristas libres: las 4 de arriba y las 3 de la derecha. Cada una es buena o mala. Mira su pegatina amarilla o blanca (si no tiene, la verde o la azul): la arista es buena si esa pegatina mira arriba o abajo, o si la arista está en la capa del medio y la pegatina mira hacia delante o hacia atrás. Si no, es mala. R y U nunca cambian si una arista es buena o mala; un cuarto de vuelta de F da la vuelta a las cuatro aristas de su capa. Siempre hay 0, 2, 4 o 6 malas: llévalas con R y U a las posiciones de un caso y usa su algoritmo; con 6, arregla primero 2 y luego las otras 4. Los diagramas miran desde delante a la derecha, con solo las 7 aristas en color.";
+
+const PETRUS_F2L_INTRO =
+  "Con las aristas orientadas, el lado derecho de las dos primeras capas se termina solo con R y U. Así nunca se estropean el bloque ni la orientación, y al acabar las aristas de arriba ya tienen el amarillo arriba. Primero la arista blanca-naranja (abajo a la derecha), luego la pareja de detrás (la esquina blanca-azul-naranja con la arista azul-naranja) y por último la de delante (la esquina blanca-verde-naranja con la arista verde-naranja). Los diagramas miran desde delante a la derecha.";
 
 export interface LearningStep {
   setId: AlgorithmSetId;
@@ -75,6 +89,12 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
   cfop: [
     { setId: "cruz", title: "Cruz" },
     { setId: "esquinas", title: "Esquinas" },
+  ],
+  petrus: [
+    { setId: "petrus-222", title: "Bloque 2×2×2", intro: PETRUS_222_INTRO },
+    { setId: "petrus-223", title: "Bloque 2×2×3", intro: PETRUS_223_INTRO },
+    { setId: "petrus-eo", title: "Orientación de aristas (EO)", intro: PETRUS_EO_INTRO },
+    { setId: "petrus-f2l", title: "Resto de F2L con R y U", intro: PETRUS_F2L_INTRO },
   ],
   ortega: [
     {
@@ -250,6 +270,12 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "nutella-aristas": "nutella",
   "nutella-l3c": "nutella",
   "nutella-l3e": "nutella",
+  "petrus-222": "petrus",
+  "petrus-223": "petrus",
+  "petrus-eo": "petrus",
+  "petrus-f2l": "petrus",
+  "petrus-coll": "petrus",
+  "petrus-epll": "petrus",
 };
 
 export interface SetInfo {
