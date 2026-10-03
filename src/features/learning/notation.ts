@@ -113,21 +113,24 @@ export interface WideMove {
   /** Lowercase letter, as written in algorithms: "r", "u"... */
   move: string;
   label: string;
+  /** The same turn written with single layers ("R M'"), checked on the engine by the tests. */
+  equals?: string;
 }
 
 /**
  * A lowercase face letter turns 2 layers: that face plus the middle layer
- * next to it — shown as "r (2x)". x, y and z are whole-cube rotations, not
- * wide moves, so they are never listed here. These have no diagram in the
- * source document, so they are not counted in the notation progress.
+ * next to it, both the way the face turns — shown as "r (2x)". Some sheets
+ * write it Rw. x, y and z are whole-cube rotations, not wide moves, so they
+ * are never listed here. These have no diagram in the source document, so
+ * they are not counted in the notation progress.
  */
 export const WIDE_MOVES: WideMove[] = [
-  { move: "f", label: "F y la capa central (S)" },
-  { move: "r", label: "R y la capa media (M)" },
-  { move: "l", label: "L y la capa media (M)" },
-  { move: "b", label: "B y la capa central (S)" },
-  { move: "u", label: "U y la capa ecuatorial (E)" },
-  { move: "d", label: "D y la capa ecuatorial (E)" },
+  { move: "f", label: "F y la capa central (S)", equals: "F S" },
+  { move: "r", label: "R y la capa media (M)", equals: "R M'" },
+  { move: "l", label: "L y la capa media (M)", equals: "L M" },
+  { move: "b", label: "B y la capa central (S)", equals: "B S'" },
+  { move: "u", label: "U y la capa ecuatorial (E)", equals: "U E'" },
+  { move: "d", label: "D y la capa ecuatorial (E)", equals: "D E" },
 ];
 
 /**
@@ -148,9 +151,11 @@ export const PYRAMINX_EXTRA_MOVES: WideMove[] = [
   { move: "[B]", label: "Todo el Pyraminx, como B" },
 ];
 
-/** "r", "r'", "2x" or "minúscula" find the wide moves; "Fw" or "[U]" the Pyraminx ones. */
+/** "r", "r'", "Rw", "2x" or "minúscula" find the wide moves; "Fw" or "[U]" the Pyraminx ones. */
 export function matchesWideMove(wide: WideMove, query: string): boolean {
-  const q = query.trim().toLowerCase().replace(/’/g, "'");
+  let q = query.trim().toLowerCase().replace(/’/g, "'");
+  // On the 3×3 Rw is another way of writing r (the Pyraminx's Rw is its own move).
+  if (/^[a-z]$/.test(wide.move)) q = q.replace(/(^|\s)([rludfb])w/g, "$1$2");
   if (q.length === 0) return true;
   if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2 && /^[a-z]$/.test(wide.move);
   const tokens = q.split(/\s+/);

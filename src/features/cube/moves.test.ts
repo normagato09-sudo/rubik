@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createSolvedCube } from "./model";
-import { ALL_MOVES, EVERY_MOVE, FACES, applyMove, applyMoves, inverseMove, invertMoves, isRotation } from "./moves";
+import { parseCubeAlgorithm } from "./algorithm";
+import { ALL_MOVES, EVERY_MOVE, FACES, SLICES, WIDES, applyMove, applyMoves, inverseMove, invertMoves, isRotation } from "./moves";
 import type { Move } from "./moves";
 
 const solved = createSolvedCube();
@@ -114,5 +115,56 @@ describe("2×2 and whole-cube rotations", () => {
   it("face turns and the scramble move list never include rotations", () => {
     expect(ALL_MOVES.some(isRotation)).toBe(false);
     expect(EVERY_MOVE.filter(isRotation)).toEqual(["x", "x'", "x2", "y", "y'", "y2", "z", "z'", "z2"]);
+  });
+});
+
+describe("middle layers and wide turns", () => {
+  const after = (moves: Move[], size: 2 | 3 = 3) => applyMoves(createSolvedCube(size), moves);
+  const same = (a: string, b: string) => expect(after(parseCubeAlgorithm(a)), `${a} = ${b}`).toEqual(after(parseCubeAlgorithm(b)));
+
+  it("each is the face turns and a rotation of the whole cube it stands for", () => {
+    // M turns as L, E as D, S as F; r is R with the middle layer, and so on.
+    same("M", "R L' x'");
+    same("E", "U D' y'");
+    same("S", "F' B z");
+    same("r", "L x");
+    same("l", "R x'");
+    same("u", "D y");
+    same("d", "U y'");
+    same("f", "B z");
+    same("b", "F z'");
+    same("r", "R M'");
+  });
+
+  it("four quarter turns are nothing, the prime undoes it and 2 is two quarter turns", () => {
+    for (const turn of [...SLICES, ...WIDES]) {
+      same(`${turn} ${turn} ${turn} ${turn}`, "");
+      same(`${turn} ${turn}'`, "");
+      same(`${turn}2`, `${turn} ${turn}`);
+    }
+  });
+
+  it("the H perm with M only moves the four top edges", () => {
+    // Centers may end up spun in place, which a 3×3 cannot show: only the other pieces count.
+    const isCenter = (id: string) => id.split(",").filter((c) => c === "0").length === 2;
+    const moved = after(parseCubeAlgorithm("M2 U M2 U2 M2 U M2")).cubies.filter(
+      (cubie, i) => !isCenter(cubie.id) && JSON.stringify(cubie) !== JSON.stringify(solved.cubies[i]),
+    );
+    expect(moved.map((cubie) => cubie.id).sort()).toEqual(["-1,1,0", "0,1,-1", "0,1,1", "1,1,0"]);
+  });
+
+  it("on a 2×2 there is no middle layer: M does nothing and r is R", () => {
+    expect(after(["M"], 2)).toEqual(after([], 2));
+    expect(after(["r"], 2)).toEqual(after(["R"], 2));
+  });
+});
+
+describe("parseCubeAlgorithm", () => {
+  it("reads Rw as r, R2' as R2, drops parentheses and joins a detached prime", () => {
+    expect(parseCubeAlgorithm("(Rw U Rw') M2' U2 '")).toEqual(["r", "U", "r'", "M2", "U2"]);
+  });
+
+  it("rejects what the engine cannot turn", () => {
+    expect(() => parseCubeAlgorithm("R Q")).toThrow("Movimiento no válido: Q");
   });
 });

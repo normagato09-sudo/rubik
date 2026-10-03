@@ -1,6 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parseCubeAlgorithm } from "@/features/cube/algorithm";
+import { createSolvedCube } from "@/features/cube/model";
+import { applyMoves } from "@/features/cube/moves";
 import { parsePyraNotation } from "@/features/pyraminx/moves";
 import {
   NOTATION_MOVES,
@@ -55,10 +58,19 @@ describe("WIDE_MOVES", () => {
     }
   });
 
-  it("finds wide moves by letter or by \"2x\"", () => {
+  it("each turns on the engine as the single layers it says it equals", () => {
+    const turn = (algorithm: string) => applyMoves(createSolvedCube(), parseCubeAlgorithm(algorithm));
+    for (const wide of WIDE_MOVES) {
+      expect(turn(wide.move), `${wide.move} = ${wide.equals}`).toEqual(turn(wide.equals!));
+      expect(turn(`${wide.move.toUpperCase()}w`)).toEqual(turn(wide.move));
+    }
+  });
+
+  it("finds wide moves by letter, by Rw or by \"2x\"", () => {
     const search = (query: string) =>
       WIDE_MOVES.filter((wide) => matchesWideMove(wide, query)).map((wide) => wide.move);
     expect(search("r'")).toEqual(["r"]);
+    expect(search("Rw'")).toEqual(["r"]);
     expect(search("2x")).toHaveLength(6);
     expect(search("x")).toEqual([]);
   });

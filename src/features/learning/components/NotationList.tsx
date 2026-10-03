@@ -77,7 +77,7 @@ export function NotationList({
 const EXTRA_MOVES_TEXT = {
   "3x3": {
     title: "Movimientos en minúscula",
-    text: "Una letra en minúscula gira 2 capas a la vez. x, y y z no cambian: giran todo el cubo.",
+    text: "Una letra en minúscula gira 2 capas a la vez: la cara y la capa del medio que tiene al lado, las dos hacia donde gira la cara. Algunas hojas la escriben con w: Rw es r. Con ' va al revés y con 2 es media vuelta. x, y y z no cambian: giran todo el cubo.",
     badge: "(2x)",
   },
   pyraminx: {
@@ -120,6 +120,9 @@ export function WideMoveList({
               )}
             </span>
             <span className="text-xs leading-snug text-navy-muted">{wide.label}</span>
+            {wide.equals && (
+              <span className="font-mono text-xs text-navy-muted">= {wide.equals}</span>
+            )}
           </li>
         ))}
       </ul>

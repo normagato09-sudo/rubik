@@ -69,7 +69,7 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
 
 1. **Niveles** (hecho): la etiqueta en Inicio (desplegable de Método) y en Aprender,
    para todos los métodos que ya existen.
-2. **Notación 3×3 ampliada**: M, E, S y giros anchos (r/Rw, l, u, d, f, b) en
+2. **Notación 3×3 ampliada** (hecho): M, E, S y giros anchos (r/Rw, l, u, d, f, b) en
    el motor, con tests, y en el bloque de notación de Aprender. De paso se
    comprueban con el motor los OLL y PLL de las hojas que usan M o giros anchos.
 3. **Petrus** (3×3).

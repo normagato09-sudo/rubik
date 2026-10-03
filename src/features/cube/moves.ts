@@ -11,14 +11,22 @@
  * The same engine turns a 3×3 and a 2×2: a face turn moves every piece
  * whose coordinate on its axis is ±1, and a 2×2 simply has no 0 layer.
  * x, y and z turn the whole cube (like R, U and F), which some 2×2
- * algorithms use; the 3×3 solver and scrambles never do.
+ * algorithms use; the 3×3 solver and scrambles never do. The middle
+ * layers M (as L), E (as D) and S (as F) and the wide turns r, l, u, d,
+ * f and b (a face and the middle layer next to it) are for the methods'
+ * algorithms; on a 2×2 there is no middle layer, so M does nothing and
+ * r is R.
  */
 import type { CubeState, Cubie, Vec3 } from "./types";
 
 export type Face = "R" | "L" | "U" | "D" | "F" | "B";
+/** Middle layers: M turns as L, E as D, S as F. */
+export type Slice = "M" | "E" | "S";
+/** Wide turns: a face and the middle layer next to it (r = R + M'). */
+export type Wide = "r" | "l" | "u" | "d" | "f" | "b";
 /** Whole-cube rotations: x as R, y as U, z as F. */
 export type Rotation = "x" | "y" | "z";
-export type Turn = Face | Rotation;
+export type Turn = Face | Slice | Wide | Rotation;
 export type Move = Turn | `${Turn}'` | `${Turn}2`;
 
 type Axis = 0 | 1 | 2;
@@ -38,8 +46,8 @@ function rotate90(axis: Axis, sign: 1 | -1) {
 
 interface FaceDef {
   axis: Axis;
-  /** Which layer (position[axis] === layer) this face affects; "all" for a whole-cube rotation. */
-  layer: 1 | -1 | "all";
+  /** Which layers (values of position[axis]) the turn moves; "all" for a whole-cube rotation. */
+  layers: readonly number[] | "all";
   /** Rotation sign of a single quarter turn, see rotate90. */
   sign: 1 | -1;
 }
@@ -48,30 +56,39 @@ interface FaceDef {
 // below encode that using the right-hand rotation about the principal
 // (not necessarily outward-facing) axis.
 const FACE_DEF: Record<Turn, FaceDef> = {
-  R: { axis: 0, layer: 1, sign: -1 },
-  L: { axis: 0, layer: -1, sign: 1 },
-  U: { axis: 1, layer: 1, sign: -1 },
-  D: { axis: 1, layer: -1, sign: 1 },
-  F: { axis: 2, layer: 1, sign: -1 },
-  B: { axis: 2, layer: -1, sign: 1 },
-  x: { axis: 0, layer: "all", sign: -1 },
-  y: { axis: 1, layer: "all", sign: -1 },
-  z: { axis: 2, layer: "all", sign: -1 },
+  R: { axis: 0, layers: [1], sign: -1 },
+  L: { axis: 0, layers: [-1], sign: 1 },
+  U: { axis: 1, layers: [1], sign: -1 },
+  D: { axis: 1, layers: [-1], sign: 1 },
+  F: { axis: 2, layers: [1], sign: -1 },
+  B: { axis: 2, layers: [-1], sign: 1 },
+  M: { axis: 0, layers: [0], sign: 1 },
+  E: { axis: 1, layers: [0], sign: 1 },
+  S: { axis: 2, layers: [0], sign: -1 },
+  r: { axis: 0, layers: [0, 1], sign: -1 },
+  l: { axis: 0, layers: [-1, 0], sign: 1 },
+  u: { axis: 1, layers: [0, 1], sign: -1 },
+  d: { axis: 1, layers: [-1, 0], sign: 1 },
+  f: { axis: 2, layers: [0, 1], sign: -1 },
+  b: { axis: 2, layers: [-1, 0], sign: 1 },
+  x: { axis: 0, layers: "all", sign: -1 },
+  y: { axis: 1, layers: "all", sign: -1 },
+  z: { axis: 2, layers: "all", sign: -1 },
 };
 
-export function getFaceDef(face: Turn): { axis: Axis; layer: 1 | -1 | "all" } {
-  const { axis, layer } = FACE_DEF[face];
-  return { axis, layer };
+export function getFaceDef(face: Turn): { axis: Axis; layers: readonly number[] | "all" } {
+  const { axis, layers } = FACE_DEF[face];
+  return { axis, layers };
 }
 
 /** Whether a piece at `position` moves when `face` turns. */
 export function isInLayer(face: Turn, position: Vec3): boolean {
-  const { axis, layer } = FACE_DEF[face];
-  return layer === "all" || position[axis] === layer;
+  const { axis, layers } = FACE_DEF[face];
+  return layers === "all" || layers.includes(position[axis]);
 }
 
 export function isRotation(move: Move): boolean {
-  return FACE_DEF[move[0] as Turn].layer === "all";
+  return FACE_DEF[move[0] as Turn].layers === "all";
 }
 
 /** Signed angle (radians) of a single quarter turn of this face. */
@@ -153,9 +170,14 @@ export const ALL_MOVES: Move[] = FACES.flatMap((face) => [
 
 export const ROTATIONS: Rotation[] = ["x", "y", "z"];
 
-/** Every move the engine understands, rotations included. */
-export const EVERY_MOVE: Move[] = [...FACES, ...ROTATIONS].flatMap((face) => [
-  face,
-  `${face}'` as Move,
-  `${face}2` as Move,
-]);
+const withModifiers = (turns: Turn[]): Move[] =>
+  turns.flatMap((turn) => [turn, `${turn}'` as Move, `${turn}2` as Move]);
+
+/** Face turns and whole-cube rotations: what the 2×2 reads. */
+export const EVERY_MOVE: Move[] = withModifiers([...FACES, ...ROTATIONS]);
+
+export const SLICES: Slice[] = ["M", "E", "S"];
+export const WIDES: Wide[] = ["r", "l", "u", "d", "f", "b"];
+
+/** Every move the engine understands: face turns, middle layers, wide turns and rotations. */
+export const ALGORITHM_MOVES: Move[] = withModifiers([...FACES, ...SLICES, ...WIDES, ...ROTATIONS]);
