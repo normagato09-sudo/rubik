@@ -235,7 +235,7 @@ describe("Aprender by method", () => {
 
   it("only accepts a block of the method being shown", () => {
     expect(isLearningMethodId("cll")).toBe(true);
-    expect(isLearningMethodId("roux")).toBe(false);
+    expect(isLearningMethodId("lbl")).toBe(false);
     expect(isLearningCategoryId("pll", "ortega")).toBe(false);
     expect(isLearningCategoryId("ortega-pbl", "ortega")).toBe(true);
   });

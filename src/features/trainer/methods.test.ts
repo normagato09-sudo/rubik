@@ -14,9 +14,9 @@ describe("getMethodsForCubeType", () => {
 });
 
 describe("getSelectableMethodsForCubeType", () => {
-  it("lists CFOP, Petrus and ZZ for 3x3; coming-soon methods stay in METHODS but are hidden", () => {
-    expect(getSelectableMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "zz"]);
-    expect(METHODS.map((method) => method.id)).toContain("roux");
+  it("lists CFOP, Petrus, ZZ and Roux for 3x3; coming-soon methods stay in METHODS but are hidden", () => {
+    expect(getSelectableMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "zz", "roux"]);
+    expect(METHODS.map((method) => method.id)).toContain("lbl");
   });
 
   it("lists Ortega and CLL for 2x2, never CFOP", () => {
@@ -53,6 +53,7 @@ describe("method levels", () => {
     expect(getMethodLevel("cfop")).toBe("Intermedio");
     expect(getMethodLevel("petrus")).toBe("Intermedio");
     expect(getMethodLevel("zz")).toBe("Avanzado");
+    expect(getMethodLevel("roux")).toBe("Avanzado");
     expect(getMethodLevel("ortega")).toBe("Intermedio");
     expect(getMethodLevel("cll")).toBe("Avanzado");
     expect(getMethodLevel("por-capas")).toBe("Principiante");

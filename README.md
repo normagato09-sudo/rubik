@@ -10,6 +10,9 @@ para el móvil.
     (42) y EPLL (4).
   - 3×3 · ZZ (`?metodo=zz`): notación, orientación de aristas (5), línea
     (4), F2L con L, U y R (14), OCLL (7) y PLL (21).
+  - 3×3 · Roux (`?metodo=roux`): notación, primer bloque (10), segundo
+    bloque (14), CMLL (42) y LSE: orientación (11), izquierda y derecha (7)
+    y capa M (11).
   - 2×2 · Ortega (`?metodo=ortega`): notación 2×2, primera cara, OLL (7) y
     PBL (5).
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).

@@ -16,6 +16,7 @@ import {
   PYRA_ULTIMA_CAPA_CASES,
 } from "./cases-pyraminx";
 import { SETS_3X3_RESEARCH } from "./cases-3x3-research";
+import { SETS_ROUX } from "./cases-roux";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
@@ -45,6 +46,7 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   l4e: L4E_LEARN_CASES,
   ...SETS_PYRAMINX_RESEARCH,
   ...SETS_3X3_RESEARCH,
+  ...SETS_ROUX,
 };
 
 const PUNTAS_INTRO =
@@ -82,6 +84,12 @@ const ZZ_LINE_INTRO =
 const ZZ_F2L_INTRO =
   "Con la EOLine hecha, las dos primeras capas se terminan solo con L, U y R, sin girar el cubo. Primero el bloque de la izquierda, con L y U: la arista blanca-roja, luego la pareja de detrás (la esquina blanca-azul-roja con la arista azul-roja) y la de delante (la blanca-verde-roja con la verde-roja). Después, el de la derecha con R y U, igual pero en espejo. Al acabar, las aristas de arriba ya tienen el amarillo arriba. Los diagramas miran desde el lado en que se trabaja.";
 
+const ROUX_FIRST_BLOCK_INTRO =
+  "Roux empieza con dos bloques de 1×2×3, uno a cada lado, y deja libre la capa del medio (M). El primero es el de la izquierda: el centro rojo con la arista blanca-roja (abajo a la izquierda) y las dos parejas de esquina y arista, la de detrás (blanca-azul-roja con azul-roja) y la de delante (blanca-verde-roja con verde-roja). Se hace con intuición y se puede empezar por cualquier lado; estos casos usan L, U, F y B: primero la arista, luego la pareja de detrás y por último la de delante. Los diagramas miran desde delante a la izquierda, con las piezas del bloque en color.";
+
+const ROUX_SECOND_BLOCK_INTRO =
+  "El segundo bloque es el de la derecha, con el centro naranja, y se hace sin romper el primero: solo con R, U, M y r (R junto con la capa del medio). M sirve para sacar la arista blanca-naranja cuando está en la capa del medio. El centro blanco puede quedar girado: la capa M se arregla al final, en LSE. Primero la arista, luego la pareja de detrás y por último la de delante. Los diagramas miran desde delante a la derecha.";
+
 export interface LearningStep {
   setId: AlgorithmSetId;
   title: string;
@@ -109,6 +117,10 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
     { setId: "zz-eo", title: "Orientación de aristas (EO)", intro: ZZ_EO_INTRO },
     { setId: "zz-linea", title: "Línea", intro: ZZ_LINE_INTRO },
     { setId: "zz-f2l", title: "F2L con L, U y R", intro: ZZ_F2L_INTRO },
+  ],
+  roux: [
+    { setId: "roux-bloque1", title: "Primer bloque", intro: ROUX_FIRST_BLOCK_INTRO },
+    { setId: "roux-bloque2", title: "Segundo bloque", intro: ROUX_SECOND_BLOCK_INTRO },
   ],
   ortega: [
     {
@@ -295,6 +307,12 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "zz-f2l": "zz",
   "zz-ocll": "zz",
   "zz-pll": "zz",
+  "roux-bloque1": "roux",
+  "roux-bloque2": "roux",
+  "roux-cmll": "roux",
+  "roux-eo": "roux",
+  "roux-ulur": "roux",
+  "roux-capa-m": "roux",
 };
 
 export interface SetInfo {

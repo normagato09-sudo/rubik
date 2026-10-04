@@ -129,7 +129,16 @@ export function LearnScreen({
     }
 
     const cases = ALGORITHM_SETS[id].filter((algorithmCase) => matchesCase(algorithmCase, filter));
-    return { count: cases.length, node: <CaseList cases={cases} learned={learned} /> };
+    const intro = categories.find((category) => category.id === id)?.intro;
+    return {
+      count: cases.length,
+      node: (
+        <div className="flex flex-col gap-2">
+          {intro && !filter && <p className="px-1 text-sm leading-relaxed text-navy-muted">{intro}</p>}
+          <CaseList cases={cases} learned={learned} />
+        </div>
+      ),
+    };
   };
 
   const toggle = (id: LearningCategoryId) =>

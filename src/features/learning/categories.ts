@@ -22,13 +22,19 @@ export type LearningCategoryId =
   | "petrus-coll"
   | "petrus-epll"
   | "zz-ocll"
-  | "zz-pll";
+  | "zz-pll"
+  | "roux-cmll"
+  | "roux-eo"
+  | "roux-ulur"
+  | "roux-capa-m";
 
 export interface LearningCategory {
   id: LearningCategoryId;
   title: string;
   description: string;
   accent: string;
+  /** What the block is about, shown above its cases. */
+  intro?: string;
 }
 
 /** The methods Aprender teaches — the active ones of features/trainer/methods.ts. */
@@ -36,6 +42,7 @@ export type LearningMethodId =
   | "cfop"
   | "petrus"
   | "zz"
+  | "roux"
   | "ortega"
   | "cll"
   | "por-capas"
@@ -57,6 +64,7 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   cfop: "3x3",
   petrus: "3x3",
   zz: "3x3",
+  roux: "3x3",
   ortega: "2x2",
   cll: "2x2",
   "por-capas": "pyraminx",
@@ -74,6 +82,7 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   cfop: "3×3 · CFOP",
   petrus: "3×3 · Petrus",
   zz: "3×3 · ZZ",
+  roux: "3×3 · Roux",
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
   "por-capas": "Pyraminx · Por capas",
@@ -176,6 +185,48 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       title: "PLL (ZZ)",
       description: "Permuta las piezas de la última capa",
       accent: "#a78bfa",
+    },
+  ],
+  roux: [
+    {
+      ...NOTATION,
+      title: "Notación del Cubo",
+      description: "Los giros básicos, y también las capas del medio y los giros anchos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Los dos bloques de 1×2×3, a los lados",
+    },
+    {
+      id: "roux-cmll",
+      title: "CMLL (Roux)",
+      description: "Orienta y coloca las esquinas de arriba sin romper los bloques",
+      accent: "#f472b6",
+    },
+    {
+      id: "roux-eo",
+      title: "LSE 4a · Orientación",
+      description: "Orienta las seis aristas que quedan, solo con M y U",
+      accent: "#facc15",
+      intro:
+        "Tras CMLL quedan seis aristas: las cuatro de arriba y las dos de abajo de la capa M (abajo delante y abajo detrás). LSE las resuelve solo con M y U, sin tocar los bloques, y empieza orientándolas. Mira la pegatina amarilla o blanca de cada una: la arista es buena si esa pegatina mira arriba o abajo, y mala si mira a un lado. Antes, los centros tienen que estar arriba y abajo (el amarillo o el blanco arriba): si están delante y detrás, haz M o M'. U no cambia si una arista es buena o mala, y un cuarto de vuelta de M da la vuelta a las cuatro de su capa. Los diagramas muestran el cubo desplegado: la cara de arriba en el centro, delante debajo y abajo al final; detrás, encima (del revés), y los lados a izquierda y derecha. Solo las seis aristas y los centros están en color.",
+    },
+    {
+      id: "roux-ulur",
+      title: "LSE 4b · Izquierda y derecha",
+      description: "Coloca las aristas de arriba a la izquierda y a la derecha",
+      accent: "#fb923c",
+      intro:
+        "Con las seis aristas orientadas, toca la amarilla-roja y la amarilla-naranja, que van arriba a la izquierda y a la derecha. Mira dónde están y súbelas juntas con M y U; el último giro de U las deja junto a sus esquinas. Si las dos están abajo, da igual cuál esté delante: M2 las sube. En los diagramas están en color esas dos aristas, las esquinas de arriba y los centros.",
+    },
+    {
+      id: "roux-capa-m",
+      title: "LSE 4c · Capa M",
+      description: "Termina las cuatro aristas de la capa del medio",
+      accent: "#a78bfa",
+      intro:
+        "Solo quedan las cuatro aristas de la capa M y sus centros. Si el centro blanco está arriba, haz M2 primero: los casos están vistos con el amarillo arriba. Mira dónde está cada arista y usa su caso; todos se hacen con M y U2, que no mueven la izquierda ni la derecha.",
     },
   ],
   ortega: [

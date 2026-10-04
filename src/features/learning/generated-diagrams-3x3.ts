@@ -7,7 +7,7 @@
  */
 import type { CubeState, Vec3 } from "@/features/cube/types";
 import { FACELET_GEOMETRY } from "@/features/solver/cube-state";
-import { caseState3, facelets3, sheetSolved3, sticker3 } from "./cube3";
+import { caseState3, facelets3, heldLike, sheetSolved3, sticker3 } from "./cube3";
 import {
   ALL_EDGES,
   FREE_EDGES,
@@ -18,7 +18,8 @@ import {
   ZZ_LINE,
   type StepCaseDef,
 } from "./cases-3x3-research";
-import { cornerViewSvg3, topViewSvg3, type CornerView } from "./diagrams-3x3";
+import { LSE_EDGES, ROUX_FIRST_BLOCK, ROUX_SECOND_BLOCK } from "./cases-roux";
+import { cornerViewSvg3, netSvg3, topViewSvg3, type CornerView } from "./diagrams-3x3";
 import { ALGORITHM_SETS } from "./sets";
 
 const solved = sheetSolved3();
@@ -63,6 +64,8 @@ export function generatedDiagrams3x3(): Record<string, string> {
     { setId: "petrus-f2l", defs: PETRUS_F2L, view: "delante-derecha" },
     { setId: "zz-linea", defs: ZZ_LINE, view: "delante-derecha" },
     { setId: "zz-f2l", defs: ZZ_F2L, view: "delante-derecha" },
+    { setId: "roux-bloque1", defs: ROUX_FIRST_BLOCK, view: "delante-izquierda" },
+    { setId: "roux-bloque2", defs: ROUX_SECOND_BLOCK, view: "delante-derecha" },
   ] as const;
   for (const { setId, defs, view } of steps) {
     ALGORITHM_SETS[setId].forEach((kase, index) => {
@@ -74,5 +77,30 @@ export function generatedDiagrams3x3(): Record<string, string> {
   for (const kase of ALGORITHM_SETS["petrus-coll"]) {
     diagrams[kase.image] = topViewSvg3(facelets3(caseState3(kase.algorithm)), `Caso ${kase.name}`, COLL_SHOWN);
   }
+  for (const kase of ALGORITHM_SETS["roux-cmll"]) {
+    diagrams[kase.image] = topViewSvg3(facelets3(heldLike(caseState3(kase.algorithm))), `Caso ${kase.name}`, CMLL_SHOWN);
+  }
+  const lse = [
+    { setId: "roux-eo", pieces: (home: Vec3) => isOneOf(home, LSE_EDGES) || isCenterOfM(home) },
+    { setId: "roux-ulur", pieces: (home: Vec3) => isOneOf(home, [UL, UR]) || (home[1] === 1 && home[0] !== 0 && home[2] !== 0) || isUpDownCenter(home) },
+    { setId: "roux-capa-m", pieces: () => true },
+  ] as const;
+  for (const { setId, pieces } of lse) {
+    for (const kase of ALGORITHM_SETS[setId]) {
+      const state = caseState3(kase.algorithm);
+      diagrams[kase.image] = netSvg3(facelets3(state), stickersOfPieces(state, pieces), `Caso ${kase.id}`);
+    }
+  }
   return diagrams;
 }
+
+/** CMLL looks only at the corners (and the center, for which way is up). */
+const CMLL_SHOWN = new Set(
+  [0, 2, 4, 6, 8].map((n) => sticker3("U", n)).concat((["F", "R", "B", "L"] as const).flatMap((face) => [sticker3(face, 0), sticker3(face, 2)])),
+);
+
+const UL: Vec3 = [-1, 1, 0];
+const UR: Vec3 = [1, 1, 0];
+const isOneOf = (p: Vec3, pieces: Vec3[]) => pieces.some((q) => same(p, q));
+const isCenterOfM = (p: Vec3) => p[0] === 0 && p.filter((c) => c === 0).length === 2;
+const isUpDownCenter = (p: Vec3) => p[0] === 0 && p[2] === 0 && p[1] !== 0;

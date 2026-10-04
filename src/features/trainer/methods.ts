@@ -4,7 +4,7 @@ import type { MethodLevel, MethodOption } from "./types";
  * Solving methods. Each is scoped to one cube type via `cubeType` — a
  * method never appears as an option for a cube type it doesn't belong
  * to (e.g. CFOP only ever shows up for `cubeType: "3x3"`). Active today:
- * CFOP, Petrus and ZZ for the 3x3, Ortega and CLL for the 2x2, and for the Pyraminx
+ * CFOP, Petrus, ZZ and Roux for the 3x3, Ortega and CLL for the 2x2, and for the Pyraminx
  * Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO and Nutella — the methods Aprender
  * teaches (features/learning/categories.ts). Each active method has its
  * level, and each cube lists them easiest first (docs/plan-metodos.md).
@@ -13,7 +13,7 @@ export const METHODS: MethodOption[] = [
   { id: "cfop", label: "CFOP", status: "active", cubeType: "3x3", level: "Intermedio" },
   { id: "petrus", label: "Petrus", status: "active", cubeType: "3x3", level: "Intermedio" },
   { id: "zz", label: "ZZ", status: "active", cubeType: "3x3", level: "Avanzado" },
-  { id: "roux", label: "Roux", status: "coming-soon", cubeType: "3x3" },
+  { id: "roux", label: "Roux", status: "active", cubeType: "3x3", level: "Avanzado" },
   { id: "lbl", label: "LBL", status: "coming-soon", cubeType: "3x3" },
   { id: "ortega", label: "Ortega", status: "active", cubeType: "2x2", level: "Intermedio" },
   { id: "cll", label: "CLL", status: "active", cubeType: "2x2", level: "Avanzado" },

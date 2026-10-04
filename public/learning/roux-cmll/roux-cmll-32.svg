@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Caso Anti Sune Columns">
+<title>Caso Anti Sune Columns</title>
+<rect x="35" y="35" width="42" height="42" rx="6" fill="#ff0000" stroke="#262626" stroke-width="1.5"/>
+<rect x="79" y="35" width="42" height="42" rx="6" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="123" y="35" width="42" height="42" rx="6" fill="#ff7f01" stroke="#262626" stroke-width="1.5"/>
+<rect x="35" y="79" width="42" height="42" rx="6" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="79" y="79" width="42" height="42" rx="6" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="123" y="79" width="42" height="42" rx="6" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="35" y="123" width="42" height="42" rx="6" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="79" y="123" width="42" height="42" rx="6" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="123" y="123" width="42" height="42" rx="6" fill="#00ff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="38" y="13" width="36" height="17" rx="3" fill="#00ff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="38" y="170" width="36" height="17" rx="3" fill="#ff0000" stroke="#262626" stroke-width="1.5"/>
+<rect x="13" y="38" width="17" height="36" rx="3" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="170" y="38" width="17" height="36" rx="3" fill="#0000fd" stroke="#262626" stroke-width="1.5"/>
+<rect x="82" y="13" width="36" height="17" rx="3" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="82" y="170" width="36" height="17" rx="3" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="13" y="82" width="17" height="36" rx="3" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="170" y="82" width="17" height="36" rx="3" fill="#9a9a9a" stroke="#262626" stroke-width="1.5"/>
+<rect x="126" y="13" width="36" height="17" rx="3" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+<rect x="126" y="170" width="36" height="17" rx="3" fill="#ff7f01" stroke="#262626" stroke-width="1.5"/>
+<rect x="13" y="126" width="17" height="36" rx="3" fill="#0000fd" stroke="#262626" stroke-width="1.5"/>
+<rect x="170" y="126" width="17" height="36" rx="3" fill="#ffff02" stroke="#262626" stroke-width="1.5"/>
+</svg>

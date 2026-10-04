@@ -126,7 +126,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   - Nutella: las aristas cambiadas (7, del motor) y su L3C (los 8 de Drew
     Brads, pasados al bloque detrás; la ficha cita el texto original).
 - `cases-3x3-research.ts` — los métodos del 3×3 investigados (Petrus y
-  ZZ). Cada caso lleva `research` y la ficha lo muestra como
+  ZZ; Roux está en `cases-roux.ts`). Cada caso lleva `research` y la ficha lo muestra como
   «Investigado».
   - Pasos intuitivos (bloque 2×2×2, bloque 2×2×3, orientación de aristas y
     resto de F2L con R y U): casos básicos, cada uno resuelto con la
@@ -141,6 +141,20 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     paso de Petrus). OCLL (7): los casos 21–27 de la hoja de OLL; el 26 de
     la hoja repite el algoritmo del 27 (Sune), así que se usa el Antisune de
     SpeedCubeDB con el diagrama de la hoja. PLL (21): la de la hoja.
+- `cases-roux.ts` — Roux, también investigado. Los dos bloques de 1×2×3
+  son pasos intuitivos como los de Petrus (el primero con L, U, F y B; el
+  segundo con R, U, M y r, sin tocar el primero). CMLL (42): el primer
+  algoritmo de cada caso de SpeedCubeDB; los tests comprueban que no rompen
+  los bloques y que son los 42 casos de esquinas que cuenta el motor (con
+  `corners-3x3.ts`, compartido con COLL y OCLL). LSE, solo con M y U: cada
+  algoritmo es el más corto que encuentra el motor, y los tests comprueban
+  que los casos son todos los que hay: 4a, orientación (11); 4b, las
+  aristas de izquierda y derecha (7: el motor ve 4 formas, pero en 3 de
+  ellas el algoritmo cambia según qué arista está dónde; el último U las
+  alinea con las esquinas); 4c, capa M (11, con el amarillo arriba). Los
+  diagramas de LSE son el cubo desplegado (`netSvg3`), para ver toda la
+  capa M. Las categorías pueden llevar `intro`, que se muestra encima de
+  sus casos.
   - `cube3.ts` sujeta el cubo como las hojas (amarillo arriba, verde
     delante) y describe dónde está cada pieza; `diagrams-3x3.ts` dibuja los
     diagramas y `generated-diagrams-3x3.ts` los junta
@@ -158,7 +172,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz` muestra Petrus o ZZ (3×3), `?metodo=ortega|cll` el 2×2,
+- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
@@ -170,5 +184,6 @@ Rutas:
   `1flip-puntas`, `1flip-bloque`, `1flip-arista`, `1flip-l3c`,
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
   `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
-  `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll` y `zz-pll`.
+  `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll`, `zz-pll`, `roux-bloque1`,
+  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

@@ -34,7 +34,7 @@ recuento incluye casos ya resueltos o casos de PBL.
 |---|---|---|---|---|
 | CFOP (hecho) | Intermedio | Cruz, Esquinas, F2L, OLL, PLL | ya en la app (F2L 24, OLL 57, PLL 21) | `docs/source/` |
 | Petrus (nuevo) | Intermedio | Bloque 2×2×2, bloque 2×2×3, orientación de aristas (EO), resto de F2L, COLL, EPLL | 2×2×2, 2×2×3, EO y F2L: intuitivos (casos básicos calculados por el motor). COLL 42 (40 + 2 con las esquinas ya orientadas). EPLL 4 | Speedsolving Wiki (Petrus, COLL, EPLL); SpeedCubeDB (COLL, EPLL) |
-| Roux (nuevo) | Avanzado | Primer bloque 1×2×3, segundo bloque, CMLL, LSE: 4a orientación, 4b UL/UR, 4c capa M | Bloques: intuitivos (casos básicos del motor). CMLL 42. LSE 4a: 11 casos de orientación. 4b: 4 casos (+ resuelto). 4c: 24 posiciones, se agrupan en casos en su fase | Speedsolving Wiki (Roux, CMLL, LSE); SpeedCubeDB (CMLL) |
+| Roux (hecho) | Avanzado | Primer bloque 1×2×3, segundo bloque, CMLL, LSE: 4a orientación, 4b UL/UR, 4c capa M | Bloques: intuitivos (casos básicos del motor). CMLL 42. LSE 4a: 11 casos de orientación. 4b: 4 formas (+ resuelto), que son 7 casos porque en 3 de ellas el algoritmo depende de qué arista está dónde. 4c: 24 posiciones = 12 con el amarillo arriba (si está el blanco, M2 antes), así que 11 casos (+ resuelto) | Speedsolving Wiki (Roux, CMLL, LSE); SpeedCubeDB (CMLL) |
 | ZZ (nuevo) | Avanzado | EOLine, F2L solo con R, U y L, OCLL, PLL | EOLine y F2L: intuitivos (casos básicos del motor). OCLL 7. PLL 21 (los de CFOP) | Speedsolving Wiki (ZZ); SpeedCubeDB (OLL/OCLL) |
 
 Comprobaciones del recuento: el motor da 493 casos para el último paso con las
@@ -74,7 +74,7 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
    comprueban con el motor los OLL y PLL de las hojas que usan M o giros anchos.
 3. **Petrus** (3×3) (hecho).
 4. **ZZ** (3×3) (hecho).
-5. **Roux** (3×3).
+5. **Roux** (3×3) (hecho).
 6. **EG** (2×2): EG-1 y EG-2; reutiliza CLL.
 7. **LEG y TCLL** (2×2).
 8. **FH**: fuera del plan por ahora (el usuario, 2026-10-03). Si más adelante dice qué método es, se añade.

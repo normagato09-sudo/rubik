@@ -13,7 +13,7 @@
  */
 import type { CubeState, Vec3 } from "@/features/cube/types";
 import type { ResearchSource } from "@/features/pyraminx/research";
-import type { AlgorithmCase } from "./algorithm-sets";
+import type { AlgorithmCase, AlgorithmSetId } from "./algorithm-sets";
 import type { CornerView } from "./diagrams-3x3";
 import {
   caseState3,
@@ -137,13 +137,13 @@ export interface StepCaseDef {
   view?: CornerView;
 }
 
-const PAIR = "El algoritmo junta las dos piezas y las mete en su hueco sin romper lo que ya está hecho.";
-const EDGE = "El algoritmo la baja a su sitio sin romper lo que ya está hecho.";
+export const PAIR = "El algoritmo junta las dos piezas y las mete en su hueco sin romper lo que ya está hecho.";
+export const EDGE = "El algoritmo la baja a su sitio sin romper lo que ya está hecho.";
 
 const cap = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** "La esquina … está …, con el blanco mirando …; la arista … ." */
-function describePieces(state: CubeState, def: StepCaseDef): string {
+export function describePieces(state: CubeState, def: StepCaseDef): string {
   return `${cap(def.pieces.map((piece, i) => describePiece(state, piece, def.keyColors[i])).join("; "))}.`;
 }
 
@@ -249,7 +249,7 @@ export const PETRUS_EO: { algorithm: string }[] = [
 /** The free edges that are bad in `state`. */
 export const badEdges = (state: CubeState) => FREE_EDGES.filter((edge) => !edgeIsGood(state, edge));
 
-const joinSpanish = (items: string[]) =>
+export const joinSpanish = (items: string[]) =>
   items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items[items.length - 1]}`;
 
 function eoExplanation(algorithm: string): string {
@@ -314,7 +314,7 @@ const COLL_ORIENTED = [
   { name: "O diagonal", pll: "Y" },
 ];
 
-const FAMILY: Record<string, string> = {
+export const FAMILY: Record<string, string> = {
   H: "H: ninguna esquina tiene el amarillo arriba, y los cuatro amarillos miran a dos lados opuestos, dos a cada lado",
   Pi: "Pi: ninguna esquina tiene el amarillo arriba; dos amarillos miran al mismo lado y los otros dos, a los lados de al lado",
   U: "U: dos esquinas vecinas tienen el amarillo arriba y las otras dos lo tienen hacia el mismo lado",
@@ -475,13 +475,13 @@ export const ANTISUNE = "y R U2 R' U' R U' R'";
 
 // ---------- the cases as Aprender shows them ----------
 
-const id = (index: number) => String(index + 1).padStart(2, "0");
+export const id = (index: number) => String(index + 1).padStart(2, "0");
 
-const COMPUTED_NOTE = (moves: string[]) =>
+export const COMPUTED_NOTE = (moves: string[]) =>
   `Calculado por RUBIKO: es el más corto que encuentra su motor con ${joinSpanish(moves)}, los giros que no rompen lo que ya está hecho.`;
 
-function stepCases(
-  setId: "petrus-222" | "petrus-223" | "petrus-f2l" | "zz-linea" | "zz-f2l",
+export function stepCases(
+  setId: AlgorithmSetId,
   defs: StepCaseDef[],
   source: ResearchSource = SOURCES_3X3.speedsolvingPetrus,
 ): AlgorithmCase[] {
@@ -492,7 +492,7 @@ function stepCases(
     algorithm: def.algorithm,
     image: `/learning/${setId}/${setId}-${id(index)}.svg`,
     explanation: `${describePieces(caseState3(def.algorithm), def)} ${def.does}`,
-    note: COMPUTED_NOTE(def.moves ?? STEP_MOVES[setId]),
+    note: COMPUTED_NOTE(def.moves ?? STEP_MOVES[setId as StepSetId]),
     research: source,
   }));
 }

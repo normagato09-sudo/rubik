@@ -39,7 +39,7 @@ describe("useTrainerPreferences", () => {
   });
 
   it("setMethod is a no-op for a method that is not active yet", () => {
-    useTrainerPreferences.getState().setMethod("roux");
+    useTrainerPreferences.getState().setMethod("lbl");
     expect(useTrainerPreferences.getState().methodId).toBe("cfop");
   });
 

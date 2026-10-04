@@ -19,6 +19,10 @@ const HIGHLIGHTED_3X3: Partial<Record<LearningCategoryId, number[]>> = {
   "petrus-epll": [1],
   "zz-ocll": [0, 2],
   "zz-pll": [0, 2],
+  "roux-cmll": [0, 2],
+  "roux-eo": [1, 4, 7],
+  "roux-ulur": [3, 5],
+  "roux-capa-m": [1, 4, 7],
 };
 
 const HIGHLIGHTED_2X2: Partial<Record<LearningCategoryId, number[]>> = {

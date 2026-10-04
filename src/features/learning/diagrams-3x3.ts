@@ -106,3 +106,37 @@ export function cornerViewSvg3(
     title,
   );
 }
+
+/** Where each face goes in the unfolded cube (in faces) and how its stickers turn to fold flat. */
+const NET: Record<"U" | "R" | "F" | "D" | "L" | "B", { col: number; row: number; at: (r: number, c: number) => [number, number] }> = {
+  B: { col: 1, row: 0, at: (r, c) => [2 - r, 2 - c] },
+  L: { col: 0, row: 1, at: (r, c) => [c, 2 - r] },
+  U: { col: 1, row: 1, at: (r, c) => [r, c] },
+  R: { col: 2, row: 1, at: (r, c) => [2 - c, r] },
+  F: { col: 1, row: 2, at: (r, c) => [r, c] },
+  D: { col: 1, row: 3, at: (r, c) => [r, c] },
+};
+
+/**
+ * The whole cube unfolded around the top face, front at the bottom: the
+ * back above (upside down, as if folded back over the top), left and
+ * right beside the top, then the front and the bottom. For the last six
+ * edges of Roux, which live on the middle layer from the back to the
+ * bottom: every one of them shows. Stickers not in `shown` are grey.
+ */
+export function netSvg3(facelets: readonly CubeColor[], shown: ReadonlySet<number>, title: string): string {
+  const cell = 15;
+  const face = cell * 3 + 3;
+  const left = (200 - face * 3) / 2;
+  const top = (200 - face * 4) / 2;
+  const parts: string[] = [];
+  for (const [name, { col, row, at }] of Object.entries(NET)) {
+    for (let n = 0; n < 9; n++) {
+      const [r, c] = at(Math.floor(n / 3), n % 3);
+      const index = sticker3(name as keyof typeof NET, n);
+      const fill = shown.has(index) ? SHEET_HEX[facelets[index]] : GREY;
+      parts.push(rect(left + col * face + c * cell, top + row * face + r * cell, cell, cell, fill, 2));
+    }
+  }
+  return svg(parts.join("\n"), title);
+}
