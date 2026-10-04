@@ -141,7 +141,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     paso de Petrus). OCLL (7): los casos 21–27 de la hoja de OLL; el 26 de
     la hoja repite el algoritmo del 27 (Sune), así que se usa el Antisune de
     SpeedCubeDB con el diagrama de la hoja. PLL (21): la de la hoja.
-- `cases-2x2-research.ts` — los métodos del 2×2 investigados (EG). La
+- `cases-2x2-research.ts` — los métodos del 2×2 investigados (EG, LEG y TCLL). La
   primera cara es la de Ortega y la CLL, la del método CLL. EG-1 y EG-2: el
   primer algoritmo de cada uno de los 40 casos de SpeedCubeDB, más los 3
   con el amarillo ya orientado, que salen de las PBL de Ortega (con x2 al

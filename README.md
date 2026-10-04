@@ -18,6 +18,9 @@ para el móvil.
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).
   - 2×2 · EG (`?metodo=eg`): notación 2×2, primera cara, CLL (42), EG-1
     (43) y EG-2 (43).
+  - 2×2 · LEG (`?metodo=leg`): notación 2×2, primera cara y LEG-1 (43).
+  - 2×2 · TCLL (`?metodo=tcll`): notación 2×2, primera capa, CLL (42),
+    TCLL+ (43) y TCLL− (43).
   - Pyraminx · Por capas (`?metodo=por-capas`): notación del Pyraminx,
     puntas, centros, primera capa y última capa (5).
   - Pyraminx · Keyhole (`?metodo=keyhole`): notación, puntas, bloque de

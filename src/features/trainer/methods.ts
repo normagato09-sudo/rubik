@@ -4,7 +4,7 @@ import type { MethodLevel, MethodOption } from "./types";
  * Solving methods. Each is scoped to one cube type via `cubeType` — a
  * method never appears as an option for a cube type it doesn't belong
  * to (e.g. CFOP only ever shows up for `cubeType: "3x3"`). Active today:
- * CFOP, Petrus, ZZ and Roux for the 3x3, Ortega, CLL and EG for the 2x2, and for the Pyraminx
+ * CFOP, Petrus, ZZ and Roux for the 3x3, Ortega, CLL, EG, LEG and TCLL for the 2x2, and for the Pyraminx
  * Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO and Nutella — the methods Aprender
  * teaches (features/learning/categories.ts). Each active method has its
  * level, and each cube lists them easiest first (docs/plan-metodos.md).
@@ -18,6 +18,8 @@ export const METHODS: MethodOption[] = [
   { id: "ortega", label: "Ortega", status: "active", cubeType: "2x2", level: "Intermedio" },
   { id: "cll", label: "CLL", status: "active", cubeType: "2x2", level: "Avanzado" },
   { id: "eg", label: "EG", status: "active", cubeType: "2x2", level: "Experto" },
+  { id: "leg", label: "LEG", status: "active", cubeType: "2x2", level: "Experto" },
+  { id: "tcll", label: "TCLL", status: "active", cubeType: "2x2", level: "Experto" },
   { id: "por-capas", label: "Por capas", status: "active", cubeType: "pyraminx", level: "Principiante" },
   { id: "keyhole", label: "Keyhole", status: "active", cubeType: "pyraminx", level: "Intermedio" },
   { id: "l4e-intuitivo", label: "L4E intuitivo", status: "active", cubeType: "pyraminx", level: "Intermedio" },

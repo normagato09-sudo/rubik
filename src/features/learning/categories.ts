@@ -29,7 +29,11 @@ export type LearningCategoryId =
   | "roux-capa-m"
   | "eg-cll"
   | "eg-1"
-  | "eg-2";
+  | "eg-2"
+  | "leg-1"
+  | "tcll-cll"
+  | "tcll-mas"
+  | "tcll-menos";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -49,6 +53,8 @@ export type LearningMethodId =
   | "ortega"
   | "cll"
   | "eg"
+  | "leg"
+  | "tcll"
   | "por-capas"
   | "keyhole"
   | "l4e-intuitivo"
@@ -72,6 +78,8 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   ortega: "2x2",
   cll: "2x2",
   eg: "2x2",
+  leg: "2x2",
+  tcll: "2x2",
   "por-capas": "pyraminx",
   keyhole: "pyraminx",
   "l4e-intuitivo": "pyraminx",
@@ -91,6 +99,8 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
   eg: "2×2 · EG",
+  leg: "2×2 · LEG",
+  tcll: "2×2 · TCLL",
   "por-capas": "Pyraminx · Por capas",
   keyhole: "Pyraminx · Keyhole",
   "l4e-intuitivo": "Pyraminx · L4E intuitivo",
@@ -110,6 +120,9 @@ const NOTATION = { id: "notation", accent: "#38bdf8" } as const;
 /** What EG-1 and EG-2 have in common: how to read the bottom, and the diagrams. */
 const EG_INTRO = (bottom: string) =>
   `Con la primera cara hecha, mira la capa de abajo: aquí tiene ${bottom}. Luego mira la de arriba como en CLL (la forma del amarillo y los faros) y usa su caso: el algoritmo resuelve las dos capas a la vez. Los diagramas miran desde arriba; en cada lado, la barra de dentro es la fila de arriba y la de fuera, la fila de abajo. Los tres últimos casos tienen el amarillo de arriba ya orientado y salen de las PBL de Ortega.`;
+/** What TCLL+ and TCLL− have in common. */
+const TCLL_INTRO = (white: string) =>
+  `Con la primera capa hecha salvo una esquina girada, pon esa esquina delante a la derecha: aquí tiene el blanco mirando ${white}. Luego mira la capa de arriba (la forma del amarillo y los faros) y usa su caso: el algoritmo gira esa esquina y resuelve el cubo entero a la vez. Los diagramas miran desde arriba; en cada lado, la barra de dentro es la fila de arriba y la de fuera, la fila de abajo.`;
 const STEPS = { id: "steps", accent: "#34d399" } as const;
 
 /**
@@ -311,6 +324,58 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       description: "Abajo, dos esquinas en diagonal cambiadas: resuelve las dos capas",
       accent: "#a78bfa",
       intro: EG_INTRO("dos esquinas en diagonal cambiadas: ningún lado tiene sus dos pegatinas de abajo iguales"),
+    },
+  ],
+  leg: [
+    {
+      ...NOTATION,
+      title: "Notación del 2×2",
+      description: "Aprende los giros del 2×2 para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Empieza el 2×2 con una cara de un color, como en Ortega",
+    },
+    {
+      id: "leg-1",
+      title: "LEG-1",
+      description: "Abajo, la barra a la izquierda: resuelve las dos capas sin girar el cubo",
+      accent: "#fb923c",
+      intro:
+        "LEG-1 resuelve los mismos casos que EG-1, pero sujetando el cubo con la barra de abajo (el lado con sus dos pegatinas de abajo iguales) a la izquierda. Así no hace falta girar el cubo después de la primera cara. Mira la capa de arriba como en CLL (la forma del amarillo y los faros) y usa su caso. Los diagramas miran desde arriba; en cada lado, la barra de dentro es la fila de arriba y la de fuera, la fila de abajo. Los tres últimos casos tienen el amarillo de arriba ya orientado y salen de las PBL de Ortega.",
+    },
+  ],
+  tcll: [
+    {
+      ...NOTATION,
+      title: "Notación del 2×2",
+      description: "Aprende los giros del 2×2 para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Empieza el 2×2 con la primera capa, como en CLL",
+    },
+    {
+      id: "tcll-cll",
+      title: "CLL (TCLL)",
+      description: "Ninguna esquina de abajo girada: resuelve la capa de arriba",
+      accent: "#f472b6",
+    },
+    {
+      id: "tcll-mas",
+      title: "TCLL+",
+      description: "La esquina de abajo girada con el blanco hacia ti: resuelve el cubo",
+      accent: "#fb923c",
+      intro: TCLL_INTRO("hacia ti (delante)"),
+    },
+    {
+      id: "tcll-menos",
+      title: "TCLL−",
+      description: "La esquina de abajo girada con el blanco a la derecha: resuelve el cubo",
+      accent: "#a78bfa",
+      intro: TCLL_INTRO("a la derecha"),
     },
   ],
   "por-capas": [

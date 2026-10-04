@@ -5,7 +5,7 @@ import { LEVELS, getMethodLevel, getMethodsForCubeType, getSelectableMethodsForC
 describe("getMethodsForCubeType", () => {
   it("returns only methods scoped to the given cube type", () => {
     expect(getMethodsForCubeType("3x3").map((method) => method.id)).toEqual(["cfop", "petrus", "zz", "roux", "lbl"]);
-    expect(getMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll", "eg"]);
+    expect(getMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll", "eg", "leg", "tcll"]);
   });
 
   it("returns an empty list for a cube type with no methods yet", () => {
@@ -20,7 +20,7 @@ describe("getSelectableMethodsForCubeType", () => {
   });
 
   it("lists Ortega and CLL for 2x2, never CFOP", () => {
-    expect(getSelectableMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll", "eg"]);
+    expect(getSelectableMethodsForCubeType("2x2").map((method) => method.id)).toEqual(["ortega", "cll", "eg", "leg", "tcll"]);
   });
 
   it("lists the Pyraminx methods by level, easiest first", () => {
@@ -56,7 +56,7 @@ describe("method levels", () => {
     expect(getMethodLevel("roux")).toBe("Avanzado");
     expect(getMethodLevel("ortega")).toBe("Intermedio");
     expect(getMethodLevel("cll")).toBe("Avanzado");
-    expect(getMethodLevel("eg")).toBe("Experto");
+    expect(["eg", "leg", "tcll"].map(getMethodLevel)).toEqual(["Experto", "Experto", "Experto"]);
     expect(getMethodLevel("por-capas")).toBe("Principiante");
     expect(["keyhole", "l4e-intuitivo", "l4e"].map(getMethodLevel)).toEqual(["Intermedio", "Intermedio", "Intermedio"]);
     expect(["oka", "1-flip", "wo"].map(getMethodLevel)).toEqual(["Avanzado", "Avanzado", "Avanzado"]);

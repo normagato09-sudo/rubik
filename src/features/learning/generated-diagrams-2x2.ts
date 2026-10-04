@@ -8,7 +8,7 @@
 import { CORNER_FACELETS_2 } from "@/features/solver2x2/facelets";
 import { ALGORITHM_SETS } from "./sets";
 import { caseFacelets } from "./cases-2x2";
-import { caseFacelets2 } from "./cases-2x2-research";
+import { caseFacelets2, legDone, tcllDone } from "./cases-2x2-research";
 import { cornerViewSvg, layersViewSvg, notationBSvg, topViewSvg } from "./diagrams-2x2";
 
 /** Kociemba corner slots (see CORNER_FACELETS_2): URF, DLF, DRB. */
@@ -49,8 +49,9 @@ export function generatedDiagrams(): Record<string, string> {
     }
   }
   diagrams["/learning/notation-2x2/notation-2x2-b.svg"] = notationBSvg();
-  for (const setId of ["eg-1", "eg-2"] as const) {
-    for (const kase of ALGORITHM_SETS[setId]) diagrams[kase.image] = layersViewSvg(caseFacelets2(kase.algorithm), `Caso ${kase.name}`);
+  const done = { "eg-1": undefined, "eg-2": undefined, "leg-1": legDone, "tcll-mas": tcllDone(1), "tcll-menos": tcllDone(2) };
+  for (const [setId, isDone] of Object.entries(done) as [keyof typeof done, (typeof done)[keyof typeof done]][]) {
+    for (const kase of ALGORITHM_SETS[setId]) diagrams[kase.image] = layersViewSvg(caseFacelets2(kase.algorithm, isDone), `Caso ${kase.name}`);
   }
   return diagrams;
 }

@@ -34,6 +34,10 @@ const HIGHLIGHTED_2X2: Partial<Record<LearningCategoryId, number[]>> = {
   "eg-cll": [0, 1],
   "eg-1": [0, 1, 3],
   "eg-2": [0, 1, 2, 3],
+  "leg-1": [0, 1, 2],
+  "tcll-cll": [0, 1],
+  "tcll-mas": [0, 1, 3],
+  "tcll-menos": [0, 1, 3],
 };
 
 const HIGHLIGHTED_PYRAMINX: Partial<Record<LearningCategoryId, number[]>> = {

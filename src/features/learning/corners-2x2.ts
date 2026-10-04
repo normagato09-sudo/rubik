@@ -81,6 +81,40 @@ export function firstFaceStates(): CubeColor[][] {
   return states;
 }
 
+/**
+ * Every position of TCLL: the bottom layer in place but its front-right
+ * corner twisted — white to the front (`twist` 1, TCLL+) or to the right
+ * (2, TCLL−) — and any top.
+ */
+export function twistedLayerStates(twist: 1 | 2): CubeColor[][] {
+  const perms = (items: number[]): number[][] =>
+    items.length <= 1 ? [items] : items.flatMap((item, i) => perms(items.filter((_, j) => j !== i)).map((rest) => [item, ...rest]));
+  const states: CubeColor[][] = [];
+  for (const yellow of perms([4, 5, 6, 7])) {
+    for (let t = 0; t < 27; t++) {
+      for (let slot = 0; slot < 4; slot++) {
+        for (const turn of [1, 2]) {
+          const white = [0, 0, 0, 0];
+          white[slot] = turn;
+          const co = [t % 3, Math.floor(t / 3) % 3, Math.floor(t / 9) % 3];
+          co.push((12 - turn - co[0] - co[1] - co[2]) % 3);
+          const facelets = applyMoves2(faceletsFromCorners({ cp: [0, 1, 2, 3, ...yellow], co: [...white, ...co] }), SHEET_FRAME);
+          if (bottomTwist(facelets) === twist) states.push(facelets);
+        }
+      }
+    }
+  }
+  return states;
+}
+
+/** 1 or 2 if the bottom layer is in place with only its front-right corner twisted (white front or right); else 0. */
+export function bottomTwist(facelets: readonly CubeColor[]): 0 | 1 | 2 {
+  const bottom = layerCorners(facelets, "bottom");
+  if (bottom.some((c) => c.piece < 0) || !bottom.every((c, i) => (c.piece - bottom[0].piece - i + 8) % 4 === 0)) return 0;
+  if (!bottom.slice(1).every((c) => c.twist === 0)) return 0;
+  return bottom[0].twist === 0 ? 0 : (bottom[0].twist as 1 | 2);
+}
+
 /** Whether the bottom face is all white. */
 export const whiteFaceDown = (facelets: readonly CubeColor[]) =>
   [0, 1, 2, 3].every((n) => facelets[faceOffset2("D") + n] === "white");

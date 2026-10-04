@@ -16,9 +16,9 @@ describe("the 2×2 diagrams RUBIKO draws", () => {
     }
   }
 
-  it("are the 3 + 3 first-layer cases, CLL 41–42, the B turn, and EG-1 and EG-2", () => {
-    const eg = (["eg-1", "eg-2"] as const).flatMap((set) => ALGORITHM_SETS[set].map((kase) => kase.image));
-    expect(eg).toHaveLength(86);
+  it("are the 3 + 3 first-layer cases, CLL 41–42, the B turn, and EG-1, EG-2, LEG-1, TCLL+ and TCLL−", () => {
+    const eg = (["eg-1", "eg-2", "leg-1", "tcll-mas", "tcll-menos"] as const).flatMap((set) => ALGORITHM_SETS[set].map((kase) => kase.image));
+    expect(eg).toHaveLength(43 * 5);
     expect(Object.keys(diagrams).filter((image) => !eg.includes(image)).sort()).toEqual([
       "/learning/cll/cll-41.svg",
       "/learning/cll/cll-42.svg",

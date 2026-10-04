@@ -148,6 +148,22 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
         "EG empieza como Ortega: haz una cara de un solo color abajo, aquí la blanca, con intuición. Sus otros colores no tienen que coincidir: lo que haya quedado abajo decide qué usar después. Si la capa de abajo está bien, CLL; si tiene dos esquinas vecinas cambiadas, EG-1; si tiene dos en diagonal, EG-2. Cada caso resuelve el cubo entero de una vez. Estos son los tres casos básicos para colocar una esquina de la cara.",
     },
   ],
+  leg: [
+    {
+      setId: "leg-cara",
+      title: "Primera cara",
+      intro:
+        "LEG empieza como Ortega: haz una cara de un solo color abajo, aquí la blanca, con intuición. Si la capa de abajo queda con dos esquinas vecinas cambiadas, sujeta el cubo con la barra (el lado con sus dos pegatinas de abajo iguales) a la izquierda y usa LEG-1, que resuelve el cubo entero de una vez. Estos son los tres casos básicos para colocar una esquina de la cara.",
+    },
+  ],
+  tcll: [
+    {
+      setId: "tcll-capa",
+      title: "Primera capa",
+      intro:
+        "TCLL empieza como CLL: haz la capa de abajo, aquí la blanca, con sus colores coincidiendo en cada lado. La diferencia es que la última esquina puede quedar en su sitio pero girada: en vez de arreglarla, ponla delante a la derecha y usa TCLL+ (blanco hacia ti) o TCLL− (blanco a la derecha), que la giran y resuelven el cubo entero a la vez. Si no queda girada, usa la CLL. Estos son los casos básicos para colocar una esquina de la capa.",
+    },
+  ],
   "por-capas": [
     { setId: "pyra-puntas", title: "Puntas", intro: PUNTAS_INTRO },
     {
@@ -327,6 +343,12 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "eg-cll": "eg",
   "eg-1": "eg",
   "eg-2": "eg",
+  "leg-cara": "leg",
+  "leg-1": "leg",
+  "tcll-capa": "tcll",
+  "tcll-cll": "tcll",
+  "tcll-mas": "tcll",
+  "tcll-menos": "tcll",
 };
 
 export interface SetInfo {
