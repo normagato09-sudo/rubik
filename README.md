@@ -66,6 +66,18 @@ de métodos y sus niveles está en `docs/plan-metodos.md`.
     grandes (U, L, R, B) más un giro por punta (u, l, r, b), con su propio
     reproductor paso a paso y el Pyraminx en 3D.
 
+- **Concursos** (`/concursos`) — calendario de los concursos a los que vas.
+  Calendario mensual (semanas de lunes a domingo) con los días de concurso
+  marcados, también los pasados, y debajo la lista de «Próximos» (los que no
+  han terminado). Arriba, cuántos días faltan para el siguiente. Cada
+  concurso tiene nombre, fecha (uno o varios días), lugar, hora de inicio,
+  fecha límite de inscripción, categorías (3×3, 2×2, Pyraminx), si ya estás
+  inscrito y notas; se puede añadir, editar y borrar (con confirmación). Si
+  no estás inscrito y la inscripción cierra en 7 días o menos, sale un
+  aviso. No hay cuentas: se guarda solo en el dispositivo (`localStorage`,
+  clave `rubiko-competitions`), así que cada persona ve los suyos en su
+  móvil.
+
 Todo el cálculo ocurre en el navegador (Web Worker); ninguna imagen sale del
 dispositivo. Cada solución se reproduce con el motor 3D de RUBIKO antes de
 mostrarse.
@@ -74,6 +86,9 @@ mostrarse.
 
 - `src/features/cube` — motor del cubo (3×3 y 2×2 con el mismo código) y
   render 3D.
+- `src/features/competitions` — Concursos: fechas y avisos (`dates.ts`,
+  sin interfaz y con tests), guardado en el dispositivo (`store.ts`) y
+  pantalla.
 - `src/features/solver` — pantalla del solucionador, cámara, reproductor,
   Worker y solver 3×3.
 - `src/features/solver2x2` — solver 2×2 (validación y búsqueda óptima) y

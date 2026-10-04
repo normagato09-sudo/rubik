@@ -62,6 +62,13 @@ export default function HomePage() {
       >
         Solucionador
       </Link>
+
+      <Link
+        href="/concursos"
+        className="relative -mt-6 flex w-full max-w-sm items-center justify-center rounded-2xl border border-border bg-surface py-4 text-lg font-semibold text-foreground transition-all hover:border-accent/40 active:scale-[0.98]"
+      >
+        Concursos
+      </Link>
     </div>
   );
 }
