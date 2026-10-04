@@ -152,6 +152,13 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   cada capa de abajo, y los tests comprueban que cada set es exactamente
   esos 43. Los diagramas (`layersViewSvg`) son la vista de arriba con las
   dos filas de cada lado, para ver también la capa de abajo.
+  LEG-1 (43): los mismos casos que EG-1 con la barra de abajo a la
+  izquierda; el algoritmo mejor valorado de speedcube.quest para los 40
+  casos y las 3 PBL de EG-1 con un giro de D delante. TCLL+ (43, de Chris
+  Olson) y TCLL− (43, de SpeedCubeTrainer): la primera capa con la esquina
+  de delante a la derecha girada (`bottomTwist`, `twistedLayerStates` en
+  `corners-2x2.ts`); los tests comprueban que cada set es exactamente los
+  43 casos que cuenta el motor.
 - `cases-roux.ts` — Roux, también investigado. Los dos bloques de 1×2×3
   son pasos intuitivos como los de Petrus (el primero con L, U, F y B; el
   segundo con R, U, M y r, sin tocar el primero). CMLL (42): el primer
@@ -183,7 +190,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll|eg` el 2×2,
+- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll|eg|leg|tcll` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
@@ -196,5 +203,5 @@ Rutas:
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
   `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
   `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll`, `zz-pll`, `roux-bloque1`,
-  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1` y `eg-2`.
+  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1`, `eg-2`, `leg-cara`, `leg-1`, `tcll-capa`, `tcll-cll`, `tcll-mas` y `tcll-menos`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.
