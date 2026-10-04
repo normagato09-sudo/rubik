@@ -17,6 +17,7 @@ import {
 } from "./cases-pyraminx";
 import { SETS_3X3_RESEARCH } from "./cases-3x3-research";
 import { SETS_ROUX } from "./cases-roux";
+import { SETS_2X2_RESEARCH } from "./cases-2x2-research";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
@@ -47,6 +48,7 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   ...SETS_PYRAMINX_RESEARCH,
   ...SETS_3X3_RESEARCH,
   ...SETS_ROUX,
+  ...SETS_2X2_RESEARCH,
 };
 
 const PUNTAS_INTRO =
@@ -136,6 +138,14 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
       title: "Primera capa",
       intro:
         "Haz la capa de abajo completa; aquí, la blanca. Tiene que tener las cuatro esquinas con el blanco abajo y, además, con sus otros colores coincidiendo en cada lado. Así la CLL puede resolver toda la capa de arriba de una vez. Coloca las esquinas de una en una: gira U hasta dejar la esquina encima de su hueco, delante a la derecha, y usa el caso según hacia dónde mire su pegatina blanca.",
+    },
+  ],
+  eg: [
+    {
+      setId: "eg-cara",
+      title: "Primera cara",
+      intro:
+        "EG empieza como Ortega: haz una cara de un solo color abajo, aquí la blanca, con intuición. Sus otros colores no tienen que coincidir: lo que haya quedado abajo decide qué usar después. Si la capa de abajo está bien, CLL; si tiene dos esquinas vecinas cambiadas, EG-1; si tiene dos en diagonal, EG-2. Cada caso resuelve el cubo entero de una vez. Estos son los tres casos básicos para colocar una esquina de la cara.",
     },
   ],
   "por-capas": [
@@ -313,6 +323,10 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "roux-eo": "roux",
   "roux-ulur": "roux",
   "roux-capa-m": "roux",
+  "eg-cara": "eg",
+  "eg-cll": "eg",
+  "eg-1": "eg",
+  "eg-2": "eg",
 };
 
 export interface SetInfo {

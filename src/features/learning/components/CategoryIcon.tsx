@@ -31,6 +31,9 @@ const HIGHLIGHTED_2X2: Partial<Record<LearningCategoryId, number[]>> = {
   "ortega-oll": [0, 1],
   "ortega-pbl": [0, 3],
   cll: [0, 1],
+  "eg-cll": [0, 1],
+  "eg-1": [0, 1, 3],
+  "eg-2": [0, 1, 2, 3],
 };
 
 const HIGHLIGHTED_PYRAMINX: Partial<Record<LearningCategoryId, number[]>> = {

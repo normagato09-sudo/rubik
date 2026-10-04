@@ -94,7 +94,7 @@ const PBL_EXPLANATIONS: Record<string, string> = {
 
 // ---------- CLL ----------
 
-const CLL_GROUPS: Record<string, string> = {
+export const CLL_GROUPS: Record<string, string> = {
   Sune: "Grupo Sune: solo una esquina tiene el amarillo arriba y las otras tres están giradas en el mismo sentido.",
   Antisune: "Grupo Antisune: solo una esquina tiene el amarillo arriba y las otras tres están giradas en el sentido contrario al Sune.",
   Pi: "Grupo Pi: ninguna esquina tiene el amarillo arriba; dos vecinas lo tienen hacia el mismo lado (faros) y las otras dos, hacia lados opuestos.",

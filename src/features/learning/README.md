@@ -141,6 +141,17 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     paso de Petrus). OCLL (7): los casos 21–27 de la hoja de OLL; el 26 de
     la hoja repite el algoritmo del 27 (Sune), así que se usa el Antisune de
     SpeedCubeDB con el diagrama de la hoja. PLL (21): la de la hoja.
+- `cases-2x2-research.ts` — los métodos del 2×2 investigados (EG). La
+  primera cara es la de Ortega y la CLL, la del método CLL. EG-1 y EG-2: el
+  primer algoritmo de cada uno de los 40 casos de SpeedCubeDB, más los 3
+  con el amarillo ya orientado, que salen de las PBL de Ortega (con x2 al
+  principio y al final cuando el cambio tiene que ser abajo). `caseFacelets2`
+  deshace el algoritmo desde el cubo resuelto sujeto como quede la primera
+  cara abajo (algunos terminan con el cubo girado). `corners-2x2.ts` cuenta
+  los casos sin importar los giros de U y D de antes y de después: 43 por
+  cada capa de abajo, y los tests comprueban que cada set es exactamente
+  esos 43. Los diagramas (`layersViewSvg`) son la vista de arriba con las
+  dos filas de cada lado, para ver también la capa de abajo.
 - `cases-roux.ts` — Roux, también investigado. Los dos bloques de 1×2×3
   son pasos intuitivos como los de Petrus (el primero con L, U, F y B; el
   segundo con R, U, M y r, sin tocar el primero). CMLL (42): el primer
@@ -172,7 +183,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   durante la hidratación.
 
 Rutas:
-- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll` el 2×2,
+- `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll|eg` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
@@ -185,5 +196,5 @@ Rutas:
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
   `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
   `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll`, `zz-pll`, `roux-bloque1`,
-  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`.
+  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1` y `eg-2`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

@@ -16,6 +16,8 @@ para el móvil.
   - 2×2 · Ortega (`?metodo=ortega`): notación 2×2, primera cara, OLL (7) y
     PBL (5).
   - 2×2 · CLL (`?metodo=cll`): notación 2×2, primera capa y CLL (42).
+  - 2×2 · EG (`?metodo=eg`): notación 2×2, primera cara, CLL (42), EG-1
+    (43) y EG-2 (43).
   - Pyraminx · Por capas (`?metodo=por-capas`): notación del Pyraminx,
     puntas, centros, primera capa y última capa (5).
   - Pyraminx · Keyhole (`?metodo=keyhole`): notación, puntas, bloque de

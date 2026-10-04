@@ -1,7 +1,8 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { generatedDiagrams } from "./generated-diagrams-2x2";
+import { ALGORITHM_SETS } from "./sets";
 
 const file = (image: string) => join(process.cwd(), "public", image);
 
@@ -9,11 +10,16 @@ describe("the 2×2 diagrams RUBIKO draws", () => {
   const diagrams = generatedDiagrams();
 
   if (process.env.WRITE_DIAGRAMS === "1") {
-    for (const [image, svg] of Object.entries(diagrams)) writeFileSync(file(image), svg);
+    for (const [image, svg] of Object.entries(diagrams)) {
+      mkdirSync(dirname(file(image)), { recursive: true });
+      writeFileSync(file(image), svg);
+    }
   }
 
-  it("are the 3 + 3 first-layer cases, CLL 41–42 and the B turn", () => {
-    expect(Object.keys(diagrams).sort()).toEqual([
+  it("are the 3 + 3 first-layer cases, CLL 41–42, the B turn, and EG-1 and EG-2", () => {
+    const eg = (["eg-1", "eg-2"] as const).flatMap((set) => ALGORITHM_SETS[set].map((kase) => kase.image));
+    expect(eg).toHaveLength(86);
+    expect(Object.keys(diagrams).filter((image) => !eg.includes(image)).sort()).toEqual([
       "/learning/cll/cll-41.svg",
       "/learning/cll/cll-42.svg",
       "/learning/notation-2x2/notation-2x2-b.svg",

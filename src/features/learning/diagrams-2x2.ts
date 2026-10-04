@@ -9,6 +9,8 @@
  * - `cornerViewSvg`: the cube seen from the front-right corner (top, front
  *   and right faces), for the first-layer cases: only the stickers that
  *   matter are colored, the rest are grey.
+ * - `layersViewSvg`: the same from above, with both rows of each side, for
+ *   the methods that solve the bottom layer at the end too (EG, LEG, TCLL).
  * - `notationBSvg`: B and B' in the style of the 2×2 notation sheet (which
  *   has U, D, R, L and F but not B).
  */
@@ -55,6 +57,32 @@ export function topViewSvg(facelets: readonly CubeColor[], title: string): strin
     rect(169, cells[0] + 3, 17, 57, hex(at("R", 1)), 3),
     rect(169, cells[1] + 3, 17, 57, hex(at("R", 0)), 3),
   ];
+  return svg(200, 200, parts.join("\n"), title);
+}
+
+/**
+ * Like `topViewSvg`, but each side shows both its rows: the inner bar is
+ * the top row and the outer bar the bottom row, so the bottom layer shows
+ * too — for EG, LEG and TCLL, where the bottom is not solved yet.
+ */
+export function layersViewSvg(facelets: readonly CubeColor[], title: string): string {
+  const hex = (index: number) => SHEET_HEX[facelets[index]];
+  const cells = [47, 101];
+  const size = 52;
+  const parts = [0, 1, 2, 3].map((n) => rect(cells[n % 2], cells[n >> 1], size, size, hex(at("U", n)), 7));
+  // Each side, seen from above: [inner (top row), outer (bottom row)], each listed left to right or back to front.
+  const sides = [
+    { inner: [at("B", 1), at("B", 0)], outer: [at("B", 3), at("B", 2)], bar: (k: number, i: number) => [cells[i] + 3, k === 0 ? 30 : 13, size - 6, 14] },
+    { inner: [at("F", 0), at("F", 1)], outer: [at("F", 2), at("F", 3)], bar: (k: number, i: number) => [cells[i] + 3, k === 0 ? 156 : 173, size - 6, 14] },
+    { inner: [at("L", 0), at("L", 1)], outer: [at("L", 2), at("L", 3)], bar: (k: number, i: number) => [k === 0 ? 30 : 13, cells[i] + 3, 14, size - 6] },
+    { inner: [at("R", 1), at("R", 0)], outer: [at("R", 3), at("R", 2)], bar: (k: number, i: number) => [k === 0 ? 156 : 173, cells[i] + 3, 14, size - 6] },
+  ];
+  for (const { inner, outer, bar } of sides) {
+    [inner, outer].forEach((row, k) => row.forEach((index, i) => {
+      const [x, y, w, h] = bar(k, i);
+      parts.push(rect(x, y, w, h, hex(index), 3));
+    }));
+  }
   return svg(200, 200, parts.join("\n"), title);
 }
 

@@ -26,7 +26,10 @@ export type LearningCategoryId =
   | "roux-cmll"
   | "roux-eo"
   | "roux-ulur"
-  | "roux-capa-m";
+  | "roux-capa-m"
+  | "eg-cll"
+  | "eg-1"
+  | "eg-2";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -45,6 +48,7 @@ export type LearningMethodId =
   | "roux"
   | "ortega"
   | "cll"
+  | "eg"
   | "por-capas"
   | "keyhole"
   | "l4e-intuitivo"
@@ -67,6 +71,7 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   roux: "3x3",
   ortega: "2x2",
   cll: "2x2",
+  eg: "2x2",
   "por-capas": "pyraminx",
   keyhole: "pyraminx",
   "l4e-intuitivo": "pyraminx",
@@ -85,6 +90,7 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   roux: "3×3 · Roux",
   ortega: "2×2 · Ortega",
   cll: "2×2 · CLL",
+  eg: "2×2 · EG",
   "por-capas": "Pyraminx · Por capas",
   keyhole: "Pyraminx · Keyhole",
   "l4e-intuitivo": "Pyraminx · L4E intuitivo",
@@ -100,6 +106,10 @@ export function isLearningMethodId(id: string): id is LearningMethodId {
 }
 
 const NOTATION = { id: "notation", accent: "#38bdf8" } as const;
+
+/** What EG-1 and EG-2 have in common: how to read the bottom, and the diagrams. */
+const EG_INTRO = (bottom: string) =>
+  `Con la primera cara hecha, mira la capa de abajo: aquí tiene ${bottom}. Luego mira la de arriba como en CLL (la forma del amarillo y los faros) y usa su caso: el algoritmo resuelve las dos capas a la vez. Los diagramas miran desde arriba; en cada lado, la barra de dentro es la fila de arriba y la de fuera, la fila de abajo. Los tres últimos casos tienen el amarillo de arriba ya orientado y salen de las PBL de Ortega.`;
 const STEPS = { id: "steps", accent: "#34d399" } as const;
 
 /**
@@ -269,6 +279,38 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       title: "CLL",
       description: "Resuelve la última capa del 2×2 con un solo algoritmo",
       accent: "#f472b6",
+    },
+  ],
+  eg: [
+    {
+      ...NOTATION,
+      title: "Notación del 2×2",
+      description: "Aprende los giros del 2×2 para leer algoritmos",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "Empieza el 2×2 con una cara de un color, como en Ortega",
+    },
+    {
+      id: "eg-cll",
+      title: "CLL (EG)",
+      description: "Abajo todo bien: resuelve la capa de arriba",
+      accent: "#f472b6",
+    },
+    {
+      id: "eg-1",
+      title: "EG-1",
+      description: "Abajo, dos esquinas vecinas cambiadas: resuelve las dos capas",
+      accent: "#fb923c",
+      intro: EG_INTRO("dos esquinas vecinas cambiadas: un lado tiene sus dos pegatinas de abajo iguales (la barra) y los otros no"),
+    },
+    {
+      id: "eg-2",
+      title: "EG-2",
+      description: "Abajo, dos esquinas en diagonal cambiadas: resuelve las dos capas",
+      accent: "#a78bfa",
+      intro: EG_INTRO("dos esquinas en diagonal cambiadas: ningún lado tiene sus dos pegatinas de abajo iguales"),
     },
   ],
   "por-capas": [

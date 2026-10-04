@@ -3,6 +3,7 @@ import { splitAlgorithm } from "./algorithm";
 import type { Research3x3SetId } from "./cases-3x3-research";
 import type { ResearchSetId } from "./cases-pyraminx-research";
 import type { RouxSetId } from "./cases-roux";
+import type { Research2x2SetId } from "./cases-2x2-research";
 
 export type AlgorithmSetId =
   | "cruz"
@@ -29,7 +30,9 @@ export type AlgorithmSetId =
   // 3×3 methods taught from research (cases-3x3-research.ts)
   | Research3x3SetId
   // Roux (cases-roux.ts)
-  | RouxSetId;
+  | RouxSetId
+  // 2×2 methods taught from research (cases-2x2-research.ts)
+  | Research2x2SetId;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -114,6 +117,10 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "roux-eo": { width: 200, height: 200 },
   "roux-ulur": { width: 200, height: 200 },
   "roux-capa-m": { width: 200, height: 200 },
+  "eg-cara": { width: 200, height: 200 },
+  "eg-cll": { width: 200, height: 200 },
+  "eg-1": { width: 200, height: 200 },
+  "eg-2": { width: 200, height: 200 },
 };
 
 export function buildCases(
@@ -166,7 +173,7 @@ const compact = (text: string) => text.toLowerCase().replace(/’/g, "'").replac
 export function matchesCase(algorithmCase: AlgorithmCase, query: string): boolean {
   const q = compact(query);
   if (q.length === 0) return true;
-  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|ocll|oll|pll|pbl|cmll|cll|coll|epll|eo|l4e|l3e|l3c)/, "");
+  const numberQuery = q.replace(/^(caso|cruz|esquinas|f2l|ocll|oll|pll|pbl|cmll|cll|coll|epll|eg-?[12]|eo|l4e|l3e|l3c)/, "");
   if (/^\d+$/.test(numberQuery)) return Number(numberQuery) === algorithmCase.number;
   const name = algorithmCase.name?.toLowerCase();
   if (name && (name.startsWith(q) || `${name}perm` === q || `${name}-perm` === q)) return true;

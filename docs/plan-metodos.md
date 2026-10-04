@@ -47,7 +47,7 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
 |---|---|---|---|---|
 | Ortega (hecho) | Intermedio | Primera cara, OLL, PBL | ya en la app (OLL 7, PBL 5) | `docs/source/` |
 | CLL (hecho) | Avanzado | Primera capa, CLL | ya en la app (CLL 42) | `docs/source/` |
-| EG (nuevo) | Experto | Primera cara, CLL / EG-1 / EG-2 según la capa de abajo | CLL 42 (el de CLL). EG-1 43 (40 + 3 de PBL). EG-2 43 (40 + 3 de PBL). En total 128, como dice la comunidad | Speedsolving Wiki (EG); SpeedCubeDB (EG-1, EG-2) |
+| EG (hecho) | Experto | Primera cara, CLL / EG-1 / EG-2 según la capa de abajo | CLL 42 (el de CLL). EG-1 43 (40 + 3 de PBL). EG-2 43 (40 + 3 de PBL). En total 128, como dice la comunidad | Speedsolving Wiki (EG); SpeedCubeDB (EG-1, EG-2) |
 | LEG (nuevo) | Experto | Primera cara con la barra a la izquierda, LEG-1 | LEG-1 43 (40 + 3 de PBL) | Speedsolving Wiki (LEG-1); speedcube.quest y SpeedCubeDB (LEG-1) |
 | TCLL (nuevo) | Experto | Primera capa con una esquina girada, TCLL+ / TCLL− | TCLL+ 43, TCLL− 43 | Speedsolving Wiki (TCLL); SpeedCubeDB (TCLL+, TCLL−) |
 | FH | — | **Sin identificar**: no aparece ningún método 2×2 llamado «FH» en Speedsolving Wiki ni en las bases de algoritmos. Pendiente de que el usuario diga qué es | — | — |
@@ -75,7 +75,7 @@ coincide con la comunidad. ZBLL no entra en el plan: son demasiados casos.
 3. **Petrus** (3×3) (hecho).
 4. **ZZ** (3×3) (hecho).
 5. **Roux** (3×3) (hecho).
-6. **EG** (2×2): EG-1 y EG-2; reutiliza CLL.
+6. **EG** (2×2): EG-1 y EG-2; reutiliza CLL (hecho).
 7. **LEG y TCLL** (2×2).
 8. **FH**: fuera del plan por ahora (el usuario, 2026-10-03). Si más adelante dice qué método es, se añade.
 

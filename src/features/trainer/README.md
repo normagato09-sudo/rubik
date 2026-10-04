@@ -10,7 +10,7 @@ Relación Cubo → Método → Etapa: cada `MethodOption` tiene un `cubeType`
 (`getStagesForMethod`). Un método nunca aparece para un cubo al que no
 pertenece — CFOP nunca se ofrece fuera de `cubeType: "3x3"`. `store.ts`
 aplica la cascada: cambiar de cubo recalcula el método por defecto para
-ese tipo de cubo. Activos hoy: 3x3 con CFOP, Petrus, ZZ y Roux, 2x2 con Ortega y CLL, y
+ese tipo de cubo. Activos hoy: 3x3 con CFOP, Petrus, ZZ y Roux, 2x2 con Ortega, CLL y EG, y
 Pyraminx con Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO y
 Nutella. Cada método activo tiene su nivel (`level`: Principiante,
 Intermedio, Avanzado o Experto, ver `docs/plan-metodos.md`) y cada cubo los
