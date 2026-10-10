@@ -14,3 +14,7 @@ las posiciones).
 `generatePyraminxScramble()` — mezclas de Pyraminx en el formato habitual:
 11 giros grandes (U, L, R, B) sin repetir punta seguida y después cada punta
 (u, l, r, b) girada o no al azar.
+
+`generateSkewbScramble()` — mezclas de Skewb de la WCA, como las de TNoodle:
+una posición al azar, todas igual de probables, alcanzada con 11 giros
+exactos de R, U, L y B (`features/skewb/search.ts`).

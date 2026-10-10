@@ -58,6 +58,9 @@ Sarah's Intermediate y Sarah's Advanced.
 | Sarah's Intermediate | Intermedio | Primera capa, esquinas de arriba, centros (L5C) | Esquinas: 2. Centros: 16 (un algoritmo por caso) | Speedsolving Wiki (Sarah's Intermediate); SpeedCubeDB (Skewb) |
 | Sarah's Advanced | Experto | Primera capa, L2L (las dos últimas capas en un algoritmo) | L2L: **136** según el motor (540 posiciones). La comunidad habla de 134; en la fase 2 se mira de dónde salen los 2 de diferencia (lo más probable: casos simétricos que se cuentan juntos) | Speedsolving Wiki (Sarah's Advanced); SpeedCubeDB (L2L) |
 
+Comprobado con el motor real (fase 1): 3.149.280 posiciones, como mucho 11
+giros, 90 de ellas a 11.
+
 Datos del motor: con la primera capa hecha, las esquinas de arriba ya están
 en su sitio y solo pueden estar giradas (9 posiciones); los 5 centros que
 quedan pueden estar en 60 posiciones.
@@ -108,7 +111,13 @@ parte del OLL. El Megaminx se queda con tres niveles.
 - Modelo del puzzle, notación de resolución estándar y la de mezclas WCA,
   render 3D con animaciones y generador de mezclas WCA.
   - Skewb: mezcla WCA de estado aleatorio (como TNoodle), que sale del
-    solucionador óptimo (tabla de 3.149.280 posiciones).
+    solucionador óptimo (tabla de 3.149.280 posiciones). Hecho: como en
+    TNoodle, la mezcla tiene siempre 11 giros exactos. Se mezcla con blanco
+    arriba y verde delante a la izquierda (Regulación 4d5), mirando la
+    esquina UFR: R, U, L y B giran DBR, UBL, DFL y DBL (Regulación 12a), y
+    ninguno mueve la UFR. La notación de resolución es la de Sarah (F, R y
+    L son las esquinas de arriba que se ven, más x, y, z), la que usan sus
+    métodos.
   - 4×4 y 5×5: el motor del cubo pasa a N×N (capas exteriores, anchas como Rw
     y 3Rw, y capas internas como r o 3r) sin romper el 3×3 ni el 2×2 (todos
     sus tests siguen igual). Mezclas: el 5×5 usa 60 movimientos al azar como
@@ -117,8 +126,12 @@ parte del OLL. El Megaminx se queda con tres niveles.
     azar y en la fase 3 pasa a estado aleatorio (confirmado 2026-10-10).
   - Megaminx: notación de resolución (U, R, F, L, ... y sus `'`, `2`, `2'`) y
     la de mezclas WCA (R++, D--, U, U'; 7 líneas).
-- Se activa en el selector «Cubo» de Inicio (timer, mezcla e historial como
-  los demás).
+- Se activa en el selector «Cubo» de Inicio al empezar la fase 2, cuando el
+  puzzle ya tiene métodos (cambio del 2026-10-10). Si se activa antes, el
+  selector «Método» se queda vacío y «Aprender» no lleva a ninguna parte.
+  Inicio solo tiene los selectores y los botones, sin timer ni mezcla en
+  pantalla (como pasa con el 2×2 y el Pyraminx): la mezcla queda en
+  `features/scramble` y el 3D se ve en Aprender y en el Solucionador.
 
 ### Fase 2: Aprender
 
@@ -151,7 +164,7 @@ parte del OLL. El Megaminx se queda con tres niveles.
 
 | Puzzle | Fase 1 | Fase 2 | Fase 3 |
 |---|---|---|---|
-| Skewb | pendiente | pendiente | pendiente |
+| Skewb | hecha | pendiente | pendiente |
 | 4×4 | pendiente | pendiente | pendiente |
 | 5×5 | pendiente | pendiente | pendiente |
 | Megaminx | pendiente | pendiente | pendiente |

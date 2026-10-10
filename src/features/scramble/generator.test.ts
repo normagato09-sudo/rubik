@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { createSolvedCube } from "@/features/cube/model";
 import { ALL_MOVES, applyMoves, getFaceDef, inverseMove } from "@/features/cube/moves";
 import type { Face, Move } from "@/features/cube/moves";
-import { DEFAULT_SCRAMBLE_LENGTH, generate2x2Scramble, generateScramble } from "./generator";
+import { applySkewbMoves, isSolvedSkewb, solvedSkewb } from "@/features/skewb/moves";
+import { DEFAULT_SCRAMBLE_LENGTH, generate2x2Scramble, generateScramble, generateSkewbScramble } from "./generator";
 
 const ALL_MOVES_SET = new Set<Move>(ALL_MOVES);
 
@@ -81,5 +82,19 @@ describe("generate2x2Scramble", () => {
     const solved = createSolvedCube(2);
     const scrambles = Array.from({ length: 20 }, () => applyMoves(solved, generate2x2Scramble()));
     expect(scrambles.some((scrambled) => JSON.stringify(scrambled) !== JSON.stringify(solved))).toBe(true);
+  });
+});
+
+describe("generateSkewbScramble", () => {
+  it("is 11 WCA moves (R, U, L, B), never the same corner twice in a row, and scrambles", () => {
+    for (let i = 0; i < 50; i++) {
+      const scramble = generateSkewbScramble();
+      expect(scramble).toHaveLength(11);
+      scramble.forEach((move, j) => {
+        expect(move).toMatch(/^[RULB]'?$/);
+        if (j > 0) expect(move[0]).not.toBe(scramble[j - 1][0]);
+      });
+      expect(isSolvedSkewb(applySkewbMoves(solvedSkewb(), scramble))).toBe(false);
+    }
   });
 });

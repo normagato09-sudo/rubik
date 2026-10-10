@@ -7,6 +7,8 @@
 import { ALL_MOVES, getFaceDef } from "@/features/cube/moves";
 import type { Face, Move } from "@/features/cube/moves";
 import type { PyraMove } from "@/features/pyraminx/moves";
+import type { SkewbMove } from "@/features/skewb/moves";
+import { randomStateSkewbScramble } from "@/features/skewb/search";
 
 export const DEFAULT_SCRAMBLE_LENGTH = 20;
 
@@ -79,4 +81,13 @@ export function generatePyraminxScramble(length: number = PYRAMINX_SCRAMBLE_LENG
     if (turn > 0) scramble.push((turn === 1 ? tip : `${tip}'`) as PyraMove);
   }
   return scramble;
+}
+
+/**
+ * A WCA Skewb scramble, as TNoodle makes them: a random position (every
+ * one equally likely) reached with exactly 11 moves of R, U, L and B.
+ * The first one builds the Skewb's distance table (under half a second).
+ */
+export function generateSkewbScramble(): SkewbMove[] {
+  return randomStateSkewbScramble().scramble;
 }
