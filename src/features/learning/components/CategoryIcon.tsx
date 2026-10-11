@@ -7,7 +7,9 @@ import type { LearningCategoryId, LearningCube } from "../categories";
  * the first two layers (F2L) or the last layer (OLL/PLL). 2×2: a turning
  * column (notation), the bottom layer (first face/layer) or the top layer
  * (OLL, PBL, CLL). Pyraminx: a face of 9 triangles — the top layer
- * (notation), the tips (steps) or the top edges (last layer, L4E).
+ * (notation), the tips (steps) or the top edges (last layer, L4E). Skewb:
+ * a face with its center and four corners — a top corner (notation), the
+ * bottom corners (first side), the twisted top corners or the center.
  */
 const HIGHLIGHTED_3X3: Partial<Record<LearningCategoryId, number[]>> = {
   notation: [2, 5, 8],
@@ -57,18 +59,60 @@ const HIGHLIGHTED_PYRAMINX: Partial<Record<LearningCategoryId, number[]>> = {
   "nutella-l3e": [1, 3, 6],
 };
 
+const HIGHLIGHTED_SKEWB: Partial<Record<LearningCategoryId, number[]>> = {
+  notation: [2],
+  steps: [3, 4],
+  "skc-centros": [0],
+  "ski-cara-arriba": [0, 1, 2],
+  "ski-centros": [0],
+  "ska-peanut": [1, 3],
+  "ska-pi": [1, 2, 3, 4],
+  "ska-l5c": [0],
+};
+
 const PYRA_FACE: [Vec2, Vec2, Vec2] = [
   [15, 2],
   [0, 28],
   [30, 28],
 ];
 
-/** Each triangle drawn a little smaller than its place, so they read as separate stickers. */
-function pyraSticker(n: number): string {
-  const corners = stickerCorners(...PYRA_FACE, n);
-  const [cx, cy] = [0, 1].map((k) => corners.reduce((sum, p) => sum + p[k], 0) / 3);
+/** Each sticker drawn a little smaller than its place, so they read as separate stickers. */
+function shrink(corners: Vec2[]): string {
+  const [cx, cy] = [0, 1].map((k) => corners.reduce((sum, p) => sum + p[k], 0) / corners.length);
   return corners.map(([x, y]) => `${cx + (x - cx) * 0.78},${cy + (y - cy) * 0.78}`).join(" ");
 }
+
+const pyraSticker = (n: number) => shrink(stickerCorners(...PYRA_FACE, n));
+
+/** A Skewb face: the center (a diamond) and the corners' triangles (up-left, up-right, down-right, down-left). */
+const SKEWB_FACE: Vec2[][] = [
+  [
+    [15, 1],
+    [29, 15],
+    [15, 29],
+    [1, 15],
+  ],
+  [
+    [1, 1],
+    [15, 1],
+    [1, 15],
+  ],
+  [
+    [29, 1],
+    [29, 15],
+    [15, 1],
+  ],
+  [
+    [29, 29],
+    [15, 29],
+    [29, 15],
+  ],
+  [
+    [1, 29],
+    [1, 15],
+    [15, 29],
+  ],
+];
 
 export function CategoryIcon({
   id,
@@ -81,6 +125,22 @@ export function CategoryIcon({
   accent: string;
   className?: string;
 }) {
+  if (cube === "skewb") {
+    const highlighted = HIGHLIGHTED_SKEWB[id] ?? [];
+    return (
+      <svg viewBox="0 0 30 30" className={className} aria-hidden="true">
+        {SKEWB_FACE.map((corners, index) => (
+          <polygon
+            key={index}
+            points={shrink(corners)}
+            strokeLinejoin="round"
+            fill={highlighted.includes(index) ? accent : "currentColor"}
+            opacity={highlighted.includes(index) ? 1 : 0.22}
+          />
+        ))}
+      </svg>
+    );
+  }
   if (cube === "pyraminx") {
     const highlighted = HIGHLIGHTED_PYRAMINX[id] ?? [];
     return (

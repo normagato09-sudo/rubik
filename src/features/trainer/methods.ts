@@ -5,7 +5,8 @@ import type { MethodLevel, MethodOption } from "./types";
  * method never appears as an option for a cube type it doesn't belong
  * to (e.g. CFOP only ever shows up for `cubeType: "3x3"`). Active today:
  * CFOP, Petrus, ZZ and Roux for the 3x3, Ortega, CLL, EG, LEG and TCLL for the 2x2, and for the Pyraminx
- * Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO and Nutella — the methods Aprender
+ * Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO and Nutella, and for the Skewb
+ * Por capas, Sarah's Intermediate and Sarah's Advanced — the methods Aprender
  * teaches (features/learning/categories.ts). Each active method has its
  * level, and each cube lists them easiest first (docs/plan-metodos.md).
  */
@@ -28,6 +29,9 @@ export const METHODS: MethodOption[] = [
   { id: "1-flip", label: "1-Flip", status: "active", cubeType: "pyraminx", level: "Avanzado" },
   { id: "wo", label: "WO", status: "active", cubeType: "pyraminx", level: "Avanzado" },
   { id: "nutella", label: "Nutella", status: "active", cubeType: "pyraminx", level: "Experto" },
+  { id: "skewb-capas", label: "Por capas", status: "active", cubeType: "skewb", level: "Principiante" },
+  { id: "sarah-intermedio", label: "Sarah's Intermediate", status: "active", cubeType: "skewb", level: "Intermedio" },
+  { id: "sarah-avanzado", label: "Sarah's Advanced", status: "active", cubeType: "skewb", level: "Experto" },
 ];
 
 /** Easiest first: the order of the levels in the Método selector. */

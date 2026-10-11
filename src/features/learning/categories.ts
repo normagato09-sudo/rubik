@@ -33,7 +33,13 @@ export type LearningCategoryId =
   | "leg-1"
   | "tcll-cll"
   | "tcll-mas"
-  | "tcll-menos";
+  | "tcll-menos"
+  | "skc-centros"
+  | "ski-cara-arriba"
+  | "ski-centros"
+  | "ska-peanut"
+  | "ska-pi"
+  | "ska-l5c";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -62,10 +68,13 @@ export type LearningMethodId =
   | "1-flip"
   | "wo"
   | "nutella"
-  | "l4e";
+  | "l4e"
+  | "skewb-capas"
+  | "sarah-intermedio"
+  | "sarah-avanzado";
 
 /** The cubes Aprender teaches. */
-export type LearningCube = "3x3" | "2x2" | "pyraminx";
+export type LearningCube = "3x3" | "2x2" | "pyraminx" | "skewb";
 
 export const DEFAULT_LEARNING_METHOD: LearningMethodId = "cfop";
 
@@ -88,6 +97,9 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   wo: "pyraminx",
   nutella: "pyraminx",
   l4e: "pyraminx",
+  "skewb-capas": "skewb",
+  "sarah-intermedio": "skewb",
+  "sarah-avanzado": "skewb",
 };
 
 /** How the Aprender screen names each method under its title. */
@@ -109,6 +121,9 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   wo: "Pyraminx · WO",
   nutella: "Pyraminx · Nutella",
   l4e: "Pyraminx · L4E",
+  "skewb-capas": "Skewb · Por capas",
+  "sarah-intermedio": "Skewb · Sarah's Intermediate",
+  "sarah-avanzado": "Skewb · Sarah's Advanced",
 };
 
 export function isLearningMethodId(id: string): id is LearningMethodId {
@@ -124,6 +139,13 @@ const EG_INTRO = (bottom: string) =>
 const TCLL_INTRO = (white: string) =>
   `Con la primera capa hecha salvo una esquina girada, pon esa esquina delante a la derecha: aquí tiene el blanco mirando ${white}. Luego mira la capa de arriba (la forma del amarillo y los faros) y usa su caso: el algoritmo gira esa esquina y resuelve el cubo entero a la vez. Los diagramas miran desde arriba; en cada lado, la barra de dentro es la fila de arriba y la de fuera, la fila de abajo.`;
 const STEPS = { id: "steps", accent: "#34d399" } as const;
+
+/** The Skewb's last centers: the same step in Por capas and Sarah's Intermediate. */
+const SKEWB_CENTERS_INTRO =
+  "Con la cara blanca abajo y la amarilla arriba solo quedan los cuatro centros de los lados. Cada algoritmo empieza girando el Skewb entero (x o x'), de modo que el blanco queda delante a la izquierda y el amarillo detrás a la derecha, y luego repite el sledgehammer. Mira qué centros no están en su sitio y usa su caso.";
+/** What the three L2L blocks of Sarah's Advanced have in common. */
+const L2L_INTRO = (shape: string) =>
+  `En Sarah's Advanced, con la cara blanca abajo, un solo algoritmo resuelve las dos últimas capas: las esquinas de arriba y los cinco centros (L2L). ${shape} Los algoritmos son los de Sarah escritos enteros, con la cara verde delante a la izquierda; gira el Skewb con y hasta verlo como en el diagrama. Los casos que su guía deja sin algoritmo llevan el más corto que encuentra el motor de RUBIKO.`;
 
 /**
  * The blocks of the Aprender screen, in order, for each method. Each one
@@ -544,6 +566,89 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       title: "L4E",
       description: "Resuelve las cuatro últimas aristas a la vez",
       accent: "#f472b6",
+    },
+  ],
+  "skewb-capas": [
+    {
+      ...NOTATION,
+      title: "Notación del Skewb",
+      description: "Los giros de Sarah: F, R, L y los giros del Skewb entero",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "La cara blanca, las esquinas de arriba y el centro amarillo",
+    },
+    {
+      id: "skc-centros",
+      title: "Centros (Por capas)",
+      description: "Coloca los cuatro centros de los lados",
+      accent: "#facc15",
+      intro: SKEWB_CENTERS_INTRO,
+    },
+  ],
+  "sarah-intermedio": [
+    {
+      ...NOTATION,
+      title: "Notación del Skewb",
+      description: "Los giros de Sarah: F, R, L y los giros del Skewb entero",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "La cara blanca",
+    },
+    {
+      id: "ski-cara-arriba",
+      title: "Cara de arriba",
+      description: "Esquinas de arriba y centro amarillo a la vez",
+      accent: "#ff8c1a",
+      intro:
+        "Con la cara blanca abajo, mira la forma de las esquinas de arriba (Pi: las cuatro giradas; Peanut: dos opuestas giradas) y dónde está el centro amarillo. Los casos de la categoría 1 dejan la cara amarilla hecha. Los de las categorías 2 y 3 son un solo sledgehammer o hedgeslammer que convierte el caso en otro de una categoría más baja, y desde ahí se sigue. Gira el Skewb entero con y hasta ver el caso como en el diagrama.",
+    },
+    {
+      id: "ski-centros",
+      title: "Centros",
+      description: "Coloca los cuatro centros de los lados",
+      accent: "#facc15",
+      intro: SKEWB_CENTERS_INTRO,
+    },
+  ],
+  "sarah-avanzado": [
+    {
+      ...NOTATION,
+      title: "Notación del Skewb",
+      description: "Los giros de Sarah: F, R, L y los giros del Skewb entero",
+    },
+    {
+      ...STEPS,
+      title: "Pasos de aprendizaje",
+      description: "La cara blanca",
+    },
+    {
+      id: "ska-peanut",
+      title: "L2L · Peanut",
+      description: "Dos esquinas opuestas de arriba giradas: resuelve el Skewb",
+      accent: "#ff8c1a",
+      intro: L2L_INTRO(
+        "Peanut: dos esquinas opuestas de arriba tienen el amarillo arriba y las otras dos no. Los grupos son los de la guía de Sarah por casos: dónde está el centro amarillo (arriba, FR, FL, BR o BL) mirando la forma desde su lado.",
+      ),
+    },
+    {
+      id: "ska-pi",
+      title: "L2L · Pi",
+      description: "Las cuatro esquinas de arriba giradas: resuelve el Skewb",
+      accent: "#a78bfa",
+      intro: L2L_INTRO(
+        "Pi: ninguna esquina de arriba tiene el amarillo arriba. Los grupos son los de la guía de Sarah por casos: dónde está el centro amarillo (arriba, F, B, R o L) mirando la forma desde su lado.",
+      ),
+    },
+    {
+      id: "ska-l5c",
+      title: "L5C",
+      description: "Esquinas de arriba hechas: los últimos cinco centros",
+      accent: "#facc15",
+      intro: L2L_INTRO("L5C: las cuatro esquinas de arriba ya tienen el amarillo arriba y solo faltan los centros."),
     },
   ],
 };

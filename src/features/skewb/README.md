@@ -1,8 +1,8 @@
 # skewb
 
 Todo lo del Skewb que no es pantalla: el motor, la búsqueda y las mezclas.
-Fase 1 de `docs/plan-puzles.md`. Aprender y el Solucionador llegan en las
-fases 2 y 3.
+Fases 1 y 2 de `docs/plan-puzles.md` (motor y 3D; lo que usa Aprender).
+El Solucionador llega en la fase 3.
 
 Posición de referencia, la de las mezclas de la WCA (Regulación 4d5):
 blanco arriba y verde delante a la izquierda, mirando la esquina de arriba
@@ -42,6 +42,17 @@ R rojo, D amarillo, L naranja, B azul.
 - `components/SkewbScene.tsx` — el Skewb en 3D, visto como lo mira la WCA,
   con animación de cada giro (de una esquina o del Skewb entero). Cada
   pegatina lleva su fondo de plástico, que gira con ella.
+
+- `sarah.ts` — los métodos de Sarah Strong como los escriben sus guías
+  (S = sledgehammer, H = hedgeslammer, (g/o/b/r) = qué cara va delante),
+  `expandSarah` para escribirlos enteros, `caseOf` para sacar el caso que
+  resuelve cada algoritmo, y el marco de x/z de sus últimos centros
+  (`front-right`).
+- `l2l.ts` — las 540 posiciones con la primera cara hecha, `caseKey` (un
+  caso visto desde otro lado es el mismo), la forma de arriba (Pi o
+  Peanut) y `shortestSarah`, la solución más corta con F, R y L.
+- `diagrams.ts` — diagramas planos de los casos (desde arriba o desde
+  abajo) y de la notación, sacados de las pegatinas.
 
 Tests:
 - `moves.test.ts` — geometría (30 pegatinas sobre las caras del cubo),

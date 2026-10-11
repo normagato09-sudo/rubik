@@ -85,6 +85,11 @@ const EXTRA_MOVES_TEXT = {
     text: "Los usan los métodos Top First. Fw, Lw, Rw y Dw giran una cara entera: todo lo que no es la capa de la punta opuesta, un tercio de vuelta en sentido horario mirando esa cara. [U], [L], [R] y [B] giran todo el Pyraminx como su letra, sin cambiar nada: solo cambia cómo lo sujetas. Con ' van al revés.",
     badge: "",
   },
+  skewb: {
+    title: "Giros del Skewb entero",
+    text: "x, y y z giran todo el Skewb, sin cambiar nada: solo cambia cómo lo sujetas. Con ' van al revés y con 2 es media vuelta. En el paso de los centros, la guía de Sarah escribe x y z mirando la cara naranja; aquí ya están pasados a esta notación y cada caso lo explica.",
+    badge: "",
+  },
 } as const;
 
 /** 3×3: lowercase moves, with "(2x)" beside the letter. Pyraminx: face turns and whole turns. */

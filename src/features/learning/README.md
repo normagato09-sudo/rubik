@@ -24,6 +24,12 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   - Nutella (Pyraminx): Notación del Pyraminx, Pasos (Puntas, Aristas
     cambiadas), L3C y L3E.
   - L4E (Pyraminx): Notación del Pyraminx, Pasos (Puntas, V) y L4E.
+  - Por capas (Skewb, `skewb-capas`): Notación del Skewb, Pasos (Cara
+    blanca, Esquinas de arriba, Centro amarillo) y Centros.
+  - Sarah's Intermediate (Skewb): Notación, Pasos (Cara blanca), Cara de
+    arriba y Centros.
+  - Sarah's Advanced (Skewb): Notación, Pasos (Cara blanca), L2L · Peanut,
+    L2L · Pi y L5C.
 
   Cada bloque tiene contenido real de `docs/source` y muestra su progreso
   X/Y. Un método nuevo solo se añade cuando tiene su fuente. `learnHref()`
@@ -181,6 +187,26 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
   Dw y [U], [L], [R], [B], que usan los métodos Top First. Sin diagrama en
   el documento, así que van aparte y no cuentan en el progreso, como las
   minúsculas del 3×3.
+- `cases-skewb.ts` — los tres métodos del Skewb, de la web de Sarah
+  Strong (`features/skewb/sarah.ts`, marcados «Investigado»). Los casos
+  los calcula el motor a partir de los algoritmos; las explicaciones se
+  leen de las pegatinas de cada caso y los diagramas los dibuja
+  `features/skewb/diagrams.ts` (`WRITE_DIAGRAMS=1 npx vitest run
+  cases-skewb` los reescribe, también los de la notación). L2L: 540
+  posiciones, 136 casos; la guía por casos tiene 134 huecos (115
+  algoritmos, que resuelven 111 casos distintos, y 19 «-»). Con la guía
+  imprimible, Sarah cubre 112; los otros 24 llevan el más corto del motor
+  (F, R y L), y la ficha lo dice. Erratas que la ficha corrige y anota:
+  - Últimos centros: la guía escribe x y z mirando la cara de delante a la
+    derecha; su z es la x de RUBIKO y su x, z'. Comprobado con el motor.
+  - Intermedio, categoría 2: «(y2) R' F R F'» y «(y2) L F' L' F» no llevan
+    a la categoría 1; funcionan y2 F R' F' R y y2 F' L F L'. Y el último
+    caso de la categoría 3 lleva a otro de la 3, no a la 2.
+  - Guía por casos: 2 casos Pi de «center on R» son de L y 2 de L son de R
+    (y 4 Peanut están en un grupo vecino).
+- `notation.ts` (Skewb) — `NOTATION_MOVES_SKEWB`: F, R y L de Sarah, con
+  diagramas del motor en `public/learning/notation-skewb/`, y
+  `SKEWB_EXTRA_MOVES`: x, y, z, aparte, sin contar en el progreso.
 - `algorithm.ts` — `splitAlgorithm()`: un paso por movimiento, tal cual. Un
   `'` suelto (`U2 '`) se une al movimiento anterior.
 - `progress-store.ts` — lo aprendido (Zustand + localStorage, clave
@@ -191,7 +217,8 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
 
 Rutas:
 - `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll|eg|leg|tcll` el 2×2,
-  `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx y `?abierto=<categoría>` deja ese
+  `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx,
+  `?metodo=skewb-capas|sarah-intermedio|sarah-avanzado` el Skewb y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
   `esquinas`, `f2l`, `oll`, `pll`, `primera-cara`, `primera-capa`,
@@ -203,5 +230,5 @@ Rutas:
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
   `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
   `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll`, `zz-pll`, `roux-bloque1`,
-  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1`, `eg-2`, `leg-cara`, `leg-1`, `tcll-capa`, `tcll-cll`, `tcll-mas` y `tcll-menos`.
+  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1`, `eg-2`, `leg-cara`, `leg-1`, `tcll-capa`, `tcll-cll`, `tcll-mas`, `tcll-menos`, y en el Skewb `skc-primera-cara`, `skc-esquinas`, `skc-centro`, `skc-centros`, `ski-primera-cara`, `ski-cara-arriba`, `ski-centros`, `ska-primera-cara`, `ska-peanut`, `ska-pi` y `ska-l5c`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

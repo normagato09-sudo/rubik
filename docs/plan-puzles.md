@@ -54,9 +54,20 @@ Sarah's Intermediate y Sarah's Advanced.
 
 | Método | Nivel | Pasos | Casos (motor) | Fuentes |
 |---|---|---|---|---|
-| Por capas | Principiante | Primera capa, esquinas de arriba, centros | Primera capa: intuitiva. Esquinas: 2 casos (con 1 algoritmo, el sledgehammer, repetido). Centros: 16 casos, resueltos con 2 algoritmos repetidos | Speedsolving Wiki (Skewb, método para principiantes) |
-| Sarah's Intermediate | Intermedio | Primera capa, esquinas de arriba, centros (L5C) | Esquinas: 2. Centros: 16 (un algoritmo por caso) | Speedsolving Wiki (Sarah's Intermediate); SpeedCubeDB (Skewb) |
-| Sarah's Advanced | Experto | Primera capa, L2L (las dos últimas capas en un algoritmo) | L2L: **136** según el motor (540 posiciones). La comunidad habla de 134; en la fase 2 se mira de dónde salen los 2 de diferencia (lo más probable: casos simétricos que se cuentan juntos) | Speedsolving Wiki (Sarah's Advanced); SpeedCubeDB (L2L) |
+| Por capas | Principiante | Cara blanca, esquinas de arriba, centro amarillo, centros | Cara blanca: intuitiva + 2 casos de la última esquina. Esquinas: 2 (Pi y Peanut). Centro amarillo: 1. Centros: 4 | Sarah's Cubing Site (variación para principiantes) |
+| Sarah's Intermediate | Intermedio | Cara blanca, cara de arriba (esquinas y centro a la vez), centros | Cara de arriba: 10 (3 de la categoría 1, 4 de la 2 y 3 de la 3). Centros: 4 | Sarah's Cubing Site (variación intermedia) |
+| Sarah's Advanced | Experto | Cara blanca, L2L (las dos últimas capas en un algoritmo): Peanut, Pi y L5C | L2L: **136** casos (540 posiciones): Peanut 60, Pi 60, L5C 16 | Sarah's Cubing Site (variación avanzada, guía por casos e imprimible) |
+
+Fase 2, cifras del motor: el «134» de la comunidad son los huecos de la
+guía por casos de Sarah (115 algoritmos y 19 «-»), no los casos. Esos 115
+resuelven 111 casos distintos (la guía repite algunos); con la guía
+imprimible son 112. Los 24 casos sin algoritmo de Sarah llevan el más
+corto que encuentra el motor con F, R y L, y la ficha lo dice. Erratas
+encontradas, corregidas en la ficha y anotadas: la x/z de los últimos
+centros (su z es la x de RUBIKO y su x, z'), dos alternativas de la
+categoría 2 del intermedio que no funcionan, la categoría 3 que lleva a
+otra de la 3 y no a la 2, y casos de la guía por casos en el grupo que no
+es (Pi R/L y 4 Peanut).
 
 Comprobado con el motor real (fase 1): 3.149.280 posiciones, como mucho 11
 giros, 90 de ellas a 11.
@@ -164,7 +175,7 @@ parte del OLL. El Megaminx se queda con tres niveles.
 
 | Puzzle | Fase 1 | Fase 2 | Fase 3 |
 |---|---|---|---|
-| Skewb | hecha | pendiente | pendiente |
+| Skewb | hecha | hecha | pendiente |
 | 4×4 | pendiente | pendiente | pendiente |
 | 5×5 | pendiente | pendiente | pendiente |
 | Megaminx | pendiente | pendiente | pendiente |

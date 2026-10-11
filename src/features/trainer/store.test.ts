@@ -15,7 +15,7 @@ describe("useTrainerPreferences", () => {
   });
 
   it("setCube is a no-op for a cube that is not active yet", () => {
-    useTrainerPreferences.getState().setCube("skewb");
+    useTrainerPreferences.getState().setCube("megaminx");
     expect(useTrainerPreferences.getState().cubeId).toBe("3x3");
   });
 
@@ -36,6 +36,15 @@ describe("useTrainerPreferences", () => {
     expect(useTrainerPreferences.getState()).toMatchObject({ cubeId: "pyraminx", methodId: "por-capas" });
     useTrainerPreferences.getState().setMethod("l4e");
     expect(useTrainerPreferences.getState().methodId).toBe("l4e");
+  });
+
+  it("choosing the Skewb cascades the method to Por capas (its own)", () => {
+    useTrainerPreferences.getState().setCube("skewb");
+    expect(useTrainerPreferences.getState()).toMatchObject({ cubeId: "skewb", methodId: "skewb-capas" });
+    useTrainerPreferences.getState().setMethod("sarah-avanzado");
+    expect(useTrainerPreferences.getState().methodId).toBe("sarah-avanzado");
+    useTrainerPreferences.getState().setMethod("por-capas");
+    expect(useTrainerPreferences.getState().methodId).toBe("sarah-avanzado");
   });
 
   it("setMethod is a no-op for a method that is not active yet", () => {

@@ -9,7 +9,7 @@ describe("getMethodsForCubeType", () => {
   });
 
   it("returns an empty list for a cube type with no methods yet", () => {
-    expect(getMethodsForCubeType("skewb")).toEqual([]);
+    expect(getMethodsForCubeType("megaminx")).toEqual([]);
   });
 });
 
@@ -61,5 +61,18 @@ describe("method levels", () => {
     expect(["keyhole", "l4e-intuitivo", "l4e"].map(getMethodLevel)).toEqual(["Intermedio", "Intermedio", "Intermedio"]);
     expect(["oka", "1-flip", "wo"].map(getMethodLevel)).toEqual(["Avanzado", "Avanzado", "Avanzado"]);
     expect(getMethodLevel("nutella")).toBe("Experto");
+    expect(["skewb-capas", "sarah-intermedio", "sarah-avanzado"].map(getMethodLevel)).toEqual([
+      "Principiante",
+      "Intermedio",
+      "Experto",
+    ]);
+  });
+});
+
+describe("Skewb methods", () => {
+  it("lists Por capas, Sarah's Intermediate and Sarah's Advanced, with no Avanzado level", () => {
+    const methods = getSelectableMethodsForCubeType("skewb");
+    expect(methods.map((method) => method.id)).toEqual(["skewb-capas", "sarah-intermedio", "sarah-avanzado"]);
+    expect(methods.map((method) => method.level)).not.toContain("Avanzado");
   });
 });

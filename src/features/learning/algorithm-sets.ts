@@ -4,6 +4,7 @@ import type { Research3x3SetId } from "./cases-3x3-research";
 import type { ResearchSetId } from "./cases-pyraminx-research";
 import type { RouxSetId } from "./cases-roux";
 import type { Research2x2SetId } from "./cases-2x2-research";
+import type { SkewbSetId } from "./cases-skewb";
 
 export type AlgorithmSetId =
   | "cruz"
@@ -32,7 +33,9 @@ export type AlgorithmSetId =
   // Roux (cases-roux.ts)
   | RouxSetId
   // 2×2 methods taught from research (cases-2x2-research.ts)
-  | Research2x2SetId;
+  | Research2x2SetId
+  // Skewb, Sarah's method (cases-skewb.ts)
+  | SkewbSetId;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -127,6 +130,17 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "tcll-cll": { width: 200, height: 200 },
   "tcll-mas": { width: 200, height: 200 },
   "tcll-menos": { width: 200, height: 200 },
+  "skc-primera-cara": { width: 200, height: 200 },
+  "skc-esquinas": { width: 200, height: 200 },
+  "skc-centro": { width: 200, height: 200 },
+  "skc-centros": { width: 200, height: 200 },
+  "ski-primera-cara": { width: 200, height: 200 },
+  "ski-cara-arriba": { width: 200, height: 200 },
+  "ski-centros": { width: 200, height: 200 },
+  "ska-primera-cara": { width: 200, height: 200 },
+  "ska-peanut": { width: 200, height: 200 },
+  "ska-pi": { width: 200, height: 200 },
+  "ska-l5c": { width: 200, height: 200 },
 };
 
 export function buildCases(

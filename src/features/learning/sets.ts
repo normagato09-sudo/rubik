@@ -19,6 +19,7 @@ import { SETS_3X3_RESEARCH } from "./cases-3x3-research";
 import { SETS_ROUX } from "./cases-roux";
 import { SETS_2X2_RESEARCH } from "./cases-2x2-research";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
+import { SETS_SKEWB } from "./cases-skewb";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
 import { ESQUINAS_CASES } from "./esquinas-cases";
@@ -49,10 +50,15 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   ...SETS_3X3_RESEARCH,
   ...SETS_ROUX,
   ...SETS_2X2_RESEARCH,
+  ...SETS_SKEWB,
 };
 
 const PUNTAS_INTRO =
   "Las puntas son las cuatro piezas pequeñas de los vértices y giran solas, sin mover nada más (u, l, r y b). Gira cada una hasta que sus tres colores coincidan con los del centro que tiene debajo. Como los giros grandes se las llevan con su centro, una vez puestas ya no se estropean: por eso se hacen al principio.";
+
+/** The Skewb's first side, the same in its three methods. */
+const SKEWB_FIRST_SIDE_INTRO =
+  "Empieza por la cara blanca: su centro y las cuatro esquinas que lo rodean, con sus otros colores coincidiendo entre ellas en cada lado (así queda hecha la primera capa). Se hace con intuición: pon el centro y las primeras esquinas mirando dónde van. La última suele ser la difícil, porque meterla saca otra; estos dos casos la colocan con la cara blanca abajo y su hueco abajo delante.";
 
 /** The Top First methods' last edge of the block, before L3E (Keyhole, L4E intuitivo). */
 const BACK_EDGE_INTRO =
@@ -270,6 +276,23 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
         "La V son los tres centros de abajo con las dos aristas de abajo de detrás (la de la izquierda y la de la derecha): vistas desde abajo forman una V. Pon los centros con el amarillo abajo, luego la primera arista con intuición y la segunda con uno de estos casos, con la V detrás. La arista de abajo delante se deja libre: la coloca L4E junto con las tres de arriba.",
     },
   ],
+  "skewb-capas": [
+    { setId: "skc-primera-cara", title: "Cara blanca", intro: SKEWB_FIRST_SIDE_INTRO },
+    {
+      setId: "skc-esquinas",
+      title: "Esquinas de arriba",
+      intro:
+        "Pon la cara blanca abajo. Las cuatro esquinas de arriba ya están en su sitio: solo hay que girarlas hasta que tengan el amarillo arriba. Si las cuatro están giradas es la forma Pi; si lo están dos opuestas, la Peanut. Si no ves ninguna de las dos, haz el sledgehammer (F' L F L') una vez desde cualquier lado y vuelve a mirar. El centro de arriba todavía no importa.",
+    },
+    {
+      setId: "skc-centro",
+      title: "Centro amarillo",
+      intro:
+        "Con las esquinas de arriba hechas, sube el centro amarillo. Si está en un lado, gira el Skewb entero con y hasta dejarlo detrás a la izquierda, como en el diagrama. Si está abajo no puede ser: la cara blanca estaría mal.",
+    },
+  ],
+  "sarah-intermedio": [{ setId: "ski-primera-cara", title: "Cara blanca", intro: SKEWB_FIRST_SIDE_INTRO }],
+  "sarah-avanzado": [{ setId: "ska-primera-cara", title: "Cara blanca", intro: SKEWB_FIRST_SIDE_INTRO }],
 };
 
 /** The 3×3 (CFOP) learning steps. */
@@ -349,6 +372,17 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "tcll-cll": "tcll",
   "tcll-mas": "tcll",
   "tcll-menos": "tcll",
+  "skc-primera-cara": "skewb-capas",
+  "skc-esquinas": "skewb-capas",
+  "skc-centro": "skewb-capas",
+  "skc-centros": "skewb-capas",
+  "ski-primera-cara": "sarah-intermedio",
+  "ski-cara-arriba": "sarah-intermedio",
+  "ski-centros": "sarah-intermedio",
+  "ska-primera-cara": "sarah-avanzado",
+  "ska-peanut": "sarah-avanzado",
+  "ska-pi": "sarah-avanzado",
+  "ska-l5c": "sarah-avanzado",
 };
 
 export interface SetInfo {

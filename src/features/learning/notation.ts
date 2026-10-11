@@ -104,8 +104,34 @@ export const NOTATION_MOVES_PYRAMINX: NotationMove[] = [
   return { id, move, label, image: `/learning/notation-pyraminx/notation-${id}.png`, width: 340, height: 160 };
 });
 
-export function notationMovesFor(cube: "3x3" | "2x2" | "pyraminx"): NotationMove[] {
+/**
+ * The Skewb notation of Sarah's methods (features/skewb/moves.ts): held
+ * with yellow up, green in front on the left and orange in front on the
+ * right, F, R and L turn the three top corners in sight, a third of a turn
+ * clockwise looking at the corner. No diagram in the user's documents:
+ * RUBIKO draws each move and its inverse from the engine
+ * (cases-skewb.ts, `generatedSkewbDiagrams`). Ids start with "skewb-".
+ */
+export const NOTATION_MOVES_SKEWB: NotationMove[] = [
+  { move: "F", label: "La esquina de arriba delante, entre la cara verde y la naranja, con su mitad del Skewb" },
+  { move: "R", label: "La esquina de arriba a la derecha, con su mitad del Skewb" },
+  { move: "L", label: "La esquina de arriba a la izquierda, con su mitad del Skewb" },
+].map(({ move, label }) => {
+  const id = `skewb-${move.toLowerCase()}`;
+  return {
+    id,
+    move,
+    label,
+    image: `/learning/notation-skewb/notation-${id}.svg`,
+    width: 400,
+    height: 236,
+    note: "Dibujado por RUBIKO con su motor: el Skewb resuelto, visto desde arriba, después del giro. En color, la mitad que gira.",
+  };
+});
+
+export function notationMovesFor(cube: "3x3" | "2x2" | "pyraminx" | "skewb"): NotationMove[] {
   if (cube === "pyraminx") return NOTATION_MOVES_PYRAMINX;
+  if (cube === "skewb") return NOTATION_MOVES_SKEWB;
   return cube === "2x2" ? NOTATION_MOVES_2X2 : NOTATION_MOVES;
 }
 
@@ -151,13 +177,20 @@ export const PYRAMINX_EXTRA_MOVES: WideMove[] = [
   { move: "[B]", label: "Todo el Pyraminx, como B" },
 ];
 
+/** The Skewb's whole turns, in Sarah's algorithms (like x, y and z on a 3×3). */
+export const SKEWB_EXTRA_MOVES: WideMove[] = [
+  { move: "x", label: "Todo el Skewb, como la cara naranja (delante a la derecha)" },
+  { move: "y", label: "Todo el Skewb, como la cara de arriba" },
+  { move: "z", label: "Todo el Skewb, como la cara verde (delante a la izquierda)" },
+];
+
 /** "r", "r'", "Rw", "2x" or "minúscula" find the wide moves; "Fw" or "[U]" the Pyraminx ones. */
 export function matchesWideMove(wide: WideMove, query: string): boolean {
   let q = query.trim().toLowerCase().replace(/’/g, "'");
   // On the 3×3 Rw is another way of writing r (the Pyraminx's Rw is its own move).
-  if (/^[a-z]$/.test(wide.move)) q = q.replace(/(^|\s)([rludfb])w/g, "$1$2");
+  if (/^[rludfb]$/.test(wide.move)) q = q.replace(/(^|\s)([rludfb])w/g, "$1$2");
   if (q.length === 0) return true;
-  if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2 && /^[a-z]$/.test(wide.move);
+  if (q === "2x" || "minúscula".startsWith(q) || "minuscula".startsWith(q)) return q.length >= 2 && /^[rludfb]$/.test(wide.move);
   const tokens = q.split(/\s+/);
   const move = wide.move.toLowerCase();
   const inverse = move.endsWith("]") ? `${move.slice(0, -1)}']` : `${move}'`;
