@@ -100,8 +100,8 @@ export function FaceFrame({ face, size = 3, children }: { face: FaceName; size?:
 export const PALETTE_COLORS: CubeColor[] = ["white", "yellow", "green", "blue", "red", "orange"];
 
 /**
- * The brush: the colors with how many of each are painted (of 9, or 4 on a
- * 2×2), plus the eraser. A Pyraminx passes its own 4 colors.
+ * The brush: the colors with how many of each are painted (of 9, 4 on a
+ * 2×2 or 5 on a Skewb), plus the eraser. A Pyraminx passes its own 4 colors.
  */
 export function ColorPalette<C extends CubeColor>({
   brush,
@@ -113,7 +113,7 @@ export function ColorPalette<C extends CubeColor>({
   brush: C | null;
   onBrush: (color: C | null) => void;
   counts: Record<C, number>;
-  perColor?: 4 | 9;
+  perColor?: 4 | 5 | 9;
   colors?: readonly C[];
 }) {
   return (

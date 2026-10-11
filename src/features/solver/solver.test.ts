@@ -24,6 +24,7 @@ import {
   solvedPyraminx,
   type PyraMove,
 } from "@/features/pyraminx/moves";
+import { applySkewbMoves, isSolvedSkewb, parseSkewbScramble, solvedSkewb, type SkewbMove } from "@/features/skewb/moves";
 import { isSolved2 } from "@/features/solver2x2/facelets";
 import { applyMoves2, solvedFacelets2 } from "@/features/solver2x2/sticker-moves";
 import { __coordinates as c, initTables, solve } from "./twophase";
@@ -407,5 +408,27 @@ describe("solver worker requests · Pyraminx", () => {
       type: "error",
       id: 6,
     });
+  });
+});
+
+describe("solver worker requests · Skewb", () => {
+  const scrambled = applySkewbMoves(solvedSkewb(), parseSkewbScramble("R U' L B R' U L' B' R U"));
+
+  it("warms up the Skewb table", () => {
+    expect(handleSolverRequest({ type: "warmupSkewb" })).toEqual({ type: "readySkewb" });
+  });
+
+  it("answers with moves that solve it", () => {
+    const response = handleSolverRequest({ type: "solveSkewb", id: 4, facelets: scrambled });
+    expect(response).toMatchObject({ type: "solved", id: 4 });
+    const moves = response?.type === "solved" ? response.moves : [];
+    expect(moves.length).toBeLessThanOrEqual(11);
+    expect(isSolvedSkewb(applySkewbMoves(scrambled, moves as SkewbMove[]))).toBe(true);
+  });
+
+  it("answers with an error (never throws) for an impossible Skewb", () => {
+    const swapped = [...scrambled];
+    [swapped[0], swapped[5]] = [scrambled[5], scrambled[0]];
+    expect(handleSolverRequest({ type: "solveSkewb", id: 7, facelets: swapped })).toMatchObject({ type: "error", id: 7 });
   });
 });

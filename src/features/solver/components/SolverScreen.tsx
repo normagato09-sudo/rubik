@@ -7,6 +7,7 @@ import type { Move } from "@/features/cube/moves";
 import { CUBE_COLOR_HEX } from "@/features/cube/palette";
 import type { CubeColor, CubeSize, CubeState } from "@/features/cube/types";
 import { emptyPyraFacelets, type PyraFacelets } from "@/features/pyraminx/facelets";
+import { emptySkewbFacelets, type SkewbFacelets } from "@/features/skewb/facelets";
 import type { TurnedFace2, Validation2 } from "@/features/solver2x2/facelets";
 import { cubeStateForSolution2 } from "@/features/solver2x2/sticker-moves";
 import { FACE_NAMES, type FaceName } from "../cubie";
@@ -42,6 +43,7 @@ import {
   type PuzzleId,
 } from "./puzzles";
 import { PyraminxSolver } from "./PyraminxSolver";
+import { SkewbSolver } from "./SkewbSolver";
 import { SolutionPlayer } from "./SolutionPlayer";
 
 /** Where each face sits in the 4×3 net: [column, row]. */
@@ -78,8 +80,10 @@ const withDetail = (puzzle: Puzzle, face: FaceName) =>
 export function SolverScreen() {
   const puzzleId = useSyncExternalStore(puzzleStore.subscribe, puzzleStore.getSnapshot, puzzleStore.getServerSnapshot);
   const isPyraminx = puzzleId === "pyraminx";
-  // The Pyraminx has its own editor (PyraminxSolver); the cube one keeps the 3×3 meanwhile.
-  const cubeId: CubePuzzleId = isPyraminx ? "3x3" : puzzleId;
+  const isSkewb = puzzleId === "skewb";
+  /** The Pyraminx and the Skewb have their own editors; the cube one keeps the 3×3 meanwhile. */
+  const ownEditor = isPyraminx || isSkewb;
+  const cubeId: CubePuzzleId = isPyraminx || isSkewb ? "3x3" : puzzleId;
   const puzzle = PUZZLES[cubeId];
   const [mode, setMode] = useState<Mode>("choose");
   const [fromCamera, setFromCamera] = useState(false);
@@ -90,11 +94,24 @@ export function SolverScreen() {
   }));
   const facelets = stickers[cubeId];
   const [pyraFacelets, setPyraFacelets] = useState<PyraFacelets>(emptyPyraFacelets);
+  const [skewbFacelets, setSkewbFacelets] = useState<SkewbFacelets>(emptySkewbFacelets);
   const [face, setFace] = useState<FaceName>("U");
   const [brush, setBrush] = useState<CubeColor | null>("white");
   const [result, setResult] = useState<Result>({ kind: "idle" });
   const [confirmReset, setConfirmReset] = useState(false);
-  const { ready, ready2x2, readyPyraminx, solve, solve2x2, solvePyraminx, warmup2x2, warmupPyraminx } = useSolver();
+  const {
+    ready,
+    ready2x2,
+    readyPyraminx,
+    readySkewb,
+    solve,
+    solve2x2,
+    solvePyraminx,
+    solveSkewb,
+    warmup2x2,
+    warmupPyraminx,
+    warmupSkewb,
+  } = useSolver();
   // Bumped on every edit: a solution that arrives for older stickers is dropped.
   const run = useRef(0);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -107,11 +124,12 @@ export function SolverScreen() {
     validation.kind === "valid" ? [] : validation.issues.flatMap((issue) => issue.stickers),
   );
 
-  // The 2×2 and Pyraminx tables are only built once that puzzle is on screen.
+  // The 2×2, Pyraminx and Skewb tables are only built once that puzzle is on screen.
   useEffect(() => {
     if (puzzleId === "2x2") warmup2x2();
     if (puzzleId === "pyraminx") warmupPyraminx();
-  }, [puzzleId, warmup2x2, warmupPyraminx]);
+    if (puzzleId === "skewb") warmupSkewb();
+  }, [puzzleId, warmup2x2, warmupPyraminx, warmupSkewb]);
 
   useEffect(() => {
     if (result.kind !== "idle" && result.kind !== "solving") {
@@ -149,6 +167,13 @@ export function SolverScreen() {
   /** The camera read the four faces of the Pyraminx: its editor takes over. */
   const scannedPyraminx = (next: PyraFacelets) => {
     setPyraFacelets(next);
+    setFromCamera(true);
+    changeMode("manual");
+  };
+
+  /** The camera read the six faces of the Skewb: its editor takes over. */
+  const scannedSkewb = (next: SkewbFacelets) => {
+    setSkewbFacelets(next);
     setFromCamera(true);
     changeMode("manual");
   };
@@ -264,7 +289,7 @@ export function SolverScreen() {
           </p>
           <h1 className="text-3xl font-bold tracking-tight">Solucionador</h1>
           <p className="text-sm text-navy-muted">
-            Introduce los colores de tu {isPyraminx ? "Pyraminx" : "cubo"}, a mano o con la cámara, y obtén los movimientos
+            Introduce los colores de tu {isPyraminx ? "Pyraminx" : isSkewb ? "Skewb" : "cubo"}, a mano o con la cámara, y obtén los movimientos
             para resolverlo.
           </p>
         </div>
@@ -272,7 +297,7 @@ export function SolverScreen() {
       </div>
 
       {mode === "choose" ? (
-        <ModePicker headingRef={modeHeading} onPick={changeMode} total={isPyraminx ? 36 : puzzle.total} />
+        <ModePicker headingRef={modeHeading} onPick={changeMode} total={isPyraminx ? 36 : isSkewb ? 30 : puzzle.total} />
       ) : (
         <div className="flex items-center justify-between gap-3">
           <h2 ref={modeHeading} tabIndex={-1} className="text-sm font-semibold outline-none">
@@ -300,9 +325,21 @@ export function SolverScreen() {
         />
       )}
 
-      {mode === "camera" && !isPyraminx && <CameraScanner key={puzzleId} puzzle={puzzle} onDone={scanned} />}
+      {isSkewb && mode !== "choose" && (
+        <SkewbSolver
+          mode={mode}
+          facelets={skewbFacelets}
+          onChange={setSkewbFacelets}
+          fromCamera={fromCamera}
+          onScanned={scannedSkewb}
+          solve={solveSkewb}
+          ready={readySkewb}
+        />
+      )}
 
-      {mode === "manual" && !isPyraminx && (
+      {mode === "camera" && !ownEditor && <CameraScanner key={puzzleId} puzzle={puzzle} onDone={scanned} />}
+
+      {mode === "manual" && !ownEditor && (
         <>
       {fromCamera && (
         <p
@@ -511,10 +548,10 @@ export function SolverScreen() {
   );
 }
 
-/** 3×3, 2×2 or Pyraminx: big buttons, easy to hit at 360 px. */
+/** 3×3, 2×2, Pyraminx or Skewb: big buttons, easy to hit at 360 px. */
 function PuzzlePicker({ selected, onPick }: { selected: PuzzleId; onPick: (id: PuzzleId) => void }) {
   return (
-    <div className="grid grid-cols-3 gap-1 rounded-2xl bg-navy-2 p-1" role="radiogroup" aria-label="Cubo">
+    <div className="grid grid-cols-4 gap-1 rounded-2xl bg-navy-2 p-1" role="radiogroup" aria-label="Cubo">
       {PUZZLE_IDS.map((id) => {
         const active = id === selected;
         return (
@@ -524,7 +561,7 @@ function PuzzlePicker({ selected, onPick }: { selected: PuzzleId; onPick: (id: P
             role="radio"
             aria-checked={active}
             onClick={() => onPick(id)}
-            className="h-11 rounded-xl text-base font-semibold transition-colors"
+            className="h-11 min-w-0 rounded-xl text-sm font-semibold transition-colors sm:text-base"
             style={
               active
                 ? { backgroundColor: ACCENT, color: "var(--navy)" }

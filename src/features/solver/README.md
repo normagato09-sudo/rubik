@@ -1,7 +1,7 @@
 # solver
 
-Solucionador 3×3, 2×2 y Pyraminx (`/solucionador`). Un selector
-"3×3 / 2×2 / Pyraminx" arriba elige el cubo; la elección se recuerda en el
+Solucionador 3×3, 2×2, Pyraminx y Skewb (`/solucionador`). Un selector
+"3×3 / 2×2 / Pyraminx / Skewb" arriba elige el cubo; la elección se recuerda en el
 dispositivo (localStorage, con try/catch: sin almacenamiento dura hasta
 cerrar la página), y cada cubo guarda sus propias pegatinas al cambiar. El
 2×2 vive en `features/solver2x2` y el Pyraminx en `features/pyraminx`; esta
@@ -106,6 +106,34 @@ propios componentes, con el mismo "Manual / Cámara / foto":
 
 El Worker resuelve también el Pyraminx (`warmupPyraminx` /
 `solvePyraminx`); su tabla solo se construye al elegir el Pyraminx.
+
+En el Skewb (30 pegatinas: en cada cara un centro en rombo y 4 triángulos
+de esquina; sus centros se mueven, así que no hay colores fijos) la
+pantalla también cede el sitio a sus propios componentes:
+- La guía es la **esquina fija**: la de arriba, delante a la derecha. Se
+  copia como un cubo (una cara hacia ti, otra arriba, en el orden y con
+  las indicaciones del 3×3) y la solución va en notación WCA (R, U, L, B),
+  que nunca gira esa esquina: se resuelve tal como se sujeta, mirando esa
+  esquina de frente. El editor la marca con un círculo de rayas en las
+  caras de arriba, delante y derecha.
+- `components/SkewbSolver.tsx` — editor cara a cara (las 6 en miniatura),
+  paleta con recuento x/5, validación en vivo (`features/skewb/facelets.ts`:
+  centros repetidos, esquinas imposibles, en espejo o repetidas, dos
+  centros cambiados, una esquina girada; y una o dos caras copiadas
+  giradas, con botón para girarlas) y "Resolver".
+- `components/SkewbCamera.tsx` — la cámara con la guía cuadrada del cubo
+  y el rombo del centro dibujado (`features/skewb/scan.ts`, que mide en el
+  centro de cada una de las 5 pegatinas); como en el 2×2, se calibra con
+  las caras ya confirmadas y las dudosas llevan "?".
+- `components/skewb-face.tsx` — cómo sujetarlo para cada cara y el dibujo
+  de una cara, compartidos por el editor y la cámara.
+- `components/SkewbSolutionPlayer.tsx` — la solución óptima
+  (`features/skewb/solve.ts`: ≤ 11 giros, de la tabla completa de
+  3 149 280 posiciones), cada movimiento explicado y el Skewb 3D
+  (`SkewbScene`) paso a paso.
+
+El Worker resuelve el Skewb con `warmupSkewb` / `solveSkewb`; su tabla
+(medio segundo) solo se construye al elegir el Skewb.
 
 Tests: `solver.test.ts` (movimientos, coordenadas, validación, solver y
 Worker), `cube-state.test.ts` (recorrido completo: estado 3D → pegatinas →

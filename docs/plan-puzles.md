@@ -162,7 +162,13 @@ parte del OLL. El Megaminx se queda con tres niveles.
 - Cámara en Skewb, 4×4 y 5×5 (6 colores; el 4×4 no tiene centros fijos, así
   que se calibra como en el 2×2). En el Megaminx, solo entrada manual.
 - Skewb: solución óptima con tabla BFS (como el 2×2). Como mucho 11
-  movimientos.
+  movimientos. Hecho (fase 3): la esquina de arriba, delante a la derecha, es la
+  guía (ningún giro de la WCA la mueve), así que el Skewb se copia como un
+  cubo sin colores fijos y se resuelve tal como se sujeta. Validación con
+  centros repetidos o cambiados, esquinas imposibles, en espejo o
+  giradas, y caras copiadas giradas; cámara con la guía cuadrada y el
+  rombo del centro, calibrada con las caras confirmadas; reproductor con
+  `SkewbScene`.
 - 4×4, 5×5 y Megaminx: la óptima no se puede calcular, así que se buscan los
   menos movimientos posibles por fases (búsqueda con tablas de poda, varias
   opciones y la más corta, cancelaciones simplificadas). 4×4 y 5×5 terminan
@@ -175,7 +181,7 @@ parte del OLL. El Megaminx se queda con tres niveles.
 
 | Puzzle | Fase 1 | Fase 2 | Fase 3 |
 |---|---|---|---|
-| Skewb | hecha | hecha | pendiente |
+| Skewb | hecha | hecha | hecha |
 | 4×4 | pendiente | pendiente | pendiente |
 | 5×5 | pendiente | pendiente | pendiente |
 | Megaminx | pendiente | pendiente | pendiente |

@@ -163,6 +163,25 @@ CORNERS.forEach((value, i) => {
   for (let m = 0; m < N_MOVES; m++) CORNER_MOVE[i * N_MOVES + m] = cornerIndex(cornersOf(applyPieceMove(pieces, m)));
 });
 
+const reaches = (index: (value: number[]) => number, value: number[]) => {
+  try {
+    index(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Which part of a position the moves can reach: the centers (only an even
+ * shuffle of them can be reached) and the corners (where they are and how
+ * they are twisted). The two are independent.
+ */
+export const reachability = (pieces: SkewbPieces) => ({
+  centers: reaches(centerIndex, pieces.centers),
+  corners: reaches(cornerIndex, cornersOf(pieces)),
+});
+
 /** A position's number (0 is solved); throws if the pieces cannot be reached. */
 export function stateIndex(pieces: SkewbPieces): number {
   return centerIndex(pieces.centers) * N_CORNERS + cornerIndex(cornersOf(pieces));

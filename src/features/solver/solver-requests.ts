@@ -1,12 +1,13 @@
 /**
  * Messages between the solver screen and solver.worker.ts, and what the
  * worker does with each one — kept free of worker globals so it can be
- * tested directly. The same worker solves the 3×3 (two-phase), the 2×2
- * and the Pyraminx (both optimal); all answer with the moves.
+ * tested directly. The same worker solves the 3×3 (two-phase), the 2×2,
+ * the Pyraminx and the Skewb (all three optimal); all answer with the moves.
  */
 import type { CubeColor } from "@/features/cube/types";
 import type { PyraColor } from "@/features/pyraminx/moves";
 import { initPyraminxTables, solvePyraminx } from "@/features/pyraminx/search";
+import { initSkewbTables, solveSkewb } from "@/features/skewb/solve";
 import { initTables2x2 } from "@/features/solver2x2/search";
 import { solve2x2 } from "@/features/solver2x2/solve";
 import type { CubieCube } from "./cubie";
@@ -18,17 +19,28 @@ export type SolverRequest =
   | { type: "warmup2x2" }
   | { type: "solve2x2"; id: number; facelets: CubeColor[] }
   | { type: "warmupPyraminx" }
-  | { type: "solvePyraminx"; id: number; facelets: PyraColor[] };
+  | { type: "solvePyraminx"; id: number; facelets: PyraColor[] }
+  | { type: "warmupSkewb" }
+  | { type: "solveSkewb"; id: number; facelets: CubeColor[] };
 
 export type SolverResponse =
   | { type: "ready" }
   | { type: "ready2x2" }
   | { type: "readyPyraminx" }
+  | { type: "readySkewb" }
   | { type: "solved"; id: number; moves: string[] }
   | { type: "error"; id: number; message: string };
 
 /** Answers one request; never throws, so the screen always hears back. */
 export function handleSolverRequest(request: SolverRequest): SolverResponse | null {
+  if (request.type === "warmupSkewb") {
+    try {
+      initSkewbTables();
+      return { type: "readySkewb" };
+    } catch {
+      return null;
+    }
+  }
   if (request.type === "warmup" || request.type === "warmup2x2" || request.type === "warmupPyraminx") {
     try {
       if (request.type === "warmup") initTables();
@@ -41,6 +53,9 @@ export function handleSolverRequest(request: SolverRequest): SolverResponse | nu
     }
   }
   try {
+    if (request.type === "solveSkewb") {
+      return { type: "solved", id: request.id, moves: solveSkewb(request.facelets) };
+    }
     if (request.type === "solvePyraminx") {
       return { type: "solved", id: request.id, moves: solvePyraminx(request.facelets) };
     }

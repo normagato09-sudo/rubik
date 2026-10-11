@@ -1,8 +1,8 @@
 # skewb
 
 Todo lo del Skewb que no es pantalla: el motor, la búsqueda y las mezclas.
-Fases 1 y 2 de `docs/plan-puzles.md` (motor y 3D; lo que usa Aprender).
-El Solucionador llega en la fase 3.
+Fases 1, 2 y 3 de `docs/plan-puzles.md`: motor y 3D, lo que usa Aprender
+y lo que usa el Solucionador (la pantalla está en `features/solver`).
 
 Posición de referencia, la de las mezclas de la WCA (Regulación 4d5):
 blanco arriba y verde delante a la izquierda, mirando la esquina de arriba
@@ -53,6 +53,18 @@ R rojo, D amarillo, L naranja, B azul.
   Peanut) y `shortestSarah`, la solución más corta con F, R y L.
 - `diagrams.ts` — diagramas planos de los casos (desde arriba o desde
   abajo) y de la notación, sacados de las pegatinas.
+- `facelets.ts` — las 30 pegatinas del Solucionador y su validación con
+  mensajes en español: recuento (5 de cada color), piezas imposibles en
+  cuanto se pintan (centro repetido; esquina con un color repetido, con
+  colores opuestos, en espejo o repetida), dos centros cambiados o una
+  esquina girada (`reachability` de `search.ts`), y una o dos caras
+  copiadas giradas (`findTurnedSkewbFaces`). `asHeldForSolver` renombra
+  los colores para que la esquina de arriba, delante a la derecha, sea la
+  de blanco, verde y rojo: así se resuelve tal como se sujeta.
+- `solve.ts` — la solución más corta de un Skewb pintado (WCA, ≤ 11
+  giros), comprobada sobre las pegatinas antes de devolverla.
+- `scan.ts` — leer una cara con la cámara: la guía cuadrada del cubo y
+  una muestra en el centro de cada una de sus 5 pegatinas.
 
 Tests:
 - `moves.test.ts` — geometría (30 pegatinas sobre las caras del cubo),
@@ -66,3 +78,10 @@ Tests:
   81 028 y 90 a 11 giros), la numeración coincide con las pegatinas,
   soluciones óptimas de 300 mezclas, piezas imposibles rechazadas y 100
   mezclas WCA de 11 giros que llevan a su posición.
+- `solve.test.ts` — 200 Skewbs sujetos de cualquier forma: válidos,
+  resueltos con la solución más corta y sin mover la esquina fija; uno
+  resuelto en cualquier posición; recuento, piezas imposibles, centros
+  cambiados, esquina girada y caras copiadas giradas.
+- `scan.test.ts` — fotos sintéticas de cada cara leídas bien (también
+  con menos luz), las 6 caras dan un Skewb válido y la esquina fija cae
+  donde dicen las indicaciones.
