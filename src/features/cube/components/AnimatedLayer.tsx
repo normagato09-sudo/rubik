@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector3, type Group } from "three";
-import { baseQuarterAngle, parseMove } from "../moves";
-import type { Move } from "../moves";
+import { layerTurn, turnAngle } from "../moves";
+import type { AnyMove } from "../moves";
 import type { CubeSize, Cubie as CubieState } from "../types";
 import { Cubie } from "./Cubie";
 
@@ -20,15 +20,6 @@ function easeOutCubic(t: number) {
   return 1 - (1 - t) ** 3;
 }
 
-/** Signed animation angle: primes take the short way (opposite sign). */
-function animationAngle(move: Move): number {
-  const { face, turns } = parseMove(move);
-  const base = baseQuarterAngle(face);
-  if (turns === 1) return base;
-  if (turns === 2) return base * 2;
-  return -base;
-}
-
 export function AnimatedLayer({
   move,
   axis,
@@ -36,7 +27,7 @@ export function AnimatedLayer({
   size = 3,
   onComplete,
 }: {
-  move: Move;
+  move: AnyMove;
   axis: 0 | 1 | 2;
   cubies: CubieState[];
   size?: CubeSize;
@@ -45,7 +36,8 @@ export function AnimatedLayer({
   const groupRef = useRef<Group>(null);
   const progress = useRef(0);
   const completed = useRef(false);
-  const targetAngle = animationAngle(move);
+  // Primes take the short way (opposite sign).
+  const targetAngle = turnAngle(layerTurn(move, size));
   const axisVector = AXIS_VECTOR[axis];
 
   useFrame((_, delta) => {

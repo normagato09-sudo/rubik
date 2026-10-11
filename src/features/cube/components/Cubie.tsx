@@ -10,11 +10,12 @@ import { STICKER_TRANSFORM } from "./sticker-transforms";
 const SPACING = 1.04;
 
 /**
- * Distance between neighbouring pieces for each cube size. Positions are
- * always in {-1, 0, 1}; a 2×2 has no middle layer, so its ±1 pieces are
- * drawn half as far apart to touch each other.
+ * Distance between neighbouring pieces for each cube size, per unit of
+ * position. Odd cubes have a layer at every integer; even ones only at odd
+ * integers (2×2: ±1; 4×4: ±1, ±3), so their pieces are drawn half as far
+ * apart per unit, to touch each other.
  */
-export const PIECE_SPACING: Record<CubeSize, number> = { 3: SPACING, 2: SPACING / 2 };
+export const PIECE_SPACING: Record<CubeSize, number> = { 2: SPACING / 2, 3: SPACING, 4: SPACING / 2, 5: SPACING };
 const CUBIE_SIZE = 0.94;
 const STICKER_SIZE = CUBIE_SIZE * 0.82;
 const STICKER_OFFSET = CUBIE_SIZE / 2 + 0.011;

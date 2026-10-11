@@ -135,6 +135,12 @@ parte del OLL. El Megaminx se queda con tres niveles.
     TNoodle. El 4×4 de la WCA es de estado aleatorio, y eso necesita el
     solucionador de la fase 3, así que en la fase 1 lleva 40 movimientos al
     azar y en la fase 3 pasa a estado aleatorio (confirmado 2026-10-10).
+    Hecho para el 4×4 (fase 1): el motor N×N (`features/cube`) sigue la
+    regla de coordenadas del 2×2 y el 3×3, que no cambian; giros R, Rw,
+    3Rw, r, 3r, x, y, z; el 3D dibuja y anima el 4×4 y el 5×5; mezcla de 40
+    movimientos (las 6 caras y Rw, Uw, Fw). El motor ya acepta el 5×5; su
+    mezcla de 60 movimientos llega en su fase 1. Comprobado con el motor:
+    la paridad de PLL (r2 U2 r2 Uw2 r2 Uw2, más U2) solo cambia UF y UB.
   - Megaminx: notación de resolución (U, R, F, L, ... y sus `'`, `2`, `2'`) y
     la de mezclas WCA (R++, D--, U, U'; 7 líneas).
 - Se activa en el selector «Cubo» de Inicio al empezar la fase 2, cuando el
@@ -182,7 +188,7 @@ parte del OLL. El Megaminx se queda con tres niveles.
 | Puzzle | Fase 1 | Fase 2 | Fase 3 |
 |---|---|---|---|
 | Skewb | hecha | hecha | hecha |
-| 4×4 | pendiente | pendiente | pendiente |
+| 4×4 | hecha | pendiente | pendiente |
 | 5×5 | pendiente | pendiente | pendiente |
 | Megaminx | pendiente | pendiente | pendiente |
 

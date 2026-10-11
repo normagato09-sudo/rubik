@@ -18,3 +18,9 @@ las posiciones).
 `generateSkewbScramble()` — mezclas de Skewb de la WCA, como las de TNoodle:
 una posición al azar, todas igual de probables, alcanzada con 11 giros
 exactos de R, U, L y B (`features/skewb/search.ts`).
+
+`generate4x4Scramble()` — mezclas de 4×4 de 40 movimientos al azar, como
+hacía TNoodle antes de las de estado aleatorio: las 6 caras y los giros
+anchos Rw, Uw y Fw (con ' y 2), nunca dos seguidos sobre el mismo eje. La
+mezcla de estado aleatorio de la WCA necesita el solucionador del 4×4, y
+llega en su fase 3 (`docs/plan-puzles.md`).

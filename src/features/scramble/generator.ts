@@ -5,7 +5,7 @@
  * real, exactly like a manual turn.
  */
 import { ALL_MOVES, getFaceDef } from "@/features/cube/moves";
-import type { Face, Move } from "@/features/cube/moves";
+import type { BigMove, Face, Move } from "@/features/cube/moves";
 import type { PyraMove } from "@/features/pyraminx/moves";
 import type { SkewbMove } from "@/features/skewb/moves";
 import { randomStateSkewbScramble } from "@/features/skewb/search";
@@ -35,6 +35,38 @@ export function generateScramble(length: number = DEFAULT_SCRAMBLE_LENGTH): Move
     previousAxis = axis;
   }
 
+  return scramble;
+}
+
+/** 4×4 scrambles: random moves, like TNoodle before random-state 4×4 (docs/plan-puzles.md). */
+export const SCRAMBLE_4X4_LENGTH = 40;
+
+/**
+ * The 4×4 turns of a scramble: the 6 outer faces and the wide turns Rw,
+ * Uw and Fw (Lw, Dw and Bw would only add the same turns with the cube
+ * held another way), each with ' and 2.
+ */
+const MOVES_4X4: BigMove[] = (["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw"] as const).flatMap((turn) => [
+  turn,
+  `${turn}'` as BigMove,
+  `${turn}2` as BigMove,
+]);
+
+/**
+ * A 4×4 scramble of 40 random moves, never on the same axis as the move
+ * before (R then L or Rw would turn parallel layers, which could be
+ * written as fewer moves).
+ */
+export function generate4x4Scramble(length: number = SCRAMBLE_4X4_LENGTH): BigMove[] {
+  const scramble: BigMove[] = [];
+  let previousAxis: 0 | 1 | 2 | null = null;
+  while (scramble.length < length) {
+    const candidate = MOVES_4X4[randomIndex(MOVES_4X4.length)];
+    const axis = getFaceDef(candidate[0] as Face).axis;
+    if (axis === previousAxis) continue;
+    scramble.push(candidate);
+    previousAxis = axis;
+  }
   return scramble;
 }
 

@@ -37,7 +37,7 @@ export type CubePuzzleId = Exclude<PuzzleId, "pyraminx" | "skewb">;
 export interface Puzzle {
   id: CubePuzzleId;
   label: string;
-  size: CubeSize;
+  size: Extract<CubeSize, 2 | 3>;
   /** Stickers per face (9 or 4), and of each color. */
   perFace: 4 | 9;
   total: number;

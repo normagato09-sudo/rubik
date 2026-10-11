@@ -1,14 +1,18 @@
 /**
- * Pure data model of a Rubik's cube (3×3 or 2×2). No Three.js / rendering
+ * Pure data model of a Rubik's cube (2×2 to 5×5). No Three.js / rendering
  * concerns live here so this can be tested and reused (scramble, timer
  * replays, solver) independently of how it is drawn on screen.
  */
 
-/** Integer vector; components are always in {-1, 0, 1} (a 2×2 never uses 0). */
+/**
+ * Integer vector. On odd cubes the layers are consecutive integers around 0
+ * (3×3: -1, 0, 1; 5×5: -2 … 2); on even ones, odd integers (2×2: -1, 1;
+ * 4×4: -3, -1, 1, 3), so a quarter turn is always an exact swap of integers.
+ */
 export type Vec3 = readonly [number, number, number];
 
-/** Pieces per edge: a 3×3 or a 2×2. */
-export type CubeSize = 2 | 3;
+/** Pieces per edge: 2×2 to 5×5. */
+export type CubeSize = 2 | 3 | 4 | 5;
 
 /** The six classic face colors. */
 export type CubeColor =
@@ -50,14 +54,14 @@ export const IDENTITY_ORIENTATION: Orientation = {
 export interface Cubie {
   /** Stable identity for the piece, independent of its current position. */
   id: string;
-  /** Current position in the grid ({-1, 0, 1} per axis; {-1, 1} on a 2×2). */
+  /** Current position in the grid (see Vec3: {-1, 0, 1} per axis on a 3×3, {-1, 1} on a 2×2). */
   position: Vec3;
   orientation: Orientation;
   /** Fixed set of colored stickers glued to this piece's local faces. */
   stickers: Sticker[];
 }
 
-/** Full state of the cube: just the visible pieces (26 on a 3×3, 8 on a 2×2). */
+/** Full state of the cube: just the visible pieces (8 on a 2×2, 26 on a 3×3, 56 on a 4×4, 98 on a 5×5). */
 export interface CubeState {
   cubies: Cubie[];
 }

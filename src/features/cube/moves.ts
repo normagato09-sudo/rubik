@@ -181,3 +181,108 @@ export const WIDES: Wide[] = ["r", "l", "u", "d", "f", "b"];
 
 /** Every move the engine understands: face turns, middle layers, wide turns and rotations. */
 export const ALGORITHM_MOVES: Move[] = withModifiers([...FACES, ...SLICES, ...WIDES, ...ROTATIONS]);
+
+// ---------- big cubes: 4×4 and 5×5 ----------
+
+/**
+ * Turns of a big cube, in the WCA notation (Regulation 12a) and the usual
+ * one for inner layers: R turns the outer layer; Rw the 2 outer layers
+ * and 3Rw the 3 outer ones (wide turns); r only the 2nd layer and 3r only
+ * the 3rd (inner layers, as in the 4×4 parity algorithms); x, y and z
+ * the whole cube. On the 3×3 and 2×2, r keeps meaning R and M together,
+ * as their algorithms write it: these are only read for a 4×4 or 5×5.
+ */
+export type BigTurn = Face | `${Face}w` | `3${Face}w` | Wide | `3${Wide}` | Rotation;
+export type BigMove = BigTurn | `${BigTurn}'` | `${BigTurn}2`;
+
+/** Any move of any cube: what the 3D scene animates. */
+export type AnyMove = Move | BigMove;
+
+/** One turn, whatever the cube: the axis, which layers (their coordinates) and how far. */
+export interface LayerTurn {
+  axis: Axis;
+  /** Coordinates on `axis` of the layers that turn, or "all" for the whole cube. */
+  layers: readonly number[] | "all";
+  /** Rotation sign of a single quarter turn, see rotate90. */
+  sign: 1 | -1;
+  turns: 1 | 2 | 3;
+}
+
+const BIG_MOVE = /^(?:(3)?([RLUDFB])(w)?|(3)?([rludfb])|([xyz]))(['2])?$/;
+
+/** The coordinate of the `depth`-th layer (1 = the outer one) from the + side of an axis. */
+function layerFromOutside(size: number, depth: number): number {
+  const outer = size % 2 === 0 ? size - 1 : (size - 1) / 2;
+  return outer - (size % 2 === 0 ? 2 : 1) * (depth - 1);
+}
+
+/**
+ * What `move` turns on a cube of `size`. The 2×2 and 3×3 read their own
+ * moves (R, M, r = R + M, x...); the 4×4 and 5×5 read BigMove. Throws on a
+ * move that cube does not have.
+ */
+export function layerTurn(move: AnyMove, size: 2 | 3 | 4 | 5): LayerTurn {
+  if (size <= 3) {
+    const { face, turns } = parseMove(move as Move);
+    const def = FACE_DEF[face];
+    if (!def) throw new Error(`Movimiento no válido: ${move}`);
+    return { axis: def.axis, layers: def.layers, sign: def.sign, turns };
+  }
+  const match = BIG_MOVE.exec(move);
+  if (!match) throw new Error(`Movimiento no válido: ${move}`);
+  const [, wideDepth, face, w, innerDepth, inner, rotation, modifier] = match;
+  const turns = modifier === "'" ? 3 : modifier === "2" ? 2 : 1;
+  if (rotation) {
+    const def = FACE_DEF[rotation as Rotation];
+    return { axis: def.axis, layers: "all", sign: def.sign, turns };
+  }
+  const letter = (face ?? inner.toUpperCase()) as Face;
+  const def = FACE_DEF[letter];
+  const side = (def.layers as readonly number[])[0] > 0 ? 1 : -1;
+  // R: layer 1. Rw: 1–2. 3Rw: 1–3. r: layer 2. 3r: layer 3.
+  let depths: number[];
+  if (face) {
+    if (wideDepth && !w) throw new Error(`Movimiento no válido: ${move}`);
+    depths = w ? Array.from({ length: wideDepth ? 3 : 2 }, (_, k) => k + 1) : [1];
+  } else {
+    depths = [innerDepth ? 3 : 2];
+  }
+  if (Math.max(...depths) >= size) throw new Error(`Movimiento no válido en un ${size}×${size}: ${move}`);
+  return { axis: def.axis, layers: depths.map((d) => side * layerFromOutside(size, d)), sign: def.sign, turns };
+}
+
+/** Whether a piece at `position` moves with `turn`. */
+export const turnsPiece = (turn: LayerTurn, position: Vec3) => turn.layers === "all" || turn.layers.includes(position[turn.axis]);
+
+/** Signed angle (radians) the turn rotates its layers, the short way for primes. */
+export function turnAngle({ sign, turns }: LayerTurn): number {
+  const quarter = sign * (Math.PI / 2);
+  return turns === 3 ? -quarter : quarter * turns;
+}
+
+/** Any move on a cube of `size` (the 2×2 and 3×3 go through applyMove, unchanged). */
+export function applyCubeMove(state: CubeState, move: AnyMove, size: 2 | 3 | 4 | 5): CubeState {
+  if (size <= 3) return applyMove(state, move as Move);
+  const turn = layerTurn(move, size);
+  const rotateQuarter = rotate90(turn.axis, turn.sign);
+  const cubies = state.cubies.map((cubie): Cubie => {
+    if (!turnsPiece(turn, cubie.position)) return cubie;
+    let position = cubie.position;
+    let orientation = cubie.orientation;
+    for (let i = 0; i < turn.turns; i++) {
+      position = rotateQuarter(position);
+      orientation = { x: rotateQuarter(orientation.x), y: rotateQuarter(orientation.y), z: rotateQuarter(orientation.z) };
+    }
+    return { ...cubie, position, orientation };
+  });
+  return { cubies };
+}
+
+export const applyCubeMoves = (state: CubeState, moves: readonly AnyMove[], size: 2 | 3 | 4 | 5): CubeState =>
+  moves.reduce((current, move) => applyCubeMove(current, move, size), state);
+
+/** The inverse of a big-cube move: R ↔ R', R2 stays. */
+export function inverseBigMove(move: BigMove): BigMove {
+  if (move.endsWith("2")) return move;
+  return (move.endsWith("'") ? move.slice(0, -1) : `${move}'`) as BigMove;
+}

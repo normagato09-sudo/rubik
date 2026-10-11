@@ -1,16 +1,18 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import type { Move } from "../moves";
+import type { AnyMove } from "../moves";
 import type { CubeSize, CubeState } from "../types";
 import { CubeBody } from "./CubeBody";
 
 const NOOP = () => {};
 
-/** Camera for each size: the smaller 2×2 is viewed from closer, so it fills the same space. */
+/** Camera for each size: each cube is viewed from as far as it needs to fill the same space. */
 const CAMERA_POSITION: Record<CubeSize, [number, number, number]> = {
-  3: [4.2, 3.6, 4.8],
   2: [2.9, 2.5, 3.3],
+  3: [4.2, 3.6, 4.8],
+  4: [5.6, 4.8, 6.4],
+  5: [7, 6, 8],
 };
 
 /**
@@ -33,7 +35,7 @@ export function CubeScene({
   size = 3,
 }: {
   cubeState: CubeState;
-  activeMove?: Move | null;
+  activeMove?: AnyMove | null;
   moveId?: number;
   onMoveComplete?: () => void;
   className?: string;

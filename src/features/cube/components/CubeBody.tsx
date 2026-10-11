@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { getFaceDef, isInLayer, parseMove } from "../moves";
-import type { Move } from "../moves";
+import { layerTurn, turnsPiece } from "../moves";
+import type { AnyMove } from "../moves";
 import type { CubeSize, Cubie as CubieState, CubeState } from "../types";
 import { AnimatedLayer } from "./AnimatedLayer";
 import { Cubie } from "./Cubie";
@@ -21,7 +21,7 @@ export function CubeBody({
   size = 3,
 }: {
   cubeState: CubeState;
-  activeMove: Move | null;
+  activeMove: AnyMove | null;
   moveId: number;
   onMoveComplete: () => void;
   size?: CubeSize;
@@ -30,15 +30,14 @@ export function CubeBody({
     if (!activeMove) {
       return { rest: cubeState.cubies, affected: [] as CubieState[], axis: 0 as 0 | 1 | 2 };
     }
-    const { face } = parseMove(activeMove);
-    const { axis } = getFaceDef(face);
+    const turn = layerTurn(activeMove, size);
     const rest: CubieState[] = [];
     const affected: CubieState[] = [];
     for (const cubie of cubeState.cubies) {
-      (isInLayer(face, cubie.position) ? affected : rest).push(cubie);
+      (turnsPiece(turn, cubie.position) ? affected : rest).push(cubie);
     }
-    return { rest, affected, axis };
-  }, [cubeState, activeMove]);
+    return { rest, affected, axis: turn.axis };
+  }, [cubeState, activeMove, size]);
 
   return (
     <group>
