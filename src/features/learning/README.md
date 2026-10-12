@@ -30,6 +30,15 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     arriba y Centros.
   - Sarah's Advanced (Skewb): Notación, Pasos (Cara blanca), L2L · Peanut,
     L2L · Pi y L5C.
+  - Reducción (4×4, `reduccion`): Notación del 4×4, Pasos (Centros,
+    Aristas, y Cruz y Esquinas de CFOP), F2L, OLL y PLL de CFOP y Paridades.
+  - Freeslice (4×4): igual, con Pasos (Centros, Ocho aristas con el corte
+    libre, Últimas aristas, Cruz, Esquinas).
+  - Hoya (4×4): Pasos (Dos centros opuestos, Cruz, Cuatro centros, Resto de
+    aristas), F2L, OLL, PLL y Paridades.
+  - Yau (4×4): Pasos (Dos centros opuestos, Tres aristas de la cruz, Cuatro
+    centros, Última arista de la cruz, Resto de aristas), F2L, OLL, PLL y
+    Paridades.
 
   Cada bloque tiene contenido real de `docs/source` y muestra su progreso
   X/Y. Un método nuevo solo se añade cuando tiene su fuente. `learnHref()`
@@ -204,6 +213,23 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
     caso de la categoría 3 lleva a otro de la 3, no a la 2.
   - Guía por casos: 2 casos Pi de «center on R» son de L y 2 de L son de R
     (y 4 Peanut están en un grupo vecino).
+- `cube4.ts`, `cases-4x4.ts`, `diagrams-4x4.ts` — los cuatro métodos del
+  4×4, de la Speedsolving Wiki (cada caso dice su página, «Investigado»).
+  `cube4.ts` lee las 96 pegatinas del motor N×N y busca el camino más
+  corto; los casos son posiciones del motor y el test comprueba que cada
+  algoritmo llega a su objetivo y que los pasos intuitivos (centros, cruz,
+  aristas) usan el más corto con los giros del paso. Las explicaciones se
+  leen de las pegatinas y los diagramas se dibujan del caso
+  (`WRITE_DIAGRAMS=1 npx vitest run cases-4x4` los reescribe, también los de
+  la notación). Últimas dos aristas: 24 colocaciones, 8 emparejadas y 16
+  que resuelve uno de los dos algoritmos (8 cada uno). La parte de 3×3 son
+  los conjuntos de CFOP tal cual (mismo progreso); por eso la pantalla
+  numera los pasos de cada método ella misma. Ojo: en el 4×4 r es solo la
+  capa de dentro y Rw las dos de fuera; los bloques de F2L, OLL y PLL lo
+  avisan, porque sus algoritmos del 3×3 usan r por Rw.
+- `notation.ts` (4×4) — `NOTATION_MOVES_4X4`: R, Rw y r de cada cara (18),
+  con diagramas del motor en `public/learning/notation-4x4/`, y
+  `CUBE4_EXTRA_MOVES`: x, y, z, aparte.
 - `notation.ts` (Skewb) — `NOTATION_MOVES_SKEWB`: F, R y L de Sarah, con
   diagramas del motor en `public/learning/notation-skewb/`, y
   `SKEWB_EXTRA_MOVES`: x, y, z, aparte, sin contar en el progreso.
@@ -218,7 +244,7 @@ en su cubo físico. Aquí no hay cubo 3D, animaciones, timer, scramble ni
 Rutas:
 - `/entrenar` — pantalla Aprender. `?metodo=petrus|zz|roux` muestra Petrus, ZZ o Roux (3×3), `?metodo=ortega|cll|eg|leg|tcll` el 2×2,
   `?metodo=por-capas|keyhole|l4e-intuitivo|oka|1-flip|wo|nutella|l4e` el Pyraminx,
-  `?metodo=skewb-capas|sarah-intermedio|sarah-avanzado` el Skewb y `?abierto=<categoría>` deja ese
+  `?metodo=skewb-capas|sarah-intermedio|sarah-avanzado` el Skewb, `?metodo=reduccion|freeslice|hoya|yau` el 4×4 y `?abierto=<categoría>` deja ese
   bloque abierto.
 - `/entrenar/<conjunto>/<NN>` — detalle de un caso. Conjuntos: `cruz`,
   `esquinas`, `f2l`, `oll`, `pll`, `primera-cara`, `primera-capa`,
@@ -230,5 +256,5 @@ Rutas:
   `1flip-l3e`, `wo-puntas`, `wo-bloque`, `wo-arista`, `wo-l3c`, `wo-l3e`, `petrus-222`,
   `petrus-223`, `petrus-eo`, `petrus-f2l`, `petrus-coll`, `petrus-epll`,
   `zz-eo`, `zz-linea`, `zz-f2l`, `zz-ocll`, `zz-pll`, `roux-bloque1`,
-  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1`, `eg-2`, `leg-cara`, `leg-1`, `tcll-capa`, `tcll-cll`, `tcll-mas`, `tcll-menos`, y en el Skewb `skc-primera-cara`, `skc-esquinas`, `skc-centro`, `skc-centros`, `ski-primera-cara`, `ski-cara-arriba`, `ski-centros`, `ska-primera-cara`, `ska-peanut`, `ska-pi` y `ska-l5c`.
+  `roux-bloque2`, `roux-cmll`, `roux-eo`, `roux-ulur` y `roux-capa-m`, `eg-cara`, `eg-cll`, `eg-1`, `eg-2`, `leg-cara`, `leg-1`, `tcll-capa`, `tcll-cll`, `tcll-mas`, `tcll-menos`, y en el Skewb `skc-primera-cara`, `skc-esquinas`, `skc-centro`, `skc-centros`, `ski-primera-cara`, `ski-cara-arriba`, `ski-centros`, `ska-primera-cara`, `ska-peanut`, `ska-pi` y `ska-l5c`, y en el 4×4 `r4-centros`, `r4-aristas`, `r4-paridades`, `fs4-centros`, `fs4-aristas`, `fs4-l4e`, `fs4-paridades`, `hoya-centros`, `hoya-cruz`, `hoya-centros4`, `hoya-aristas`, `hoya-paridades`, `yau-centros`, `yau-cruz3`, `yau-centros4`, `yau-cruz4`, `yau-aristas` y `yau-paridades`.
 `/entrenar/cross` sigue siendo el entrenador antiguo de Cross.

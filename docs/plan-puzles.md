@@ -90,6 +90,17 @@ OLL distintas, y con dos aristas cambiadas, 22 de PLL. No se enseñan todas:
 como en el «2 pasos» del 3×3, un algoritmo de paridad y después el
 OLL/PLL normal de CFOP. Las 54 y 22 quedan como dato.
 
+Fase 2, hecha (2026-10-12): casos en los pasos: 20 en Reducción, 20 en Freeslice, 11 en
+Hoya y 13 en Yau, más las dos paridades en cada uno; la parte de 3×3 son
+Cruz, Esquinas, F2L, OLL y PLL de CFOP tal cual. Cifras del motor, en
+tests: últimas dos aristas, 24 colocaciones de sus cuatro piezas, 8 ya
+emparejadas y 16 que resuelve uno de los dos algoritmos (misma altura o
+distinta, 8 cada uno). La paridad de OLL pura (r2 B2 U2 l U2 r' U2 r U2 F2
+r F2 l' B2 r2) solo voltea una arista; la habitual con Rw voltea la misma
+pero mueve más piezas de arriba, y la ficha lo dice. La de PLL (r2 U2 r2
+Uw2 r2 u2) solo cambia dos aristas opuestas. Las 54 y 22 de arriba no se
+han vuelto a contar en tests: no se enseñan una a una.
+
 ### 3. 5×5
 
 | Método | Nivel | Pasos | Casos (motor) | Fuentes |
@@ -188,7 +199,7 @@ parte del OLL. El Megaminx se queda con tres niveles.
 | Puzzle | Fase 1 | Fase 2 | Fase 3 |
 |---|---|---|---|
 | Skewb | hecha | hecha | hecha |
-| 4×4 | hecha | pendiente | pendiente |
+| 4×4 | hecha | hecha | pendiente |
 | 5×5 | pendiente | pendiente | pendiente |
 | Megaminx | pendiente | pendiente | pendiente |
 
