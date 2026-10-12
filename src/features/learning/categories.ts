@@ -43,7 +43,10 @@ export type LearningCategoryId =
   | "r4-paridades"
   | "fs4-paridades"
   | "hoya-paridades"
-  | "yau-paridades";
+  | "yau-paridades"
+  | "c4-f2l"
+  | "c4-oll"
+  | "c4-pll";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -175,17 +178,17 @@ const NOTATION_4X4 = {
  * are (the same cases, and the same progress). Only the words change.
  */
 const AS_3X3 =
-  "Con los centros hechos y las aristas emparejadas, el 4×4 se resuelve como un 3×3: cada pareja de piezas es una arista y cada centro de 2×2, un centro. Estos son los casos de CFOP tal cual. Ojo con una letra: en los algoritmos del 3×3, r gira dos capas, y en el 4×4 eso es Rw (r, en el 4×4, es solo la capa de dentro). Lo mismo con l, u, d, f y b.";
+  "Con los centros hechos y las aristas emparejadas, el 4×4 se resuelve como un 3×3: cada pareja de piezas es una arista y cada centro de 2×2, un centro. Estos son los casos de CFOP del 3×3, dibujados en el 4×4 y con los algoritmos escritos para él: la r del 3×3 (dos capas) es aquí 3Rw, las tres capas de ese lado, porque con Rw el 4×4 se deshace; y la capa del medio, M, son las dos de dentro (l r'). Cada algoritmo está comprobado con el motor en un 4×4 reducido.";
 const CFOP_4X4 = (method: string): LearningCategory[] => [
   {
-    id: "f2l",
+    id: "c4-f2l",
     title: "F2L (CFOP)",
     description: method === "reduccion" || method === "freeslice" ? "Las dos primeras capas, ya como un 3×3" : "Las dos primeras capas sobre la cruz que ya está hecha",
     accent: "#ff8c1a",
     intro: AS_3X3,
   },
-  { id: "oll", title: "OLL (CFOP)", description: "Orienta la última capa, como en el 3×3", accent: "#facc15", intro: AS_3X3 },
-  { id: "pll", title: "PLL (CFOP)", description: "Permuta la última capa, como en el 3×3", accent: "#a78bfa", intro: AS_3X3 },
+  { id: "c4-oll", title: "OLL (CFOP)", description: "Orienta la última capa, como en el 3×3", accent: "#facc15", intro: AS_3X3 },
+  { id: "c4-pll", title: "PLL (CFOP)", description: "Permuta la última capa, como en el 3×3", accent: "#a78bfa", intro: AS_3X3 },
 ];
 /** The two parities, the same in the four methods. */
 const PARITY_4X4 = (id: LearningCategoryId): LearningCategory => ({

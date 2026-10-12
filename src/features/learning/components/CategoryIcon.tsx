@@ -75,9 +75,9 @@ const HIGHLIGHTED_SKEWB: Partial<Record<LearningCategoryId, number[]>> = {
 const HIGHLIGHTED_4X4: Partial<Record<LearningCategoryId, number[]>> = {
   notation: [3, 7, 11, 15],
   steps: [5, 6, 9, 10],
-  f2l: [8, 9, 10, 11, 12, 13, 14, 15],
-  oll: [0, 1, 2, 3],
-  pll: [0, 3],
+  "c4-f2l": [8, 9, 10, 11, 12, 13, 14, 15],
+  "c4-oll": [0, 1, 2, 3],
+  "c4-pll": [0, 3],
   "r4-paridades": [1, 2],
   "fs4-paridades": [1, 2],
   "hoya-paridades": [1, 2],

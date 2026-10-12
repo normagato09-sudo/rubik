@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { IMAGE_SIZE, caseTitle, type AlgorithmCase } from "../algorithm-sets";
 import { caseItemId } from "../progress-store";
+import type { LearningMethodId } from "../categories";
 import { getSetInfo } from "../sets";
 import { CheckIcon } from "./CheckIcon";
 
@@ -10,20 +11,23 @@ import { CheckIcon } from "./CheckIcon";
 export function CaseList({
   cases,
   learned,
+  method,
 }: {
   cases: AlgorithmCase[];
   learned: Record<string, true>;
+  /** The method whose screen lists them: the case opens knowing it (?metodo=), for sets several methods share. */
+  method?: LearningMethodId;
 }) {
   return (
     <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {cases.map((algorithmCase) => {
         const { setId, id } = algorithmCase;
         const isLearned = learned[caseItemId(setId, id)] === true;
-        const { title: setTitle, accent } = getSetInfo(setId);
+        const { title: setTitle, accent } = getSetInfo(setId, method);
         return (
           <li key={id}>
             <Link
-              href={`/entrenar/${setId}/${id}`}
+              href={`/entrenar/${setId}/${id}${method ? `?metodo=${method}` : ""}`}
               className="flex items-center gap-3 rounded-2xl bg-navy px-3 py-2.5 transition-colors hover:bg-navy-3 active:scale-[0.99]"
             >
               <Image

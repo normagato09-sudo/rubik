@@ -91,8 +91,8 @@ const EXTRA_MOVES_TEXT = {
     badge: "",
   },
   "4x4": {
-    title: "Giros del cubo entero",
-    text: "x, y y z giran todo el 4×4, sin cambiar nada: solo cambia cómo lo sujetas, como en el 3×3. Con ' van al revés y con 2 es media vuelta.",
+    title: "Tres capas y giros del cubo entero",
+    text: "3Rw gira las tres capas de la derecha, todas menos la izquierda: en un 4×4 con los centros y las aristas hechos, es lo que hace la r del 3×3, y por eso la usan los algoritmos de F2L, OLL y PLL (con Rw el 4×4 se deshace). Igual 3Lw, 3Uw, 3Dw, 3Fw y 3Bw. x, y y z giran todo el cubo, sin cambiar nada. Con ' van al revés y con 2 es media vuelta.",
     badge: "",
   },
 } as const;

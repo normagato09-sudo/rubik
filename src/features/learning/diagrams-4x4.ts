@@ -10,7 +10,7 @@
  *   faces around it, for pairing edges: both stickers of every edge piece
  *   of the front show.
  * - `topViewSvg4`: the top face with the top row of each side around it,
- *   for the parities.
+ *   for the parities, OLL and PLL (with the sheets' arrows).
  * - `moveSvg4`: a move and its inverse, for the notation.
  */
 import type { CubeColor, Vec3 } from "@/features/cube/types";
@@ -109,8 +109,38 @@ export function frontViewSvg4(colors: readonly CubeColor[], shown: ReadonlySet<n
   return svg(parts.join("\n"), title);
 }
 
+/** An arrow over the top view, between two places given as [row, column] of the 4×4 top (0–3); `both`: a head at each end. */
+export interface Arrow4 {
+  from: [number, number];
+  to: [number, number];
+  both?: boolean;
+}
+
+function arrowSvg({ from, to, both }: Arrow4): string {
+  const at = ([row, col]: [number, number]) => [40 + col * 30 + 14, 40 + row * 30 + 14];
+  const [x1, y1] = at(from);
+  const [x2, y2] = at(to);
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const [ux, uy] = [(x2 - x1) / length, (y2 - y1) / length];
+  // Start and end a little inside the stickers, so a head does not cover the next one.
+  const [ax, ay, bx, by] = [x1 + ux * 6, y1 + uy * 6, x2 - ux * 6, y2 - uy * 6];
+  const head = (x: number, y: number, dx: number, dy: number) =>
+    `<polygon points="${x.toFixed(1)},${y.toFixed(1)} ${(x - dx * 11 - dy * 6).toFixed(1)},${(y - dy * 11 + dx * 6).toFixed(1)} ${(x - dx * 11 + dy * 6).toFixed(1)},${(y - dy * 11 - dx * 6).toFixed(1)}" fill="${LINE}"/>`;
+  const start = both ? [ax + ux * 9, ay + uy * 9] : [ax, ay];
+  return [
+    `<line x1="${start[0].toFixed(1)}" y1="${start[1].toFixed(1)}" x2="${(bx - ux * 9).toFixed(1)}" y2="${(by - uy * 9).toFixed(1)}" stroke="${LINE}" stroke-width="3.5" stroke-linecap="round"/>`,
+    head(bx, by, ux, uy),
+    ...(both ? [head(ax, ay, -ux, -uy)] : []),
+  ].join("\n");
+}
+
 /** Seen from above with the front at the bottom: the 16 top stickers and the top row of each side around them. */
-export function topViewSvg4(colors: readonly CubeColor[], title: string, shown?: ReadonlySet<number>): string {
+export function topViewSvg4(
+  colors: readonly CubeColor[],
+  title: string,
+  shown?: ReadonlySet<number>,
+  arrows: readonly Arrow4[] = [],
+): string {
   const fill = filler(colors, shown);
   const cell = 30;
   const origin = 40;
@@ -125,6 +155,7 @@ export function topViewSvg4(colors: readonly CubeColor[], title: string, shown?:
     parts.push(rect(14, origin + k * cell + 2, 20, cell - 6, fill(sticker4("L", 0, k)), 3));
     parts.push(rect(origin + 4 * cell + 4, origin + k * cell + 2, 20, cell - 6, fill(sticker4("R", 0, 3 - k)), 3));
   }
+  parts.push(...arrows.map(arrowSvg));
   return svg(parts.join("\n"), title);
 }
 

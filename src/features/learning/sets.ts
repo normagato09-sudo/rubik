@@ -21,7 +21,8 @@ import { SETS_2X2_RESEARCH } from "./cases-2x2-research";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { SETS_SKEWB } from "./cases-skewb";
 import { SETS_4X4 } from "./cases-4x4";
-import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
+import { SETS_CFOP_4X4 } from "./cases-4x4-cfop";
+import { getCategory, isLearningCategoryId, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
 import { ESQUINAS_CASES } from "./esquinas-cases";
 import { F2L_CASES } from "./f2l-cases";
@@ -53,6 +54,7 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   ...SETS_2X2_RESEARCH,
   ...SETS_SKEWB,
   ...SETS_4X4,
+  ...SETS_CFOP_4X4,
 };
 
 const PUNTAS_INTRO =
@@ -314,15 +316,15 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
   reduccion: [
     { setId: "r4-centros", title: "Centros", intro: FIRST_CENTERS_4X4(LAST_CENTERS_4X4("")) },
     { setId: "r4-aristas", title: "Aristas", intro: `${PAIR_INTRO} ${LAST_TWO_INTRO}` },
-    { setId: "cruz", title: "Cruz" },
-    { setId: "esquinas", title: "Esquinas" },
+    { setId: "c4-cruz", title: "Cruz" },
+    { setId: "c4-esquinas", title: "Esquinas" },
   ],
   freeslice: [
     { setId: "fs4-centros", title: "Centros", intro: FIRST_CENTERS_4X4(LAST_CENTERS_4X4("")) },
     { setId: "fs4-aristas", title: "Ocho aristas con el corte libre", intro: FREESLICE_INTRO },
     { setId: "fs4-l4e", title: "Últimas aristas", intro: `Quedan las cuatro aristas del medio. Se emparejan como en Reducción, de dos en dos, sin estropear las de arriba y abajo. ${LAST_TWO_INTRO}` },
-    { setId: "cruz", title: "Cruz" },
-    { setId: "esquinas", title: "Esquinas" },
+    { setId: "c4-cruz", title: "Cruz" },
+    { setId: "c4-esquinas", title: "Esquinas" },
   ],
   hoya: [
     { setId: "hoya-centros", title: "Dos centros opuestos", intro: FIRST_CENTERS_4X4("Los otros cuatro centros esperan: primero va la cruz.") },
@@ -450,6 +452,12 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "yau-cruz4": "yau",
   "yau-aristas": "yau",
   "yau-paridades": "yau",
+  // Shared by the four 4×4 methods: a case opened from one of them comes back to it (getSetInfo).
+  "c4-cruz": "reduccion",
+  "c4-esquinas": "reduccion",
+  "c4-f2l": "reduccion",
+  "c4-oll": "reduccion",
+  "c4-pll": "reduccion",
 };
 
 export interface SetInfo {
@@ -462,8 +470,17 @@ export interface SetInfo {
   accent: string;
 }
 
-export function getSetInfo(setId: AlgorithmSetId): SetInfo {
-  const method = SET_METHOD[setId];
+/** Whether a method lists a set (as a step or as a block). */
+export const methodListsSet = (method: LearningMethodId, setId: AlgorithmSetId) =>
+  METHOD_STEPS[method].some((step) => step.setId === setId) || isLearningCategoryId(setId, method);
+
+/**
+ * Where a set is listed. A set several methods share (CFOP on the 4×4)
+ * belongs to SET_METHOD's; `from` names the one it was opened from, so
+ * its step number and the way back are that method's.
+ */
+export function getSetInfo(setId: AlgorithmSetId, from?: LearningMethodId): SetInfo {
+  const method = from && methodListsSet(from, setId) ? from : SET_METHOD[setId];
   const steps = METHOD_STEPS[method];
   const stepIndex = steps.findIndex((step) => step.setId === setId);
   if (stepIndex !== -1) {

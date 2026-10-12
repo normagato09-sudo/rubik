@@ -123,7 +123,7 @@ export function LearnScreen({
                   {step.intro && !filter && (
                     <p className="px-1 text-sm leading-relaxed text-navy-muted">{step.intro}</p>
                   )}
-                  <CaseList cases={step.cases} learned={learned} />
+                  <CaseList cases={step.cases} learned={learned} method={method} />
                 </div>
               );
             })}
@@ -139,7 +139,7 @@ export function LearnScreen({
       node: (
         <div className="flex flex-col gap-2">
           {intro && !filter && <p className="px-1 text-sm leading-relaxed text-navy-muted">{intro}</p>}
-          <CaseList cases={cases} learned={learned} />
+          <CaseList cases={cases} learned={learned} method={method} />
         </div>
       ),
     };

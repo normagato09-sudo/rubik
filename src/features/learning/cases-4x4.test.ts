@@ -78,13 +78,13 @@ describe("the four 4×4 methods", () => {
   const METHODS = ["reduccion", "freeslice", "hoya", "yau"] as const;
 
   it("each has its steps, then CFOP's F2L, OLL and PLL and the parities", () => {
-    expect(METHOD_STEPS.reduccion.map((step) => step.setId)).toEqual(["r4-centros", "r4-aristas", "cruz", "esquinas"]);
-    expect(METHOD_STEPS.freeslice.map((step) => step.setId)).toEqual(["fs4-centros", "fs4-aristas", "fs4-l4e", "cruz", "esquinas"]);
+    expect(METHOD_STEPS.reduccion.map((step) => step.setId)).toEqual(["r4-centros", "r4-aristas", "c4-cruz", "c4-esquinas"]);
+    expect(METHOD_STEPS.freeslice.map((step) => step.setId)).toEqual(["fs4-centros", "fs4-aristas", "fs4-l4e", "c4-cruz", "c4-esquinas"]);
     expect(METHOD_STEPS.hoya.map((step) => step.setId)).toEqual(["hoya-centros", "hoya-cruz", "hoya-centros4", "hoya-aristas"]);
     expect(METHOD_STEPS.yau.map((step) => step.setId)).toEqual(["yau-centros", "yau-cruz3", "yau-centros4", "yau-cruz4", "yau-aristas"]);
     for (const method of METHODS) {
       expect(METHOD_CUBE[method]).toBe("4x4");
-      expect(METHOD_CATEGORIES[method].map((block) => block.id).slice(0, 5)).toEqual(["notation", "steps", "f2l", "oll", "pll"]);
+      expect(METHOD_CATEGORIES[method].map((block) => block.id).slice(0, 5)).toEqual(["notation", "steps", "c4-f2l", "c4-oll", "c4-pll"]);
       for (const step of METHOD_STEPS[method].filter((step) => step.setId in SETS_4X4)) {
         expect(step.intro?.length, step.setId).toBeGreaterThan(100);
         expect(getSetInfo(step.setId).method).toBe(method);

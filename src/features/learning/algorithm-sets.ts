@@ -6,6 +6,7 @@ import type { RouxSetId } from "./cases-roux";
 import type { Research2x2SetId } from "./cases-2x2-research";
 import type { SkewbSetId } from "./cases-skewb";
 import type { Set4Id } from "./cases-4x4";
+import type { Cfop4SetId } from "./cases-4x4-cfop";
 
 export type AlgorithmSetId =
   | "cruz"
@@ -38,7 +39,9 @@ export type AlgorithmSetId =
   // Skewb, Sarah's method (cases-skewb.ts)
   | SkewbSetId
   // 4×4: Reducción, Freeslice, Hoya and Yau (cases-4x4.ts)
-  | Set4Id;
+  | Set4Id
+  // CFOP on the 4×4 (cases-4x4-cfop.ts)
+  | Cfop4SetId;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -162,6 +165,11 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "yau-cruz4": { width: 200, height: 200 },
   "yau-aristas": { width: 200, height: 200 },
   "yau-paridades": { width: 200, height: 200 },
+  "c4-cruz": { width: 200, height: 200 },
+  "c4-esquinas": { width: 200, height: 200 },
+  "c4-f2l": { width: 200, height: 200 },
+  "c4-oll": { width: 200, height: 200 },
+  "c4-pll": { width: 200, height: 200 },
 };
 
 export function buildCases(

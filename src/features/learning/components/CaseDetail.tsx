@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 import { ChevronRightIcon } from "@/components/ui/icons";
 import { IMAGE_SIZE, getAdjacentCases, getSteps, type AlgorithmSetId } from "../algorithm-sets";
-import { learnHref } from "../categories";
+import { isLearningMethodId, learnHref, type LearningMethodId } from "../categories";
 import { caseItemId, useLearningProgress } from "../progress-store";
 import { ALGORITHM_SETS, getCase, getSetInfo } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
@@ -17,12 +18,27 @@ import { CheckIcon } from "./CheckIcon";
  * moves as numbered steps, to reproduce on a physical cube. Nothing here
  * moves or animates a cube — the only interaction is marking it learned.
  */
+/**
+ * The method the case was opened from (?metodo=, set by CaseList), read on
+ * the client so the page stays static. Undefined on the server.
+ */
+function useFromMethod(): LearningMethodId | undefined {
+  const metodo = useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(window.location.search).get("metodo") ?? "",
+    () => "",
+  );
+  return isLearningMethodId(metodo) ? metodo : undefined;
+}
+
 export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: string }) {
   const cases = ALGORITHM_SETS[setId];
   const algorithmCase = getCase(setId, caseId)!;
   const steps = getSteps(algorithmCase);
   const { previous, next } = getAdjacentCases(cases, caseId);
-  const info = getSetInfo(setId);
+  const from = useFromMethod();
+  const info = getSetInfo(setId, from);
+  const query = from ? `?metodo=${from}` : "";
   const { accent } = info;
 
   const hydrated = useLearningProgressHydration();
@@ -157,7 +173,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
       <nav className="grid grid-cols-2 gap-3" aria-label={`Casos de ${info.title}`}>
         {previous ? (
           <Link
-            href={`/entrenar/${setId}/${previous.id}`}
+            href={`/entrenar/${setId}/${previous.id}${query}`}
             className="flex h-12 items-center justify-center gap-1 rounded-2xl bg-navy-2 text-sm font-medium text-foreground transition-colors hover:bg-navy-3"
           >
             <ChevronRightIcon className="h-4 w-4 rotate-180" />
@@ -168,7 +184,7 @@ export function CaseDetail({ setId, caseId }: { setId: AlgorithmSetId; caseId: s
         )}
         {next ? (
           <Link
-            href={`/entrenar/${setId}/${next.id}`}
+            href={`/entrenar/${setId}/${next.id}${query}`}
             className="flex h-12 items-center justify-center gap-1 rounded-2xl bg-navy-2 text-sm font-medium text-foreground transition-colors hover:bg-navy-3"
           >
             {next.name ?? `Caso ${next.id}`}

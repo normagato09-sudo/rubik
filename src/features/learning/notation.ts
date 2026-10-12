@@ -248,8 +248,18 @@ export const NOTATION_MOVES_4X4: NotationMove[] = (
   };
 });
 
-/** The 4×4's whole-cube turns (x, y, z), as on the 3×3; apart, like the 3×3's lowercase moves. */
+/**
+ * Apart, like the 3×3's lowercase moves: the 4×4's three-layer turns
+ * (3Rw...), which on a reduced 4×4 do what the 3×3's r does (CFOP's
+ * blocks use them, cases-4x4-cfop.ts), and its whole-cube turns.
+ */
 export const CUBE4_EXTRA_MOVES: WideMove[] = [
+  { move: "3Rw", label: "Las tres capas de la derecha", equals: "R r l'" },
+  { move: "3Lw", label: "Las tres capas de la izquierda", equals: "L l r'" },
+  { move: "3Uw", label: "Las tres capas de arriba", equals: "U u d'" },
+  { move: "3Dw", label: "Las tres capas de abajo", equals: "D d u'" },
+  { move: "3Fw", label: "Las tres capas de delante", equals: "F f b'" },
+  { move: "3Bw", label: "Las tres capas de detrás", equals: "B b f'" },
   { move: "x", label: "Todo el cubo, como R" },
   { move: "y", label: "Todo el cubo, como U" },
   { move: "z", label: "Todo el cubo, como F" },
