@@ -10,6 +10,8 @@ import type { LearningCategoryId, LearningCube } from "../categories";
  * (notation), the tips (steps) or the top edges (last layer, L4E). Skewb:
  * a face with its center and four corners — a top corner (notation), the
  * bottom corners (first side), the twisted top corners or the center.
+ * 4×4: a turning column (notation), the centers (steps), the first two
+ * layers, the last layer or one top edge (parities).
  */
 const HIGHLIGHTED_3X3: Partial<Record<LearningCategoryId, number[]>> = {
   notation: [2, 5, 8],
@@ -68,6 +70,18 @@ const HIGHLIGHTED_SKEWB: Partial<Record<LearningCategoryId, number[]>> = {
   "ska-peanut": [1, 3],
   "ska-pi": [1, 2, 3, 4],
   "ska-l5c": [0],
+};
+
+const HIGHLIGHTED_4X4: Partial<Record<LearningCategoryId, number[]>> = {
+  notation: [3, 7, 11, 15],
+  steps: [5, 6, 9, 10],
+  f2l: [8, 9, 10, 11, 12, 13, 14, 15],
+  oll: [0, 1, 2, 3],
+  pll: [0, 3],
+  "r4-paridades": [1, 2],
+  "fs4-paridades": [1, 2],
+  "hoya-paridades": [1, 2],
+  "yau-paridades": [1, 2],
 };
 
 const PYRA_FACE: [Vec2, Vec2, Vec2] = [
@@ -157,8 +171,8 @@ export function CategoryIcon({
       </svg>
     );
   }
-  const size = cube === "2x2" ? 2 : 3;
-  const highlighted = (cube === "2x2" ? HIGHLIGHTED_2X2 : HIGHLIGHTED_3X3)[id] ?? [];
+  const size = cube === "2x2" ? 2 : cube === "4x4" ? 4 : 3;
+  const highlighted = (cube === "2x2" ? HIGHLIGHTED_2X2 : cube === "4x4" ? HIGHLIGHTED_4X4 : HIGHLIGHTED_3X3)[id] ?? [];
   const cell = 30 / size;
   return (
     <svg viewBox="0 0 30 30" className={className} aria-hidden="true">

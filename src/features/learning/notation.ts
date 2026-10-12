@@ -1,3 +1,5 @@
+import type { LearningCube } from "./categories";
+
 export interface NotationMove {
   /** Lowercase move letter, used in ids and file names ("d", "m", "x"...). */
   id: string;
@@ -129,8 +131,9 @@ export const NOTATION_MOVES_SKEWB: NotationMove[] = [
   };
 });
 
-export function notationMovesFor(cube: "3x3" | "2x2" | "pyraminx" | "skewb"): NotationMove[] {
+export function notationMovesFor(cube: LearningCube): NotationMove[] {
   if (cube === "pyraminx") return NOTATION_MOVES_PYRAMINX;
+  if (cube === "4x4") return NOTATION_MOVES_4X4;
   if (cube === "skewb") return NOTATION_MOVES_SKEWB;
   return cube === "2x2" ? NOTATION_MOVES_2X2 : NOTATION_MOVES;
 }
@@ -206,7 +209,48 @@ export function matchesNotationMove(notation: NotationMove, query: string): bool
   if (tokens.every((token) => token === letter || token === `${letter}'`)) {
     // On the Pyraminx "U" and "u" are different moves: an uppercase letter only finds the big one.
     const typed = query.trim().split(/\s+/);
-    return typed.every((token) => token[0] === token[0].toLowerCase() || token[0] === notation.move);
+    return typed.every((token) => token[0] === token[0].toLowerCase() || token[0] === notation.move[0]);
   }
   return q.length >= 3 && notation.label.toLowerCase().includes(q);
 }
+
+/**
+ * The 4×4 notation (WCA Regulation 12a, and the usual one for the inner
+ * layers): each face (R), its two outer layers (Rw) and the second layer
+ * on its own (r). In RUBIKO lowercase r is only that inner layer, as the
+ * parity algorithms write it. No diagram in the user's documents: RUBIKO
+ * draws each move and its inverse from the engine (cases-4x4.ts,
+ * `generated4x4Diagrams`). Ids start with "4x4-".
+ */
+export const NOTATION_MOVES_4X4: NotationMove[] = (
+  [
+    ["R", "r", "La cara derecha"],
+    ["L", "l", "La cara izquierda"],
+    ["U", "u", "La cara de arriba"],
+    ["D", "d", "La cara de abajo"],
+    ["F", "f", "La cara de delante"],
+    ["B", "b", "La cara de detrás"],
+  ] as const
+).flatMap(([face, inner, label]) => [
+  { move: face, file: inner, label },
+  { move: `${face}w`, file: `${inner}w`, label: `${label} y la capa de al lado: las dos de fuera` },
+  { move: inner, file: `${inner}-interna`, label: `Solo la segunda capa, la de al lado de ${label.replace(/^La /, "la ")}` },
+]).map(({ move, file, label }) => {
+  const id = `4x4-${file}`;
+  return {
+    id,
+    move,
+    label,
+    image: `/learning/notation-4x4/notation-${id}.svg`,
+    width: 400,
+    height: 225,
+    note: "Dibujado por RUBIKO con su motor: el 4×4 resuelto después del giro. En color, las capas que giran.",
+  };
+});
+
+/** The 4×4's whole-cube turns (x, y, z), as on the 3×3; apart, like the 3×3's lowercase moves. */
+export const CUBE4_EXTRA_MOVES: WideMove[] = [
+  { move: "x", label: "Todo el cubo, como R" },
+  { move: "y", label: "Todo el cubo, como U" },
+  { move: "z", label: "Todo el cubo, como F" },
+];

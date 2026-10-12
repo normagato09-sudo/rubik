@@ -90,6 +90,11 @@ const EXTRA_MOVES_TEXT = {
     text: "x, y y z giran todo el Skewb, sin cambiar nada: solo cambia cómo lo sujetas. Con ' van al revés y con 2 es media vuelta. En el paso de los centros, la guía de Sarah escribe x y z mirando la cara naranja; aquí ya están pasados a esta notación y cada caso lo explica.",
     badge: "",
   },
+  "4x4": {
+    title: "Giros del cubo entero",
+    text: "x, y y z giran todo el 4×4, sin cambiar nada: solo cambia cómo lo sujetas, como en el 3×3. Con ' van al revés y con 2 es media vuelta.",
+    badge: "",
+  },
 } as const;
 
 /** 3×3: lowercase moves, with "(2x)" beside the letter. Pyraminx: face turns and whole turns. */

@@ -5,6 +5,7 @@ import type { ResearchSetId } from "./cases-pyraminx-research";
 import type { RouxSetId } from "./cases-roux";
 import type { Research2x2SetId } from "./cases-2x2-research";
 import type { SkewbSetId } from "./cases-skewb";
+import type { Set4Id } from "./cases-4x4";
 
 export type AlgorithmSetId =
   | "cruz"
@@ -35,7 +36,9 @@ export type AlgorithmSetId =
   // 2×2 methods taught from research (cases-2x2-research.ts)
   | Research2x2SetId
   // Skewb, Sarah's method (cases-skewb.ts)
-  | SkewbSetId;
+  | SkewbSetId
+  // 4×4: Reducción, Freeslice, Hoya and Yau (cases-4x4.ts)
+  | Set4Id;
 
 export interface AlgorithmCase {
   setId: AlgorithmSetId;
@@ -141,6 +144,24 @@ export const IMAGE_SIZE: Record<AlgorithmSetId, { width: number; height: number 
   "ska-peanut": { width: 200, height: 200 },
   "ska-pi": { width: 200, height: 200 },
   "ska-l5c": { width: 200, height: 200 },
+  "r4-centros": { width: 200, height: 200 },
+  "r4-aristas": { width: 200, height: 200 },
+  "r4-paridades": { width: 200, height: 200 },
+  "fs4-centros": { width: 200, height: 200 },
+  "fs4-aristas": { width: 200, height: 200 },
+  "fs4-l4e": { width: 200, height: 200 },
+  "fs4-paridades": { width: 200, height: 200 },
+  "hoya-centros": { width: 200, height: 200 },
+  "hoya-cruz": { width: 200, height: 200 },
+  "hoya-centros4": { width: 200, height: 200 },
+  "hoya-aristas": { width: 200, height: 200 },
+  "hoya-paridades": { width: 200, height: 200 },
+  "yau-centros": { width: 200, height: 200 },
+  "yau-cruz3": { width: 200, height: 200 },
+  "yau-centros4": { width: 200, height: 200 },
+  "yau-cruz4": { width: 200, height: 200 },
+  "yau-aristas": { width: 200, height: 200 },
+  "yau-paridades": { width: 200, height: 200 },
 };
 
 export function buildCases(

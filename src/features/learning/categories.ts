@@ -39,7 +39,11 @@ export type LearningCategoryId =
   | "ski-centros"
   | "ska-peanut"
   | "ska-pi"
-  | "ska-l5c";
+  | "ska-l5c"
+  | "r4-paridades"
+  | "fs4-paridades"
+  | "hoya-paridades"
+  | "yau-paridades";
 
 export interface LearningCategory {
   id: LearningCategoryId;
@@ -71,10 +75,14 @@ export type LearningMethodId =
   | "l4e"
   | "skewb-capas"
   | "sarah-intermedio"
-  | "sarah-avanzado";
+  | "sarah-avanzado"
+  | "reduccion"
+  | "freeslice"
+  | "hoya"
+  | "yau";
 
 /** The cubes Aprender teaches. */
-export type LearningCube = "3x3" | "2x2" | "pyraminx" | "skewb";
+export type LearningCube = "3x3" | "2x2" | "pyraminx" | "skewb" | "4x4";
 
 export const DEFAULT_LEARNING_METHOD: LearningMethodId = "cfop";
 
@@ -100,6 +108,10 @@ export const METHOD_CUBE: Record<LearningMethodId, LearningCube> = {
   "skewb-capas": "skewb",
   "sarah-intermedio": "skewb",
   "sarah-avanzado": "skewb",
+  reduccion: "4x4",
+  freeslice: "4x4",
+  hoya: "4x4",
+  yau: "4x4",
 };
 
 /** How the Aprender screen names each method under its title. */
@@ -124,6 +136,10 @@ export const METHOD_LABEL: Record<LearningMethodId, string> = {
   "skewb-capas": "Skewb · Por capas",
   "sarah-intermedio": "Skewb · Sarah's Intermediate",
   "sarah-avanzado": "Skewb · Sarah's Advanced",
+  reduccion: "4×4 · Reducción",
+  freeslice: "4×4 · Reducción con Freeslice",
+  hoya: "4×4 · Hoya",
+  yau: "4×4 · Yau",
 };
 
 export function isLearningMethodId(id: string): id is LearningMethodId {
@@ -146,6 +162,40 @@ const SKEWB_CENTERS_INTRO =
 /** What the three L2L blocks of Sarah's Advanced have in common. */
 const L2L_INTRO = (shape: string) =>
   `En Sarah's Advanced, con la cara blanca abajo, un solo algoritmo resuelve las dos últimas capas: las esquinas de arriba y los cinco centros (L2L). ${shape} Los algoritmos son los de Sarah escritos enteros, con la cara verde delante a la izquierda; gira el Skewb con y hasta verlo como en el diagrama. Los casos que su guía deja sin algoritmo llevan el más corto que encuentra el motor de RUBIKO.`;
+
+/** The 4×4's notation block, the same in its four methods. */
+const NOTATION_4X4 = {
+  ...NOTATION,
+  title: "Notación del 4×4",
+  description: "Cada cara, sus dos capas de fuera (Rw) y la capa de dentro sola (r)",
+} as const;
+
+/**
+ * The 3×3 part of the 4×4 methods: CFOP's F2L, OLL and PLL blocks as they
+ * are (the same cases, and the same progress). Only the words change.
+ */
+const AS_3X3 =
+  "Con los centros hechos y las aristas emparejadas, el 4×4 se resuelve como un 3×3: cada pareja de piezas es una arista y cada centro de 2×2, un centro. Estos son los casos de CFOP tal cual. Ojo con una letra: en los algoritmos del 3×3, r gira dos capas, y en el 4×4 eso es Rw (r, en el 4×4, es solo la capa de dentro). Lo mismo con l, u, d, f y b.";
+const CFOP_4X4 = (method: string): LearningCategory[] => [
+  {
+    id: "f2l",
+    title: "F2L (CFOP)",
+    description: method === "reduccion" || method === "freeslice" ? "Las dos primeras capas, ya como un 3×3" : "Las dos primeras capas sobre la cruz que ya está hecha",
+    accent: "#ff8c1a",
+    intro: AS_3X3,
+  },
+  { id: "oll", title: "OLL (CFOP)", description: "Orienta la última capa, como en el 3×3", accent: "#facc15", intro: AS_3X3 },
+  { id: "pll", title: "PLL (CFOP)", description: "Permuta la última capa, como en el 3×3", accent: "#a78bfa", intro: AS_3X3 },
+];
+/** The two parities, the same in the four methods. */
+const PARITY_4X4 = (id: LearningCategoryId): LearningCategory => ({
+  id,
+  title: "Paridades",
+  description: "Lo que un 3×3 no puede tener: una arista volteada o dos cambiadas",
+  accent: "#f472b6",
+  intro:
+    "Al resolver el 4×4 como un 3×3 pueden salir dos casos imposibles en un 3×3, por cómo se juntaron los centros y las aristas. Paridad de OLL: al orientar la última capa, una sola arista (o tres) queda con el amarillo hacia el lado. Paridad de PLL: al permutarla, dos aristas quedan cambiadas sin ninguna PLL que lo arregle. Cada una tiene un algoritmo; después se sigue con la OLL o la PLL normal. Aquí r y l son solo la capa de dentro, y Rw, Lw y Uw, las dos de fuera.",
+});
 
 /**
  * The blocks of the Aprender screen, in order, for each method. Each one
@@ -650,6 +700,30 @@ export const METHOD_CATEGORIES: Record<LearningMethodId, LearningCategory[]> = {
       accent: "#facc15",
       intro: L2L_INTRO("L5C: las cuatro esquinas de arriba ya tienen el amarillo arriba y solo faltan los centros."),
     },
+  ],
+  reduccion: [
+    NOTATION_4X4,
+    { ...STEPS, title: "Pasos de aprendizaje", description: "Los seis centros, las aristas de una en una y la cruz y las esquinas del 3×3" },
+    ...CFOP_4X4("reduccion"),
+    PARITY_4X4("r4-paridades"),
+  ],
+  freeslice: [
+    NOTATION_4X4,
+    { ...STEPS, title: "Pasos de aprendizaje", description: "Los centros, ocho aristas con el corte libre, las últimas y el 3×3" },
+    ...CFOP_4X4("freeslice"),
+    PARITY_4X4("fs4-paridades"),
+  ],
+  hoya: [
+    NOTATION_4X4,
+    { ...STEPS, title: "Pasos de aprendizaje", description: "Dos centros, la cruz, los otros cuatro centros y el resto de aristas" },
+    ...CFOP_4X4("hoya"),
+    PARITY_4X4("hoya-paridades"),
+  ],
+  yau: [
+    NOTATION_4X4,
+    { ...STEPS, title: "Pasos de aprendizaje", description: "Dos centros, tres aristas de la cruz, los otros centros, la última y el resto" },
+    ...CFOP_4X4("yau"),
+    PARITY_4X4("yau-paridades"),
   ],
 };
 

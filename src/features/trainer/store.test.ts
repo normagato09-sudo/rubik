@@ -47,6 +47,13 @@ describe("useTrainerPreferences", () => {
     expect(useTrainerPreferences.getState().methodId).toBe("sarah-avanzado");
   });
 
+  it("choosing the 4×4 cascades the method to Reducción (its own)", () => {
+    useTrainerPreferences.getState().setCube("4x4");
+    expect(useTrainerPreferences.getState()).toMatchObject({ cubeId: "4x4", methodId: "reduccion" });
+    useTrainerPreferences.getState().setMethod("yau");
+    expect(useTrainerPreferences.getState().methodId).toBe("yau");
+  });
+
   it("setMethod is a no-op for a method that is not active yet", () => {
     useTrainerPreferences.getState().setMethod("lbl");
     expect(useTrainerPreferences.getState().methodId).toBe("cfop");

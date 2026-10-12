@@ -69,6 +69,14 @@ describe("method levels", () => {
   });
 });
 
+describe("4×4 methods", () => {
+  it("lists Reducción, Freeslice, Hoya and Yau, one per level", () => {
+    const methods = getSelectableMethodsForCubeType("4x4");
+    expect(methods.map((method) => method.id)).toEqual(["reduccion", "freeslice", "hoya", "yau"]);
+    expect(methods.map((method) => method.level)).toEqual(["Principiante", "Intermedio", "Avanzado", "Experto"]);
+  });
+});
+
 describe("Skewb methods", () => {
   it("lists Por capas, Sarah's Intermediate and Sarah's Advanced, with no Avanzado level", () => {
     const methods = getSelectableMethodsForCubeType("skewb");

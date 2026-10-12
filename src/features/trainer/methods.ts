@@ -6,7 +6,8 @@ import type { MethodLevel, MethodOption } from "./types";
  * to (e.g. CFOP only ever shows up for `cubeType: "3x3"`). Active today:
  * CFOP, Petrus, ZZ and Roux for the 3x3, Ortega, CLL, EG, LEG and TCLL for the 2x2, and for the Pyraminx
  * Por capas, Keyhole, L4E intuitivo, L4E, Oka, 1-Flip, WO and Nutella, and for the Skewb
- * Por capas, Sarah's Intermediate and Sarah's Advanced — the methods Aprender
+ * Por capas, Sarah's Intermediate and Sarah's Advanced, and for the 4×4 Reducción, Freeslice, Hoya
+ * and Yau — the methods Aprender
  * teaches (features/learning/categories.ts). Each active method has its
  * level, and each cube lists them easiest first (docs/plan-metodos.md).
  */
@@ -32,6 +33,10 @@ export const METHODS: MethodOption[] = [
   { id: "skewb-capas", label: "Por capas", status: "active", cubeType: "skewb", level: "Principiante" },
   { id: "sarah-intermedio", label: "Sarah's Intermediate", status: "active", cubeType: "skewb", level: "Intermedio" },
   { id: "sarah-avanzado", label: "Sarah's Advanced", status: "active", cubeType: "skewb", level: "Experto" },
+  { id: "reduccion", label: "Reducción", status: "active", cubeType: "4x4", level: "Principiante" },
+  { id: "freeslice", label: "Freeslice", status: "active", cubeType: "4x4", level: "Intermedio" },
+  { id: "hoya", label: "Hoya", status: "active", cubeType: "4x4", level: "Avanzado" },
+  { id: "yau", label: "Yau", status: "active", cubeType: "4x4", level: "Experto" },
 ];
 
 /** Easiest first: the order of the levels in the Método selector. */

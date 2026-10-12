@@ -16,6 +16,7 @@ import {
   type LearningMethodId,
 } from "../categories";
 import {
+  CUBE4_EXTRA_MOVES,
   PYRAMINX_EXTRA_MOVES,
   SKEWB_EXTRA_MOVES,
   WIDE_MOVES,
@@ -29,7 +30,7 @@ import {
   notationItemId,
   useLearningProgress,
 } from "../progress-store";
-import { ALGORITHM_SETS, METHOD_STEPS, getSetInfo } from "../sets";
+import { ALGORITHM_SETS, METHOD_STEPS } from "../sets";
 import { useLearningProgressHydration } from "../use-progress-hydration";
 import { CaseList } from "./CaseList";
 import { CategoryCard } from "./CategoryCard";
@@ -70,9 +71,8 @@ export function LearnScreen({
     if (id === "notation") {
       const accent = getCategory("notation", method).accent;
       const moves = notationMovesFor(cube).filter((notation) => matchesNotationMove(notation, filter));
-      // A 2×2 has no middle layers, so no wide moves; the Pyraminx has its face and whole turns, the Skewb its whole turns.
-      const extra =
-        cube === "3x3" ? WIDE_MOVES : cube === "pyraminx" ? PYRAMINX_EXTRA_MOVES : cube === "skewb" ? SKEWB_EXTRA_MOVES : [];
+      // A 2×2 has no middle layers, so no wide moves; the Pyraminx has its face and whole turns, the Skewb and the 4×4 their whole turns.
+      const extra = { "3x3": WIDE_MOVES, "2x2": [], pyraminx: PYRAMINX_EXTRA_MOVES, skewb: SKEWB_EXTRA_MOVES, "4x4": CUBE4_EXTRA_MOVES }[cube];
       const wideMoves = extra.filter((wide) => matchesWideMove(wide, filter));
       return {
         count: moves.length + wideMoves.length,
@@ -96,8 +96,10 @@ export function LearnScreen({
     }
 
     if (id === "steps") {
-      const steps = METHOD_STEPS[method].map((step) => ({
+      // Numbered here: a step can be another method's too (the 4×4 methods list CFOP's Cruz and Esquinas).
+      const steps = METHOD_STEPS[method].map((step, index) => ({
         ...step,
+        heading: `Paso ${index + 1} · ${step.title}`,
         cases: ALGORITHM_SETS[step.setId].filter((algorithmCase) =>
           matchesCase(algorithmCase, filter),
         ),
@@ -111,7 +113,7 @@ export function LearnScreen({
               return (
                 <div key={step.setId} className="flex flex-col gap-2">
                   <h3 className="flex items-baseline justify-between px-1 text-sm font-semibold text-foreground">
-                    {getSetInfo(step.setId).title}
+                    {step.heading}
                     {hydrated && (
                       <span className="text-xs font-semibold text-navy-muted tabular-nums">
                         {countLearned(learned, stepItemIds)}/{stepItemIds.length}

@@ -20,6 +20,7 @@ import { SETS_ROUX } from "./cases-roux";
 import { SETS_2X2_RESEARCH } from "./cases-2x2-research";
 import { SETS_PYRAMINX_RESEARCH } from "./cases-pyraminx-research";
 import { SETS_SKEWB } from "./cases-skewb";
+import { SETS_4X4 } from "./cases-4x4";
 import { getCategory, type LearningCategoryId, type LearningMethodId } from "./categories";
 import { CRUZ_CASES } from "./cruz-cases";
 import { ESQUINAS_CASES } from "./esquinas-cases";
@@ -51,6 +52,7 @@ export const ALGORITHM_SETS: Record<AlgorithmSetId, AlgorithmCase[]> = {
   ...SETS_ROUX,
   ...SETS_2X2_RESEARCH,
   ...SETS_SKEWB,
+  ...SETS_4X4,
 };
 
 const PUNTAS_INTRO =
@@ -59,6 +61,22 @@ const PUNTAS_INTRO =
 /** The Skewb's first side, the same in its three methods. */
 const SKEWB_FIRST_SIDE_INTRO =
   "Empieza por la cara blanca: su centro y las cuatro esquinas que lo rodean, con sus otros colores coincidiendo entre ellas en cada lado (así queda hecha la primera capa). Se hace con intuición: pon el centro y las primeras esquinas mirando dónde van. La última suele ser la difícil, porque meterla saca otra; estos dos casos la colocan con la cara blanca abajo y su hueco abajo delante.";
+
+/** The 4×4's first two centers (Reducción and Freeslice build them first; Hoya and Yau only these two). */
+const FIRST_CENTERS_4X4 = (rest: string) =>
+  `El 4×4 no tiene centros fijos: cada centro son cuatro piezas que hay que juntar. Primero el blanco, que se hace arriba, donde se ve: busca piezas blancas, júntalas de dos en dos en barras y sube cada barra con una capa de dentro (r o l). Luego gira el cubo (x2) para dejar el blanco abajo y haz el amarillo arriba igual, con cuidado de bajar y subir siempre la misma capa para no romper el blanco. ${rest}`;
+const LAST_CENTERS_4X4 = (keep: string) =>
+  `Con el blanco a la izquierda y el amarillo a la derecha (gira el cubo con z), quedan los cuatro centros de alrededor. Cada uno se hace igual: junta una barra, ponla debajo del hueco y súbela con r, que no toca los centros de los lados. Para los dos últimos basta un algoritmo, según estén sus barras en caras vecinas u opuestas. ${keep}En los diagramas, en color, las piezas que importan.`;
+const PAIR_INTRO =
+  "Una arista del 4×4 son dos piezas iguales que hay que juntar. Con los centros hechos, pon una de ellas delante a la derecha y busca su pareja: los casos dependen de si están a la misma altura (enseñando el mismo color hacia ti) o no. Uw y Dw mueven dos capas y luego vuelven, así que los centros quedan como estaban; R U R' F R' F' R guarda la arista hecha y saca otra. Los diagramas muestran la cara de delante abierta, con las dos piezas en color.";
+const LAST_TWO_INTRO =
+  "Las dos últimas aristas se emparejan a la vez: pon sus cuatro piezas delante a la izquierda y delante a la derecha. El motor de RUBIKO cuenta 24 formas de tenerlas: 8 ya están emparejadas y las otras 16 son solo estos dos casos, con las piezas de cada arista a la misma altura o no.";
+const FREESLICE_INTRO =
+  "Freeslice empareja las primeras ocho aristas en la capa de arriba y en la de abajo con el corte de abajo (d) girado: los centros de los lados se rompen un momento, pero solo en esa fila. Pon la pieza que quieres delante a la derecha, arriba, y busca su pareja en la fila de d: con d, d' o d2 la juntas debajo, y R U R' la guarda arriba y baja otra. Al acabar, vuelve d a su sitio.";
+const CROSS_4X4_INTRO = (method: string, rest: string) =>
+  `En ${method} la cruz blanca se hace antes de terminar los centros: como los cuatro centros de los lados aún no importan, las capas de dentro (u y d) se pueden girar libremente para juntar las dos piezas de cada arista. Con el blanco abajo, pon las piezas de la arista blanca-verde a la misma altura, júntalas con u o d y bájalas con F. ${rest}`;
+const SIDE_EDGES_INTRO =
+  "Quedan ocho aristas y la cruz está hecha, a la izquierda (gira el cubo con z). Se emparejan con el 3-2-3 de la Speedsolving Wiki: Uw o Dw aparta una pieza, R U R' (o R2) trae su pareja a la misma arista y Uw' o Dw las junta y devuelve los centros y la cruz. Los diagramas miran desde delante, con las dos piezas en color.";
 
 /** The Top First methods' last edge of the block, before L3E (Keyhole, L4E intuitivo). */
 const BACK_EDGE_INTRO =
@@ -293,6 +311,37 @@ export const METHOD_STEPS: Record<LearningMethodId, LearningStep[]> = {
   ],
   "sarah-intermedio": [{ setId: "ski-primera-cara", title: "Cara blanca", intro: SKEWB_FIRST_SIDE_INTRO }],
   "sarah-avanzado": [{ setId: "ska-primera-cara", title: "Cara blanca", intro: SKEWB_FIRST_SIDE_INTRO }],
+  reduccion: [
+    { setId: "r4-centros", title: "Centros", intro: FIRST_CENTERS_4X4(LAST_CENTERS_4X4("")) },
+    { setId: "r4-aristas", title: "Aristas", intro: `${PAIR_INTRO} ${LAST_TWO_INTRO}` },
+    { setId: "cruz", title: "Cruz" },
+    { setId: "esquinas", title: "Esquinas" },
+  ],
+  freeslice: [
+    { setId: "fs4-centros", title: "Centros", intro: FIRST_CENTERS_4X4(LAST_CENTERS_4X4("")) },
+    { setId: "fs4-aristas", title: "Ocho aristas con el corte libre", intro: FREESLICE_INTRO },
+    { setId: "fs4-l4e", title: "Últimas aristas", intro: `Quedan las cuatro aristas del medio. Se emparejan como en Reducción, de dos en dos, sin estropear las de arriba y abajo. ${LAST_TWO_INTRO}` },
+    { setId: "cruz", title: "Cruz" },
+    { setId: "esquinas", title: "Esquinas" },
+  ],
+  hoya: [
+    { setId: "hoya-centros", title: "Dos centros opuestos", intro: FIRST_CENTERS_4X4("Los otros cuatro centros esperan: primero va la cruz.") },
+    { setId: "hoya-cruz", title: "Cruz", intro: CROSS_4X4_INTRO("Hoya", "Haz así las cuatro aristas de la cruz.") },
+    { setId: "hoya-centros4", title: "Cuatro centros", intro: LAST_CENTERS_4X4("r no rompe la cruz, que está a la izquierda. ") },
+    { setId: "hoya-aristas", title: "Resto de aristas", intro: SIDE_EDGES_INTRO },
+  ],
+  yau: [
+    { setId: "yau-centros", title: "Dos centros opuestos", intro: FIRST_CENTERS_4X4("Los otros cuatro centros esperan: primero van tres aristas de la cruz.") },
+    { setId: "yau-cruz3", title: "Tres aristas de la cruz", intro: CROSS_4X4_INTRO("Yau", "Haz así tres de las cuatro; la cuarta, la de delante, se deja para después de los centros.") },
+    { setId: "yau-centros4", title: "Cuatro centros", intro: LAST_CENTERS_4X4("Con la cruz a la izquierda y su hueco delante, r no rompe sus tres aristas. ") },
+    {
+      setId: "yau-cruz4",
+      title: "Última arista de la cruz",
+      intro:
+        "Con los seis centros hechos, la última arista de la cruz ya no se puede juntar con las capas de dentro sin romperlos. Se empareja como en Reducción (Uw' R U R' F R' F' R Uw), delante a la derecha, y F la baja a su sitio. Con el blanco abajo, los diagramas miran desde delante.",
+    },
+    { setId: "yau-aristas", title: "Resto de aristas", intro: SIDE_EDGES_INTRO },
+  ],
 };
 
 /** The 3×3 (CFOP) learning steps. */
@@ -383,6 +432,24 @@ const SET_METHOD: Record<AlgorithmSetId, LearningMethodId> = {
   "ska-peanut": "sarah-avanzado",
   "ska-pi": "sarah-avanzado",
   "ska-l5c": "sarah-avanzado",
+  "r4-centros": "reduccion",
+  "r4-aristas": "reduccion",
+  "r4-paridades": "reduccion",
+  "fs4-centros": "freeslice",
+  "fs4-aristas": "freeslice",
+  "fs4-l4e": "freeslice",
+  "fs4-paridades": "freeslice",
+  "hoya-centros": "hoya",
+  "hoya-cruz": "hoya",
+  "hoya-centros4": "hoya",
+  "hoya-aristas": "hoya",
+  "hoya-paridades": "hoya",
+  "yau-centros": "yau",
+  "yau-cruz3": "yau",
+  "yau-centros4": "yau",
+  "yau-cruz4": "yau",
+  "yau-aristas": "yau",
+  "yau-paridades": "yau",
 };
 
 export interface SetInfo {
